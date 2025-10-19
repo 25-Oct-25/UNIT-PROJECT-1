@@ -1,0 +1,34 @@
+import os, smtplib, ssl, mimetypes
+from typing import List, Optional
+from email.message import EmailMessage
+
+def _smtp_conf():
+    host = os.environ.get("SMTP_HOST")
+    port = int(os.environ.get("SMTP_PORT", "587"))
+    user = os.environ.get("SMTP_USER")
+    pwd  = os.environ.get("SMTP_PASS")
+    from_addr = os.environ.get("FROM_EMAIL")
+    if not (host and user and pwd and from_addr):
+        raise RuntimeError("Set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, FROM_EMAIL in environment.")
+    return host, port, user, pwd, from_addr
+
+def send_email_smtp(to: str, subject: str, text: str, attachments: Optional[List[str]] = None, from_addr: Optional[str]=None) -> str:
+    host, port, user, pwd, default_from = _smtp_conf()
+    from_addr = from_addr or default_from
+    msg = EmailMessage()
+    msg["From"], msg["To"], msg["Subject"] = from_addr, to, subject
+    msg.set_content(text)
+
+    for path in (attachments or []):
+        ctype, _ = mimetypes.guess_type(path)
+        if ctype is None: ctype = "application/octet-stream"
+        maintype, subtype = ctype.split("/", 1)
+        with open(path, "rb") as f:
+            msg.add_attachment(f.read(), maintype=maintype, subtype=subtype, filename=os.path.basename(path))
+
+    ctx = ssl.create_default_context()
+    with smtplib.SMTP(host, port) as server:
+        server.starttls(context=ctx)
+        server.login(user, pwd)
+        server.send_message(msg)
+    return "OK"
