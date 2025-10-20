@@ -1,0 +1,28 @@
+import json
+from car_profile import Car
+
+DATA_FILE= "/Users/nawaf/Documents/python-camp/UNIT-PROJECT-1/DATA.json"
+
+def save_cars(cars_list):
+
+    cars_data =[]
+    for car in cars_list:
+        cars_data.append(car.__dict__)
+    with open (DATA_FILE, "w") as f:
+        json.dump(cars_data,f, indent=4)
+
+def load_cars():
+    try:
+        with open (DATA_FILE,"r") as f:
+            cars_data = json.load(f)
+
+            cars_list =[]
+
+            for data in cars_data:
+                cars_list.append(Car(**data))
+            
+            return cars_list
+    
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+    
