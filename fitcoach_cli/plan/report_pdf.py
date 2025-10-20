@@ -1,38 +1,102 @@
+# Path: UNIT-PROJECT-1/fitcoach_cli/plan/report_pdf.py
+"""Weekly PDF report generator.
+
+Builds a branded A4 PDF summarizing the user's goal, calorie targets,
+training plan, recent progress, habits, and short coach advice. Uses
+`fpdf2` and a light wrapper class to simplify section rendering.
+"""
+
 from fpdf import FPDF
 import datetime, os
 from ..core.models import AppState
 from ..nutrition.calculator import bmr_mifflin_st_jeor, tdee, macro_targets
 
+
 def _brand(state: AppState):
+    """Resolve branding settings (color/title/logo) from app state.
+
+    Args:
+        state (AppState): Application state containing `settings["brand"]`.
+
+    Returns:
+        Tuple[Tuple[int, int, int], str, str]:
+            A tuple ``(rgb, title, logo_path)`` where:
+            - ``rgb`` is a 3-tuple of ints (0–255).
+            - ``title`` is the report title string.
+            - ``logo_path`` is a filesystem path to an optional logo.
+    """
     brand = state.settings.get("brand", {}) if getattr(state, "settings", None) else {}
     color = brand.get("color", "#0A84FF"); title = brand.get("title", "FitCoach — Weekly Report")
     logo = brand.get("logo", "")
     color = color.lstrip("#"); r, g, b = int(color[0:2],16), int(color[2:4],16), int(color[4:6],16)
     return (r,g,b), title, logo
 
+
 class ReportPDF(FPDF):
+    """Small helper over FPDF with branded header and section helpers."""
+
     def __init__(self, *a, **kw):
+        """Initialize with default brand placeholders, then call super()."""
         self.brand_rgb = (10,132,255); self.brand_title = "FitCoach — Weekly Report"; self.brand_logo = ""
         super().__init__(*a, **kw)
+
     def header(self):
+        """Draw a colored header bar with optional logo and title."""
         self.set_fill_color(*self.brand_rgb); self.rect(0,0,self.w,18,"F")
         if self.brand_logo and os.path.exists(self.brand_logo):
             try: self.image(self.brand_logo, x=self.l_margin, y=3, h=12)
             except Exception: pass
         self.set_text_color(255,255,255); self.set_font("Helvetica","B",14); self.set_y(5)
         self.cell(0,8,self.brand_title,align="C"); self.ln(12); self.set_text_color(0,0,0)
+
     def section_title(self, title: str):
+        """Print a colored section title.
+
+        Args:
+            title (str): The section title text.
+        """
         self.set_font("Helvetica","B",12); self.set_text_color(*self.brand_rgb)
         self.cell(0,8,title,new_x="LMARGIN", new_y="NEXT"); self.set_text_color(0,0,0)
+
     def kv(self, k: str, v: str):
+        """Print a key–value line.
+
+        Args:
+            k (str): Label on the left.
+            v (str): Value on the right.
+        """
         self.set_font("Helvetica","",11); self.cell(50,6,k+":",align="L"); self.cell(0,6,v,new_x="LMARGIN", new_y="NEXT")
+
     def bullet(self, text: str):
+        """Print a single bullet line with wrapped text.
+
+        Args:
+            text (str): The bullet content.
+        """
         self.set_font("Helvetica","",11); self.cell(5,6,u"•"); self.multi_cell(0,6,text)
 
+
 def _week_range(days:int=7):
+    """Compute inclusive start/end dates for a trailing window.
+
+    Args:
+        days (int): Number of days to include (default 7).
+
+    Returns:
+        Tuple[date, date]: (start_date, end_date) inclusive.
+    """
     end = datetime.date.today(); start = end - datetime.timedelta(days=days-1); return start, end
 
+
 def _table(pdf: FPDF, headers, rows, col_w=None):
+    """Render a simple table.
+
+    Args:
+        pdf (FPDF): The active PDF object.
+        headers (List[str]): Column headers.
+        rows (Iterable[Iterable[Any]]): Row values.
+        col_w (Optional[List[float]]): Column widths in mm; if None, auto-fit.
+    """
     pdf.set_font("Helvetica","B",10); col_w = col_w or [pdf.w/len(headers)-20]*len(headers)
     for h,w in zip(headers,col_w): pdf.cell(w,7,h,border=1,align="C")
     pdf.ln(7); pdf.set_font("Helvetica","",9)
@@ -40,7 +104,29 @@ def _table(pdf: FPDF, headers, rows, col_w=None):
         for cell,w in zip(r,col_w): pdf.cell(w,6,str(cell),border=1)
         pdf.ln(6)
 
+
 def build_weekly_pdf(state: AppState, out_file: str, days: int = 7) -> str:
+    """Build a branded weekly report PDF.
+
+    Sections:
+      - Summary (date range, goal, activity, height/weight)
+      - Calories & Macros (BMR, TDEE, target kcal, macro targets)
+      - Training Plan (table)
+      - Progress (weight table + trend)
+      - Habits (averages)
+      - Coach Advice (bullets)
+
+    Args:
+        state (AppState): Application state with profile, plan, logs, and settings.
+        out_file (str): Output PDF path.
+        days (int): Trailing number of days to summarize (default 7).
+
+    Returns:
+        str: The output file path.
+
+    Raises:
+        OSError: If the PDF cannot be written to the given path.
+    """
     start, end = _week_range(days); p = state.profile
     brand_rgb, brand_title, brand_logo = _brand(state)
     pdf = ReportPDF(orientation="P", unit="mm", format="A4")

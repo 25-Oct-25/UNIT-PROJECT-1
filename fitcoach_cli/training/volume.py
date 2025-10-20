@@ -1,3 +1,6 @@
+# Path: fitcoach_cli/training/volume_counter.py
+# Description: Map exercises to muscle groups and count how many movements hit each muscle.
+
 from typing import Dict
 from ..core.models import WeeklyPlan
 
@@ -23,6 +26,14 @@ EX_TO_MUSCLE = {
 }
 
 def count_volume(plan: WeeklyPlan) -> Dict[str, int]:
+    """Count movements per muscle in a weekly plan.
+
+    Args:
+        plan (WeeklyPlan): Plan with workouts and exercises.
+
+    Returns:
+        Dict[str, int]: Muscle -> movement count.
+    """
     vol: Dict[str, int] = {}
     if not plan:
         return vol

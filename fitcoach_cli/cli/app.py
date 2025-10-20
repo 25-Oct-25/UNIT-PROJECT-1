@@ -1,12 +1,26 @@
-# fitcoach_cli/cli/app.py
+# -*- coding: utf-8 -*-
+# File: fitcoach_cli/cli/app.py
+# Functions: 5  (cmd_help, _load, _save, handle, main)
+# Key features:
+#   - Colored, sectioned CLI help using Colorama (with optional boxes & wide layout)
+#   - Central command router (parses tokens via shlex) for auth/profile/plan/recipes/report/email/etc.
+#   - Persistent application state (load/save) including RBAC users and report schedules
+#   - Email & weekly PDF report integration; background scheduler bootstrap
+#   - Theming & color toggle (--no-color), plus Arabic/English language setting
+
 import shlex, sys, datetime, os
 from typing import Dict, Any
 from dataclasses import asdict
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv(), override=False)  # Load .env if present (safe no-op otherwise)
 
 from colorama import Fore, Style
-from .console import section
+from .console import (
+    section, banner, info, success, warn, error, ask,
+    set_theme, set_color_enabled
+)
 
-# ====== Imports الخاصة بالوظائف ======
+# ====== Feature imports ======
 from ..core.models import AppState, UserProfile
 from ..storage.db import load_state, save_state
 from ..nutrition.calculator import bmr_mifflin_st_jeor, tdee, macro_targets
@@ -33,83 +47,101 @@ from ..auth.roles import (
     current_role, require_role
 )
 
-# ====== Help (ملوّن) ======
-def cmd_help() -> None:
-    section("Commands", "help | exit", color=Fore.CYAN)
+def cmd_help(*, box: bool = False, wide: bool = True) -> None:
+    """Print the colored CLI help with grouped sections.
 
-    section("Authentication / Roles",
-            "auth add-user --username=admin --role=admin --password=secret\n"
-            "auth login --username=admin --password=secret\n"
-            "auth logout\n"
-            "auth whoami\n"
-            "auth list-users\n"
-            "auth role set --username=user1 --role=coach\n"
-            "auth delete-user --username=user1",
-            color=Fore.MAGENTA)
+    Args:
+        box: If True, draw a box/border around each section title.
+        wide: If True, pad titles (wider header) for improved readability.
+    """
+    def add_section(title: str, body: str, color):
+        section(title, body, color=color, box=box, wide=wide)
 
-    section("Profile",
-            "profile show\n"
-            "profile set --sex=male|female --age=22 --height=183 --weight=110 "
-            "--activity=sedentary|light|moderate|active|very_active --goal=cut|bulk|recomp",
-            color=Fore.GREEN)
+    add_section("Commands", "help | exit", color=Fore.CYAN)
 
-    section("Calories / Plan",
-            "calories calc\n"
-            "plan generate --split=upper-lower|full-body|ppl --days=3..6\n"
-            "plan show\n"
-            "plan volume",
-            color=Fore.YELLOW)
+    add_section("Authentication / Roles",
+      "auth add-user --username=admin --role=admin --password=secret\n"
+      "auth login --username=admin --password=secret\n"
+      "auth logout\n"
+      "auth whoami\n"
+      "auth list-users\n"
+      "auth role set --username=user1 --role=coach\n"
+      "auth delete-user --username=user1",
+      color=Fore.MAGENTA)
 
-    section("Groceries & Export",
-            "plan groceries --target=2400 --P=180 --C=250 --F=70 [--filters=chicken,rice]\n"
-            "export csv --file=week.csv",
-            color=Fore.BLUE)
+    add_section("Profile",
+      "profile show\n"
+      "profile set --sex=male|female --age=22 --height=183 --weight=110 "
+      "--activity=sedentary|light|moderate|active|very_active --goal=cut|bulk|recomp",
+      color=Fore.GREEN)
 
-    section("Recipes",
-            "recipes suggest --kcal=700 --protein=40 [--filters=chicken,rice]\n"
-            "recipes build-day --target=2400 --P=180 --C=250 --F=70 [--filters=chicken,rice]",
-            color=Fore.CYAN)
+    add_section("Calories / Plan",
+      "calories calc\n"
+      "plan generate --split=upper-lower|full-body|ppl --days=3..6\n"
+      "plan show\n"
+      "plan volume",
+      color=Fore.YELLOW)
 
-    section("Daily Advice & Habits",
-            "advice daily\n"
-            "habits log --water=3 --sleep=7.5 --steps=9000\n"
-            "habits score\n"
-            "nudge --type=water|sleep|steps|protein",
-            color=Fore.MAGENTA)
+    add_section("Groceries & Export",
+      "plan groceries --target=2400 --P=180 --C=250 --F=70 [--filters=chicken,rice]\n"
+      "export csv --file=week.csv",
+      color=Fore.BLUE)
 
-    section("Progress",
-            "progress log --weight=108.5\n"
-            "progress analyze\n"
-            "progress plot",
-            color=Fore.GREEN)
+    add_section("Recipes",
+      "recipes suggest --kcal=700 --protein=40 [--filters=chicken,rice]\n"
+      "recipes build-day --target=2400 --P=180 --C=250 --F=70 [--filters=chicken,rice]",
+      color=Fore.CYAN)
 
-    section("Workouts",
-            "workout log --day=2 --ex=\"Bench Press\" --weight=80 --reps=8 --RPE=8\n"
-            "workout suggest --ex=\"Bench Press\"",
-            color=Fore.YELLOW)
+    add_section("Daily Advice & Habits",
+      "advice daily\n"
+      "habits log --water=3 --sleep=7.5 --steps=9000\n"
+      "habits score\n"
+      "nudge --type=water|sleep|steps|protein",
+      color=Fore.MAGENTA)
 
-    section("Reports (PDF)",
-            "report pdf --file=week_report.pdf --days=7\n"
-            "report brand --title=\"FitCoach — Weekly Report\" --color=#0A84FF --logo=./logo.png\n"
-            "report send --file=week_report.pdf --subject=\"FitCoach — Weekly Report\" --text=\"ملخص أسبوعك جاهز\"\n"
-            "report schedule add --time=21:00 --day=Sun --file=week_report.pdf --text=\"ملخص أسبوعك جاهز\" --days=7\n"
-            "report schedule list\n"
-            "report schedule remove --id=1",
-            color=Fore.BLUE)
+    add_section("Progress",
+      "progress log --weight=108.5\n"
+      "progress analyze\n"
+      "progress plot",
+      color=Fore.GREEN)
 
-    section("Email",
-            "email config --to=user@example.com [--from=coach@fitcoach.dev]\n"
-            "email test --subject=\"Test\" --text=\"Hello from FitCoach\"",
-            color=Fore.CYAN)
+    add_section("Workouts",
+      "workout log --day=2 --ex=\"Bench Press\" --weight=80 --reps=8 --RPE=8\n"
+      "workout suggest --ex=\"Bench Press\"",
+      color=Fore.YELLOW)
 
-    section("App Language",
-            "app lang --set=ar|en",
-            color=Fore.MAGENTA)
+    add_section("Reports (PDF)",
+      "report pdf --file=week_report.pdf --days=7\n"
+      "report brand --title=\"FitCoach — Weekly Report\" --color=#0A84FF --logo=./logo.png\n"
+      "report send --file=week_report.pdf --subject=\"FitCoach — Weekly Report\" --text=\"ملخص أسبوعك جاهز\"\n"
+      "report schedule add --time=21:00 --day=Sun --file=week_report.pdf --text=\"ملخص أسبوعك جاهز\" --days=7\n"
+      "report schedule list\n"
+      "report schedule remove --id=1",
+      color=Fore.BLUE)
+
+    add_section("Email",
+      "email config --to=user@example.com [--from=coach@fitcoach.dev]\n"
+      "email test --subject=\"Test\" --text=\"Hello from FitCoach\"",
+      color=Fore.CYAN)
+
+    add_section("App Language",
+      "app lang --set=ar|en",
+      color=Fore.MAGENTA)
+
+
 
 # ====== State ======
 STATE = AppState()
 
-def _load():
+def _load() -> None:
+    """Load the persisted application state (if available) into the global STATE.
+
+    Populates profile, plan, progress, logs, settings, email endpoints, RBAC users,
+    current user, and report schedules from the storage backend.
+
+    Side Effects:
+        Mutates the global ``STATE`` object with loaded values.
+    """
     d = load_state()
     global STATE
     if d:
@@ -133,7 +165,14 @@ def _load():
         STATE.current_user = d.get("current_user")
         STATE.report_schedules = d.get("report_schedules", [])
 
-def _save():
+def _save() -> None:
+    """Persist the current STATE to storage.
+
+    Serializes all mutable parts of the global ``STATE`` and invokes ``save_state``.
+
+    Side Effects:
+        Writes the serialized state via the storage layer.
+    """
     d: Dict[str, Any] = {
         "profile": asdict(STATE.profile),
         "plan": asdict(STATE.plan) if STATE.plan else None,
@@ -149,22 +188,34 @@ def _save():
     }
     save_state(d)
 
-# ====== Router ======
 def handle(cmd: str) -> str:
+    """Route a single CLI command line to its handler and return the output.
+
+    The router splits the input line with ``shlex`` (so quoted strings are respected),
+    matches the primary verb (e.g., ``auth``, ``profile``, ``plan``), parses ``--key=value``
+    options into a dictionary where needed, performs RBAC checks, and returns user-friendly
+    text results. Returning an empty string means "no additional text to print".
+
+    Args:
+        cmd: The raw line entered by the user.
+
+    Returns:
+        str: A printable message for the user; empty string for purely-informational actions.
+    """
     tokens = shlex.split(cmd)
     if not tokens:
         return ""
 
-    # help (ملوّن)
+    # help (colored)
     if tokens[0] == "help":
-        cmd_help()
+        cmd_help(box=True)
         return ""
 
     # exit
     if tokens[0] in ("exit", "quit", "q"):
         _save(); sys.exit(0)
 
-    # AUTH
+    # ---------- AUTH ----------
     if tokens[0] == "auth":
         if len(tokens) > 1 and tokens[1] == "add-user":
             opts = {k: v for k, v in (t.split("=", 1) for t in tokens[2:] if "=" in t)}
@@ -172,7 +223,8 @@ def handle(cmd: str) -> str:
             if not username or not password:
                 return "Usage: auth add-user --username=<name> --role=admin|coach|user --password=<pw>"
             try:
-                if STATE.users:  # أول مستخدم بدون قيود، بعدين فقط admin
+                # First ever user is allowed without RBAC; subsequent additions require admin.
+                if STATE.users:
                     err = require_role(STATE, ["admin"])
                     if err: return err
                 add_user(STATE, username, role, password); _save()
@@ -216,7 +268,7 @@ def handle(cmd: str) -> str:
             res = delete_user(STATE, username); _save(); return res
         return "Unknown auth command."
 
-    # PROFILE
+    # ---------- PROFILE ----------
     if tokens[0] == "profile":
         if len(tokens) > 1 and tokens[1] == "show":
             p = STATE.profile
@@ -235,7 +287,7 @@ def handle(cmd: str) -> str:
             return "Profile updated."
         return "Unknown profile command. Try: profile show | profile set ..."
 
-    # CALORIES
+    # ---------- CALORIES ----------
     if tokens[0] == "calories" and len(tokens) > 1 and tokens[1] == "calc":
         p = STATE.profile
         b = bmr_mifflin_st_jeor(p.sex, p.weight_kg, p.height_cm, p.age)
@@ -246,7 +298,7 @@ def handle(cmd: str) -> str:
                 f"Target kcal: {target:.0f}\n"
                 f"Macros -> Protein: {prot} g | Carbs: {carbs} g | Fat: {fat} g")
 
-    # PLAN
+    # ---------- PLAN ----------
     if tokens[0] == "plan":
         if len(tokens) > 1 and tokens[1] == "generate":
             opts = {k: v for k, v in (t.split("=", 1) for t in tokens[2:] if "=" in t)}
@@ -275,7 +327,7 @@ def handle(cmd: str) -> str:
             return "\n".join(lines)
         return "Unknown plan command."
 
-    # EXPORT
+    # ---------- EXPORT ----------
     if tokens[0] == "export" and len(tokens) > 1 and tokens[1] == "csv":
         opts = {k: v for k, v in (t.split("=", 1) for t in tokens[2:] if "=" in t)}
         file_path = opts.get("--file", "week.csv")
@@ -283,7 +335,7 @@ def handle(cmd: str) -> str:
         export_plan_csv(STATE.plan, file_path)
         return f"Exported: {os.path.abspath(file_path)}"
 
-    # RECIPES
+    # ---------- RECIPES ----------
     if tokens[0] == "recipes":
         if len(tokens) > 1 and tokens[1] == "suggest":
             opts = {k: v for k, v in (t.split("=", 1) for t in tokens[2:] if "=" in t)}
@@ -303,7 +355,7 @@ def handle(cmd: str) -> str:
             return "\n".join(lines)
         return "Unknown recipes command."
 
-    # ADVICE & HABITS
+    # ---------- ADVICE & HABITS ----------
     if tokens[0] == "advice" and len(tokens) > 1 and tokens[1] == "daily":
         tips = daily_tips(STATE.profile)
         return "Daily Advice:\n" + "\n".join([f" - {t}" for t in tips])
@@ -319,7 +371,7 @@ def handle(cmd: str) -> str:
         opts = {k: v for k, v in (t.split("=", 1) for t in tokens[1:] if "=" in t)}
         return nudge(opts.get("--type", ""))
 
-    # PROGRESS
+    # ---------- PROGRESS ----------
     if tokens[0] == "progress":
         if len(tokens) > 1 and tokens[1] == "log":
             opts = {k: v for k, v in (t.split("=", 1) for t in tokens[2:] if "=" in t)}
@@ -333,7 +385,7 @@ def handle(cmd: str) -> str:
             values = [x["weight"] for x in STATE.progress[-40:]]; return ascii_plot(values)
         return "Unknown progress command."
 
-    # WORKOUTS
+    # ---------- WORKOUTS ----------
     if tokens[0] == "workout":
         if len(tokens) > 1 and tokens[1] == "log":
             opts = {k: v for k, v in (t.split("=", 1) for t in tokens[2:] if "=" in t)}
@@ -345,7 +397,7 @@ def handle(cmd: str) -> str:
             ex = opts.get("--ex", ""); return suggest_loads(STATE, ex)
         return "Unknown workout command."
 
-    # REPORT
+    # ---------- REPORT ----------
     if tokens[0] == "report":
         if len(tokens) > 1 and tokens[1] == "pdf":
             opts = {k: v for k, v in (t.split("=", 1) for t in tokens[2:] if "=" in t)}
@@ -393,7 +445,7 @@ def handle(cmd: str) -> str:
             STATE.settings["brand"] = brand; _save(); return f"Brand set: {brand}"
         return "Unknown report command."
 
-    # EMAIL
+    # ---------- EMAIL ----------
     if tokens[0] == "email":
         if len(tokens) > 1 and tokens[1] == "config":
             err = require_role(STATE, ["admin"])
@@ -410,7 +462,7 @@ def handle(cmd: str) -> str:
             return "Test email sent."
         return "Unknown email command."
 
-    # APP
+    # ---------- APP ----------
     if tokens[0] == "app" and len(tokens) > 1 and tokens[1] == "lang":
         opts = {k: v for k, v in (t.split("=", 1) for t in tokens[2:] if "=" in t)}
         lang = opts.get("--set")
@@ -419,15 +471,42 @@ def handle(cmd: str) -> str:
 
     return "Unknown command. Type 'help'."
 
-# ====== Entry ======
-def main():
+def main() -> None:
+    """Application entrypoint: bootstrap theme, show first-run help, start scheduler, and REPL loop.
+
+    Behavior:
+        - Loads persisted state.
+        - Honors ``--no-color`` flag to disable colored output.
+        - Applies a color theme.
+        - Prints banner + colored help (boxed).
+        - Starts the weekly report email scheduler (non-blocking).
+        - Enters a simple REPL (read-eval-print loop) until EOF or 'exit'.
+
+    Side Effects:
+        Reads from stdin, writes to stdout, and persists state on exit.
+    """
     _load()
 
-    # Banner ملوّن + الهيلب الملوّن عند البدء
-    print(Style.BRIGHT + Fore.CYAN + "FitCoach CLI — type 'help' to see commands, 'exit' to quit." + Style.RESET_ALL)
-    cmd_help()
+    # Honor --no-color if present
+    argv = sys.argv[1:]
+    if "--no-color" in argv:
+        set_color_enabled(False)
+        argv = [a for a in argv if a != "--no-color"]
 
-    # بدء مجدول التقارير
+    # Theme
+    set_theme(
+        primary=Fore.CYAN,
+        success=Fore.GREEN,
+        warning=Fore.YELLOW,
+        danger=Fore.RED,
+        muted=Fore.WHITE,
+    )
+
+    # First-run banner & help
+    banner("FitCoach CLI — type 'help' to see commands, 'exit' to quit.")
+    cmd_help(box=True)
+
+    # Start background scheduler
     start_report_scheduler_email(lambda: STATE, build_weekly_pdf, send_email_smtp, interval_sec=30)
 
     try:
@@ -444,3 +523,4 @@ def main():
                 print(out)
     finally:
         _save()
+    print("Goodbye!")

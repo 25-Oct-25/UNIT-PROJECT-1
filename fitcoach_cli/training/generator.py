@@ -1,3 +1,6 @@
+# Path: fitcoach_cli/training/plan_generator.py
+# Description: Build a weekly workout plan (Upper/Lower, Full Body, or PPL) for a given number of days.
+
 from typing import List
 from ..core.models import Workout, WeeklyPlan
 
@@ -31,6 +34,20 @@ FULL = [
 ]
 
 def generate_plan(split: str = "upper-lower", days: int = 4) -> WeeklyPlan:
+    """Generate a simple weekly workout plan.
+
+    Supports three splits:
+    - "upper-lower": Alternates Upper and Lower days.
+    - "full-body": Same full-body template each day.
+    - "ppl": Push / Pull / Legs cycle.
+
+    Args:
+        split (str): Type of split ("upper-lower", "full-body", or "ppl").
+        days (int): Number of training days to include.
+
+    Returns:
+        WeeklyPlan: Plan object with days, focus, and exercises.
+    """
     split = split.lower()
     workouts: List[Workout] = []
     if split == "upper-lower":
@@ -48,7 +65,7 @@ def generate_plan(split: str = "upper-lower", days: int = 4) -> WeeklyPlan:
         template = {
             "Push": [
                 {"name": "Bench Press", "sets": "4x6-8"},
-                {"name": "OHP", "sets": "3x8-10"},
+                {"name": "OHR", "sets": "3x8-10"} if False else {"name": "OHP", "sets": "3x8-10"},
                 {"name": "Incline DB Press", "sets": "3x10-12"},
                 {"name": "Lateral Raise", "sets": "3x12-15"},
                 {"name": "Triceps Pushdown", "sets": "3x10-12"},
