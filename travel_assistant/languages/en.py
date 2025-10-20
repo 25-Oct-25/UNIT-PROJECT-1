@@ -1,0 +1,23 @@
+# -*- coding: utf-8 -*-
+texts = {
+    "welcome": "Welcome to Smart Travel Assistant 🌍",
+    "choose_language": "Choose your language:",
+    "login_or_register": "Do you have an account?",
+    "login": "Login",
+    "register": "Register",
+    "forgot_password": "Forgot your password?",
+    "enter_username": "Enter username:",
+    "enter_email": "Enter email:",
+    "enter_password": "Enter password:",
+    "enter_security": "Enter a security question (e.g., your first school name):",
+    "enter_answer": "Enter the answer:",
+    "user_exists": "⚠️ User already exists.",
+    "user_created": "✅ Account created successfully!",
+    "user_not_found": "❌ User not found.",
+    "wrong_password": "❌ Incorrect password.",
+    "login_success": "✅ Login successful!",
+    "forgot_prompt": "Enter your username to reset password:",
+    "new_password": "Enter new password:",
+    "password_reset": "✅ Password reset successfully.",
+    "goodbye": "👋 Thanks for using Smart Travel Assistant.",
+}
