@@ -4,7 +4,7 @@ from datetime import datetime
 class CommunityUser:
 
     #Initilize constructor
-    def __init__(self, user_id:int ,name:str ,location:str ,email:str, password_number:str, registration_date = None):
+    def __init__(self, user_id:str ,name:str ,location:str ,email:str, password_number:str, registration_date = None):
         #Add attributes
         self.user_id = user_id
         self.name = name
@@ -21,8 +21,12 @@ class CommunityUser:
         "location": self.location,
         "email":self.email,
         "password": self.password,
-        "registration_date": self.registration_date.isoformat(),"user_type": "User"
-        }
+        "registration_date": self.registration_date.isoformat(),
+        "user_type": "User"}
+    
+    #Write a method to set a user id attribute and check if the enter value is right or not (just accept a name)
+
+    #Write a method to check if the enter email is a valid email or not
 
     #Update information
     def update_information(self,email:str, password_number:str):
@@ -35,10 +39,11 @@ class CommunityUser:
     def user_information(self):
         return f"User ID: {self.user_id}, Name: {self.name}, Location: {self.location}, Registered on: {self.registration_date}"
     
-    def get_name(self):
-        return self.name
 
+
+'''
 #Test
 user = CommunityUser(21,"Ahmed","riyadh","bora@gmail.com","123")
-print (user.get_name())
+print (user.user_information())
+'''
 
