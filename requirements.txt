@@ -1,0 +1,8 @@
+# مكتبات 
+typer
+rich
+httpx
+tldextract
+rapidfuzz
+python-whois
+requests
