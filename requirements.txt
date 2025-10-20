@@ -1,0 +1,8 @@
+schedule
+python-dotenv
+Pillow
+colorama
+art
+openai
+requests
+dotenv

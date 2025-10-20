@@ -1,0 +1,156 @@
+[
+  {
+    "title": "Eid",
+    "date": "2025-10-19 18:43",
+    "description": "Welcome",
+    "location": "Jubail",
+    "reminders": [],
+    "poster": null,
+    "attendees": [
+      {
+        "name": "Ziyad",
+        "email": "zsyz8335@gmail.com",
+        "status": "pending"
+      },
+      {
+        "name": "Ziyad",
+        "email": "zsyz8335@gmail.com",
+        "status": "pending"
+      },
+      {
+        "name": "Abdulrahman",
+        "email": "aaq_224@hotmail.com",
+        "status": "pending"
+      },
+      {
+        "name": "Ziyad",
+        "email": "zsyz8335\"gmail.com",
+        "status": "pending"
+      },
+      {
+        "name": "Ziyad",
+        "email": "zsyz8335@gmail.com",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "title": "Happy Berthday",
+    "date": "2025-10-19 19:10",
+    "description": "25 years old",
+    "location": "Juabil",
+    "reminders": [],
+    "poster": null,
+    "attendees": [
+      {
+        "name": "Ahmed",
+        "email": "zsyz8335@gmail.com",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "title": "Birthday",
+    "date": "2025-10-21 12:00",
+    "description": "Ziyad Birthday",
+    "location": "Riyadh",
+    "reminders": [],
+    "poster": null,
+    "attendees": [
+      {
+        "name": "Ziyad",
+        "email": "zsyz8335@gmail.com",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "title": "Birthday Event",
+    "date": "2025-10-20 9:45",
+    "description": "25 years old",
+    "location": "Riyadh",
+    "reminders": [
+      {
+        "minutes_before": 1,
+        "fired": false
+      }
+    ],
+    "poster": null,
+    "attendees": [
+      {
+        "name": "Ziyad",
+        "email": "zsyz8335@gmail.com",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "title": "Test",
+    "date": "2025-10-20 10:49",
+    "description": "test",
+    "location": "jubail",
+    "reminders": [
+      {
+        "minutes_before": 1,
+        "fired": false
+      },
+      {
+        "minutes_before": 3,
+        "fired": false
+      }
+    ],
+    "poster": null,
+    "attendees": [
+      {
+        "name": "Ziyad",
+        "email": "zsyz8335@gmail.com",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "title": "reminder",
+    "date": "2025-10-20 11:00",
+    "description": "TEST",
+    "location": "jubail",
+    "reminders": [
+      {
+        "minutes_before": 2,
+        "fired": false
+      }
+    ],
+    "poster": null,
+    "attendees": [
+      {
+        "name": "ziyad",
+        "email": "zsyz8335@gmail.com",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "title": "Graduation ceremony",
+    "date": "2025-10-20 11:10",
+    "description": "Celebrating for the graduates",
+    "location": "jaubil",
+    "reminders": [
+      {
+        "minutes_before": 2,
+        "fired": true
+      }
+    ],
+    "poster": null,
+    "attendees": [
+      {
+        "name": "Ziyad",
+        "email": "zsyz8335@gmail",
+        "status": "pending"
+      },
+      {
+        "name": "Abdulrahman",
+        "email": "aaq_224@hotmail.com",
+        "status": "pending"
+      }
+    ]
+  }
+]
