@@ -47,7 +47,6 @@ def send_invites_for_event(event_title: str, tone: str = "polite, friendly", use
             f"Where: {ev.get('location','')}",
             ev.get('description',''),
         ],
-        # language=None  # اتركها تلقائي أو مرر 'ar'/'en'
         signature="Ziyad",
     )
 
@@ -69,11 +68,28 @@ def send_invites_for_event(event_title: str, tone: str = "polite, friendly", use
 
     sent = 0
     for a in attendees:
-        email = (a or {}).get('email')
-        if not email: continue
-        if send_email(email, subject, body, attachments=attachments, html=is_html):
+        name = (a or {}).get('name', '').strip()
+        email = (a or {}).get('email', '').strip()
+        if not email:
+            continue
+
+        # إنشاء نسخة مخصصة من النص لكل مستلم
+        personalized_body = body_text
+        if name:
+            if personalized_body.lower().startswith("dear"):
+                # استبدال السطر الأول فقط
+                lines = personalized_body.splitlines()
+                lines[0] = f"Dear {name},"
+                personalized_body = "\n".join(lines)
+            else:
+                personalized_body = f"Dear {name},\n\n{personalized_body}"
+
+        ok = send_email(email, subject, personalized_body, attachments=attachments)
+        if ok:
             sent += 1
+
     print(f"Invites sent: {sent}/{len(attendees)}")
+
 
 def send_invites_cli():
     title = input("Event title to invite: ").strip()
