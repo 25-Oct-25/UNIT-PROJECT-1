@@ -40,4 +40,3 @@ class DataFetcher:
 
         print(f"Data fetched and filtered successfuly. Found {len(df_stats)} qualified players.")
         return df_stats
-        
