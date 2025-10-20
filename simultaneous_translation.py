@@ -2,26 +2,20 @@
 from googletrans import Translator
 
 #Create object
-translator = Translator()
 
-#Create  a transtion function
-def quick_translator (phrase:str, target_language:str)->str:
-    user_input = phrase
 
-    #Create a variable to find the language of the phrase
-    detect_lang = translator.detect(user_input).lang
-    print(detect_lang)
-
+#Create  a translation function
+def quick_translator (phrase:str, target_language:str) ->str:
+    '''
+    The function has two parameters : the first one for the text
+    and the second one for a target language
+    The function return the text after translate
+    '''
+    translator = Translator()
     #Call Translate method
-    translated_phrase = translator.translate(user_input, dest = target_language)
-    return translated_phrase
+    translated_phrase = translator.translate(phrase, dest = target_language)
+    return translated_phrase.text
 
 
 #Function test
-sent = "Hello world"
-print(quick_translator(sent, "ar"))
-'''
-print(quick_translator(sent,"kr"))
-print(quick_translator(sent, "zh"))
-print(quick_translator(sent,"jp"))
-'''
+print(quick_translator("مرحبا بالعالم","ko"))
