@@ -29,11 +29,13 @@ def check_email(email:str)-> bool:
     try:
         isValid = validate_email(email)
         email_address = v.email
-        print(f'{email_address} The email is correct')
         return True
-    except EmailNotValidEroor as e:
-        print(f"{str(e)} The email unvalid")
+        print(f'{email_address} The email is correct')
+        
+    except EmailNotValidError as e:
         return False
+        print(f"{str(e)} The email unvalid")
+        
 
 
 users_list = []
@@ -86,7 +88,7 @@ while True:
 
 
 
-    if user_input == "5":
+    elif user_input == "5":
         #save the content to the file
         save_to_users_list()
         #print a good bye sentence
@@ -108,7 +110,7 @@ while True:
         "-'tr' for Turkish.\n" \
         "-'it' for Italian.\n" )
         print("Your translation text is: ", quick_translator(text_to_translate, select_language))
-    if user_input == "3":
+    elif user_input == "3":
         #To determine the user type if the user translator 
         # will create a new translator object and if the user is a company 
         # will create a new company object
@@ -117,10 +119,38 @@ while True:
         "2- Company.\n")
         if user_input == "1":
             #Add user information
+
+            #Print a menu to tell the user what will be enter in the next
+            print("To add a user name we need a following information:\n" \
+            "1- Translator name.\n" \
+            "2- Translator location.\n" \
+            "3- Translator email.\n" \
+            "4- Translator gender.\n" \
+            "5- Translator major.\n" \
+            "6- Translator mother tongue.\n" \
+            "7- Is Translator have an offical certificate? ('True' or 'False')\n" \
+            "9- How many years of experience do Translator have? (number) \n")
+
+
             user_name = input("Enter your name: ")
             user_location = input("Where are you live? ")
-            user_email = input("Enter your email: ")#I should check if the email format is valid or not
-            user_password = input("Enter your password: ")
+            user_email = input("Enter your email: ")  
+            
+            #email check function
+            if check_email(user_email):
+                continue
+            else: 
+                user_email = input("Enter your email again: ")
+            
+            user_gender = input("Enter your gender: ")
+            user_major = input("Enter your major: ")
+            user_mother_tongue = input ("Enter your mother tongue: ")
+            user_certificate = input ("Enter 'True' or 'False' if you have official certificate: ")
+            user_experience_years = input("Enter a number of years of experience do you have: ")
+            #if statement to check if the user entered a right email or not
+
+    
+            #name,location, email, gender:str, major:str,language:str,  official_certificate:bool, years_of_experience:int=0
             user = Translator(user_name, user_location, user_email, user_password)
             users_list.append(user)
             

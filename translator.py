@@ -4,7 +4,7 @@ from community import CommunityUser
 class Translator(CommunityUser):
 
     #Initilize constructor
-    def __init__(self, name,location, email, gender:str, major:str,language:str,  official_certificate:bool, rate:int, years_of_experience:int=0 , more_language=[]):
+    def __init__(self, name,location, email, gender:str, major:str,language:str,  official_certificate:bool,  years_of_experience:int=0 ,rate:int = 0, more_language=[]):
         super().__init__(name, location,email)
         self.gender = gender
         self.major = major
