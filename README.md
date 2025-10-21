@@ -101,8 +101,7 @@ calories calc
 خطة التمرين: plan
 توليد/عرض/حجم:
 
-bash
-Copy code
+
 plan generate --split=upper-lower|full-body|ppl --days=3..6
 plan show
 plan volume
@@ -112,8 +111,7 @@ plan volume
 
 قائمة المشتريات + تصدير CSV:
 
-bash
-Copy code
+
 plan groceries --target=2400 --P=180 --C=250 --F=70 [--filters=chicken,rice]
 export csv --file=week.csv
 
@@ -122,8 +120,7 @@ export csv --file=week.csv
 الوصفات والوجبات: recipes
 اقتراح وصفات ضمن هدف:
 
-bash
-Copy code
+
 recipes suggest --kcal=700 --protein=40 [--filters=chicken,rice]
 
 

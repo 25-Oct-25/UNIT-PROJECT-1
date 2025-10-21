@@ -46,6 +46,21 @@ from ..auth.roles import (
     login as auth_login, logout as auth_logout,
     current_role, require_role
 )
+from fitcoach_cli.notifications.emailer import send_email_smtp
+
+send_email_smtp(
+    to=["test@recipient.com"],
+    subject="تجربة إرسال – UTF-8 ✅",
+    text="هذه نسخة نصية (fallback).",
+    html="""
+      <h2 style="margin:0">مرحبًا 👋</h2>
+      <p>هذه رسالة <b>HTML</b> بترميز UTF-8 وتتنسيق صحيح.</p>
+    """,
+    from_name="فريق FitCoach",
+    # attachments=["/path/to/report.pdf"],  # اختياري
+)
+
+
 
 def cmd_help(*, box: bool = False, wide: bool = True) -> None:
     """Print the colored CLI help with grouped sections.
