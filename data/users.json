@@ -1,0 +1,20 @@
+{
+    "ghala": {
+        "password": "1234",
+        "scores": {
+            "TimeTraveler": 30,
+            "EscapeRoom": 102
+        },
+        "achievements": [
+            "Time Explorer 2000s",
+            "Time Explorer 1980s",
+            "Escape Beginner",
+            "No Help Needed"
+        ]
+    },
+    "Wafi": {
+        "password": "0000",
+        "scores": {},
+        "achievements": []
+    }
+}
