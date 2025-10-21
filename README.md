@@ -191,3 +191,7 @@ email test --subject="Test" --text="Hello from FitCoach"
 app lang --set=ar
 # أو
 app lang --set=en
+
+
+
+stable
