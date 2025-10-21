@@ -1,77 +1,46 @@
-import json
-import os
-
-
-
 SAVE_FILE = 'savegame.json'
+LAST_BOSS_UNLOCK_LEVEL = 3
 
 class Player:
 
     ROLES_INITIAL_STATS = {
-        "Paladin": {"hp": 120, "attack": 15, "defense": 30, "xp": 0},
-        "Knight":  {"hp": 140, "attack": 18, "defense": 25, "xp": 0},
-    }
-
-    ENEMIES = {
-        "Goblin": {"hp": 30, "attack": 5, "defense": 2, "xp_reward": 10},
-        "Slime":  {'HP': 20, 'ATK': 3, 'DEF': 1, 'XP_REWARD': 7, 'COIN_REWARD': 5}
-        #"Dragon Lord":   {"hp": 200, "attack": 20, "defense": 10, "xp_reward": 150},
+        "Paladin": {"hp": 120, "atk": 15, "defense": 30, 'weapon': 'Wooden Sword'},
+        "Knight":  {"hp": 140, "atk": 18, "defense": 25}, 'weapon': 'Simple Axe'
     }
 
     SHOP_ITEMS = {
-    'Sword':    {'Price': 80,  'ATK': 10, 'DEF': 5},
-    'Claymore': {'Price': 150, 'ATK': 20, 'DEF': 0},
-    'Heal Potion': {'Price': 15, 'Effect': 50, 'Type': 'Consumable'}
+        'Sword':    {'Price': 80,  'ATK': 10, 'defense': 5},
+        'Claymore': {'Price': 150, 'ATK': 20, 'defense': 0},
+        'Heal Potion': {'Price': 15, 'Effect': 50, 'Type': 'Consumable'}
     }
 
-    LAST_BOSS = {'Name': 'Dragon Lord', 'HP': 200, 'ATK': 25, 'DEF': 15, 'XP_REWARD': 100, 'COIN_REWARD': 100}
-
-    last_boss_unlock_level = 3
-    
-    @staticmethod
-    def save_game(player):
-        try:
-            with open(SAVE_FILE, 'w') as f:
-                json.dump(player, f, indent=4)
-            print("Progress saved successfully")
-        except Exception as e:
-            print(f"\nSaving failed... {e}")
-
-    @staticmethod
-    def load_game():
-        if os.path.exists(SAVE_FILE):
-            try:
-                with open(SAVE_FILE, 'r') as f:
-                    player = json.load(f)
-                print("\nPrevious data loaded successfully")
-                return player
-            except Exception:
-                print("\nloading data failed...")
-                return None
-        else:
-            return None
+    def __init__(self, name: str, role: str, level: int, coins: int, inventory: dict, loaded_data = None):
         
-    def quit_game(self):
-        pass
+        if loaded_data:
+            self.__dict__.update(loaded_data)
+        else: 
+            #Name check and assign
+            self.name = (name or "").strip()
+            '''if not self.name:
+                self.name = "Fighter"'''
+            
+            #role check and assign
+            role = (role or "").lower().strip()
+            if role not in self.ROLES_INITIAL_STATS:
+                raise ValueError(f"unknown role. Choose between 1- Paladin 2- Knight")
+            self.role = role
 
-    def __init__(self, name: str, role: str, coins: int, inventory: dict):
-
-        #Name Check
-        self.name = (name or "").strip()
-        if not self.name:
-            self.name = "Fighter"
-
-        #Role Check
-        role = (role or "").lower().strip()
-        if role not in self.ROLES_INITIAL_STATS:
-            raise ValueError(f"unknown role. Choose between 1- Paladin 2- Knight")
-        self.role = role
-
-        self.stats = dict(self.ROLES_INITIAL_STATS[self.role])
+            self.level = 1
+            self.xp = 0
+            self.coins = 20
+            self.inventory = {}
+            base_stats = self.ROLES_INITIAL_STATS.get(role, self.ROLES_INITIAL_STATS[])
+            self.hp = base_stats['hp']
+            self.atk = base_stats['atk']
+            self.defense = base_stats['def']
+            self.weapon = base_stats['WEAPON']
         
-        self.coins = 20
-        self.inventory = {}
-        self._validate_stats()
+            self._validate_stats()
 
     #Check on Stats
     def _validate_stats(self):
@@ -79,57 +48,30 @@ class Player:
         if s["hp"] <= 0 or s["attack"] < 0 or s["defense"] < 0 or s["xp"] < 0:
             print("There is a problem with your stats")
 
-    def welcoming(self):
-        print("Welcome to the game!")
-        name = input("What is your character's name? ").strip()
-        self.name = name
-        print(f"Welcome {self.name}, Hope you enjoy the game!")
+    def display_stats(self):
+        #print("Your current stats:")
+        print(f"Stats for player {self.name}:")
+        print(f"Role: {self.role}, HP: {self.hp}, Level: {self.level}")
+        print(f"Attack: {self.atk}, Defense: {self.defense}")
+        print(f"Coins: {self.coins}, XP: {self.xp}")
+        print(f"Weapon: {self.weapon}")
 
 
-    def start_menu(self):
-        print("Choose from the menu:")
-        print("1- Pick a role")
-        print("2- Save game")
-        print("3- Load game")
-        print("4- Quit game")
+    def level_up(self):
+        xp_required = {1: 0, 2: 25, 3: 35, 4: 50}
+        
+        #to increase player level
+        while self.level < 4 and self.xp >= xp_required.get(self.level + 1, float('inf')):
+            self.level += 1
 
-        cmd = input("").strip()
-        mapping = {
-            "1": self.pick_role,
-            "2": self.save_game,
-            "3": self.load_game,
-            "4": self.quit_game,
-        }
-        action = mapping.get(cmd)
-        if action:
-            action()
-        else:
-            print("Unknown command. Try again.")
+            #to increase player stats
+            self.max_hp += 10 
+            self.current_hp = self.max_hp # استعادة كاملة
+            self.attack += 5
+            self.defense += 3
+            print(f"\nCongratulations you reached level {self.level}!")
+            print(f"Your new stats: HP:{self.max_hp}, ATK:{self.atk}, DEF:{self.defense}")
 
 
-    def pick_role(self):
-        print("Please pick a role:")
-
-        role_names = list(self.ROLES_INITIAL_STATS.keys())
-
-        #To print the roles
-        for i, role_name in enumerate(self.ROLES_INITIAL_STATS.keys()):
-            print(f"{i+1}- {role_name}")
-
-        while True:
-
-            role = input("Enter the number of the role: ").strip()
-            #will convert each to index so the user could just pick a number, and checks if index is in correct range
-            try:
-                role_index = int(role) - 1
-                if 0 <= role_index < len(role_names):
-                    new_role = role_names[role_index]
-
-                    self.role = new_role
-                    self.stats = dict(self.ROLES_INITIAL_STATS[self.role])
-                    self.stats['current_hp'] = self.stats['hp']
-            
-                print(f"Your role is now set to {self.role}.")
-                break
-            except (ValueError, IndexError):
-                print("Unknown command. Try again.")
+    def enter_shop():
+        pass
