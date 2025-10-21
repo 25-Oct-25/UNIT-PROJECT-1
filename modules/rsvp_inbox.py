@@ -1,4 +1,3 @@
-# modules/rsvp_inbox.py
 import os
 import re
 import time
@@ -19,14 +18,14 @@ IMAP_PORT   = int(os.getenv("IMAP_PORT", "993"))
 EMAIL_USER  = os.getenv("EMAIL_USER", "")
 EMAIL_PASS  = os.getenv("EMAIL_PASS", "")
 
-# أنماط العنوان المتفق عليها في mailto (لا تغيّرها في invites.py)
+# Subject patterns agreed with mailto buttons (keep in sync with invites.py)
 SUBJ_ACCEPT_PREFIX = "RSVP ACCEPT — "
 SUBJ_DECLINE_PREFIX = "RSVP DECLINE — "
 
-POLL_SECONDS = 60  # افحص كل دقيقة
+POLL_SECONDS = 60  # check every minute
 
 def _apply_rsvp_decision(event_title: str, attendee_email: str, accept: bool) -> bool:
-    """يحدّث حالة الحضور في ملفات المشروع (attendees/<event>.json و events.json)."""
+    """Update attendance across files (attendees/<event>.json and events.json)."""
     attendee_email = (attendee_email or "").strip().lower()
     changed = False
 
@@ -40,7 +39,7 @@ def _apply_rsvp_decision(event_title: str, attendee_email: str, accept: bool) ->
     if changed:
         save_attendees(event_title, attendees)
 
-    # 2) نسخة داخل events.json (لو موجودة)
+    # 2) inline copy within events.json (if present)
     events = load_events()
     ev_changed = False
     for ev in events:
@@ -74,7 +73,7 @@ def _extract_event_from_subject(subj: str) -> Tuple[Optional[str], Optional[bool
 
 def _extract_attendee_from_body(text: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """
-    نتوقع النص الذي يبنيه mailto:
+    Expected body from mailto:
       Event: <title>
       Attendee: <Name> <email>
       Response: ACCEPT | DECLINE
@@ -83,7 +82,7 @@ def _extract_attendee_from_body(text: str) -> Tuple[Optional[str], Optional[str]
     name  = None
     email_addr = None
 
-    # حدث
+    # Event
     m = re.search(r"Event:\s*(.+)", text, re.IGNORECASE)
     if m: event = m.group(1).strip()
 
@@ -93,7 +92,7 @@ def _extract_attendee_from_body(text: str) -> Tuple[Optional[str], Optional[str]
         name = m.group(1).strip()
         email_addr = m.group(2).strip()
 
-    # إذا ما لقينا، جرّب صيغة ثانية أبسط
+    # Fallback: grab <email> if present anywhere
     if not email_addr:
         m2 = re.search(r"<([^>]+)>", text)
         if m2:
@@ -129,9 +128,9 @@ def _connect():
 
 def poll_inbox_once(mark_seen: bool = True) -> int:
     """
-    يقرأ الرسائل غير المقروءة التي تحتوي على 'RSVP ' في العنوان،
-    ويطبّق القرار على ملفات الحضور.
-    يرجّع عدد الرسائل التي تم التعامل معها.
+    Read unseen emails with 'RSVP ' in subject,
+    apply decisions to attendance,
+    return count processed.
     """
     try:
         M = _connect()
@@ -142,7 +141,7 @@ def poll_inbox_once(mark_seen: bool = True) -> int:
     processed = 0
     try:
         M.select("INBOX")
-        # ابحث عن غير المقروءة وبها RSVP
+        # Unseen and has RSVP in subject
         status, data = M.search(None, '(UNSEEN SUBJECT "RSVP ")')
         if status != "OK":
             return 0
@@ -159,12 +158,11 @@ def poll_inbox_once(mark_seen: bool = True) -> int:
                 body_text = _walk_text(msg)
                 event_from_body, _, attendee_email = _extract_attendee_from_body(body_text)
 
-                # فضّل عنوان الإيميل لتحديد القبول/الرفض
+                # Prefer subject for decision, fallback to body
                 if accept_from_subj is None:
-                    # fallback: من النص
                     accept_from_subj = True if re.search(r"Response:\s*ACCEPT", body_text, re.I) else False if re.search(r"Response:\s*DECLINE", body_text, re.I) else None
 
-                # الحدث من العنوان أولاً ثم من النص
+                # Event from subject first, then body
                 event_title = event_from_subj or event_from_body
 
                 if event_title and attendee_email and accept_from_subj is not None:
@@ -181,7 +179,7 @@ def poll_inbox_once(mark_seen: bool = True) -> int:
             except Exception as e:
                 ui.error(f"[RSVP] Parse error: {e}")
 
-            # علّمها كمقروءة حتى لا تتكرر
+            # Mark as seen to avoid re-processing
             if mark_seen:
                 try:
                     M.store(msg_id, '+FLAGS', '\\Seen')
@@ -198,7 +196,7 @@ def poll_inbox_once(mark_seen: bool = True) -> int:
     return processed
 
 def start_inbox_watcher():
-    """يشغّل polling في خلفية البرنامج (كل 60 ثانية)."""
+    """Background polling every 60s."""
     import threading
     def _loop():
         ui.badge("RSVP inbox watcher started", bg="green")

@@ -1,4 +1,3 @@
-# modules/report.py
 import os
 from datetime import datetime
 from fpdf import FPDF
@@ -34,7 +33,7 @@ def email_event_report(event_title: str, to: str | None = None) -> str:
 
 
 # -------- settings --------
-POSTER_MAX_W_MM = 90   # << poster width on A4 (smaller footprint)
+POSTER_MAX_W_MM = 90   # Poster width on A4 (small footprint)
 
 def _ensure_dir(p: str):
     os.makedirs(p, exist_ok=True)
@@ -132,8 +131,7 @@ def generate_event_report(event_title: str, poster_max_w_mm: int = POSTER_MAX_W_
             x = (210 - poster_max_w_mm) / 2  # center on A4 width
             y = pdf.get_y()
             pdf.image(poster, x=x, y=y, w=poster_max_w_mm)
-            # estimate height to push cursor (keep it smaller footprint)
-            # A4 width: 210mm. Our poster is portrait; scale ~1.5x height to width typically.
+            # push cursor roughly for portrait image
             approx_h = poster_max_w_mm * 1.4
             pdf.ln(approx_h + 2)
         except Exception:

@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "title": "HR",
+    "date": "2025-10-21 20:00",
+    "description": "Jubail",
+    "location": "Jubail",
+    "reminders": [
+      {
+        "minutes_before": 6,
+        "fired": true
+      }
+    ],
+    "poster": null,
+    "attendees": []
+  },
+  {
+    "title": "Wedding Celebration",
+    "date": "2025-11-21 20:10",
+    "description": "Join us for a night full of joy and love as we celebrate the wedding of Ziyad & Atheer.",
+    "location": "Riyadh",
+    "reminders": [
+      {
+        "minutes_before": 10,
+        "fired": false
+      }
+    ],
+    "poster": null,
+    "attendees": []
+  }
+]

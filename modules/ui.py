@@ -1,4 +1,4 @@
-# modules/ui.py (نسخة Rich)
+# (Rich-powered UI helpers)
 import os, sys, shutil
 from colorama import init as colorama_init
 from rich.console import Console
@@ -9,16 +9,16 @@ from rich.align import Align
 from rich.box import SIMPLE_HEAVY, MINIMAL_DOUBLE_HEAD
 from rich.text import Text
 
-# نفعل Colorama لويندوز (للتوافق)
+# Enable Colorama on Windows for ANSI colors
 colorama_init(autoreset=True, convert=True)
 console = Console()
 
-# أيقونات (مع بدائل لو ما يدعم الإيموجي)
+# Emoji icons with safe fallbacks
 OK = "✅"; WARN = "⚠️"; ERR = "❌"; MAIL = "✉️"; STAR = "⭐"; TIME = "⏰"; POSTER = "🖼️"; PEOPLE = "👥"; CAL = "📅"
 if os.name == "nt" and (not sys.stdout.encoding or sys.stdout.encoding.lower() not in ("utf-8","utf8")):
     OK, WARN, ERR, MAIL, STAR, TIME, POSTER, PEOPLE, CAL = "[OK]", "[!]", "[X]", "[MAIL]", "[*]", "[TIME]", "[IMG]", "[PEOPLE]", "[CAL]"
 
-# ألوان مختصرة (متوافقة مع بقية الكود)
+# Short color aliases
 class F:
     BLUE   = "blue"
     CYAN   = "cyan"
@@ -75,9 +75,9 @@ def boxed(text: str, color=F.WHITE):
 def badge(text: str, bg=B.GREEN, fg=F.WHITE):
     console.print(Panel.fit(f"[bold]{text}[/]", style="black on green", padding=(0,2)))
 
-# ===== جداول جاهزة للاستخدام =====
+# ===== Ready-made tables =====
 def table(headers: list[str], rows: list[list[str]], title: str | None = None):
-    """جدول بسيط وأنيق."""
+    """Simple, clean table."""
     tbl = Table(title=title, box=SIMPLE_HEAVY, show_lines=False, header_style="bold cyan")
     for h in headers:
         tbl.add_column(h, overflow="fold")
@@ -86,7 +86,7 @@ def table(headers: list[str], rows: list[list[str]], title: str | None = None):
     console.print(tbl)
 
 def menu(title: str, items: list[tuple[str, str]]):
-    """items: list of (key, label) — يطبع جدول خيارات بشكل مرتب ويرجع اختيار المستخدم."""
+    """items: (key, label). Render options and read a choice."""
     clear()
     header(title)
     tbl = Table(box=MINIMAL_DOUBLE_HEAD, header_style="bold cyan")
@@ -97,7 +97,7 @@ def menu(title: str, items: list[tuple[str, str]]):
     console.print(tbl)
     return console.input("[bold cyan]Select option: [/]").strip()
 
-# ===== عناصر عرض متخصصة للمشروع =====
+# ===== Project-specific views =====
 def events_table(events: list[dict]):
     if not events:
         warning("No events.")

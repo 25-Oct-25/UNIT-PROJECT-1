@@ -1,12 +1,11 @@
-# modules/rsvp_mailto.py
 import os, urllib.parse
 from dotenv import load_dotenv
 load_dotenv()
 
-# نرسل الردود إلى هذا الإيميل (المنظّم)
+# Where replies go (organizer)
 ORGANIZER_EMAIL = (
     os.getenv("ORGANIZER_EMAIL")
-    or os.getenv("EMAIL_USER")               # fallback على نفس حساب الإرسال
+    or os.getenv("EMAIL_USER")               # fallback to sender account
 )
 
 def _mailto_link(to_email: str, subject: str, body: str) -> str:
@@ -16,7 +15,7 @@ def _mailto_link(to_email: str, subject: str, body: str) -> str:
 
 def build_mailto_buttons_html(event_title: str, attendee_name: str, attendee_email: str) -> str:
     if not ORGANIZER_EMAIL:
-        # لو ما فيه بريد منظّم محدد، نخلي الزرود disabled نصيًا
+        # If organizer email is missing, show a friendly warning
         return "<p style='color:#dc2626'>Organizer email is not configured.</p>"
 
     subj_ok  = f"RSVP ACCEPT — {event_title}"

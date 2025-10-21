@@ -1,11 +1,10 @@
-# modules/ai_poster.py
 import os, io, time, requests
 from datetime import datetime
 from dotenv import load_dotenv
 from PIL import Image, ImageDraw, ImageFont
 import qrcode
 
-# ===== Gemini (اختياري) =====
+# ===== Gemini (optional) =====
 try:
     import google.generativeai as genai
     _GENAI_AVAILABLE = True
@@ -14,23 +13,23 @@ except Exception:
 
 load_dotenv()
 
-# ===== مفاتيح من .env =====
+# ===== Tokens from .env =====
 REPLICATE_TOKEN = os.getenv("REPLICATE_API_TOKEN", "").strip()
 HF_TOKEN        = os.getenv("HF_API_TOKEN", "").strip()
 GEMINI_API_KEY  = os.getenv("GEMINI_API_KEY", "").strip()
 
-# ===== إعدادات الموديلات =====
-# أفضل جودة حالياً للبوسترات (FLUX 1.1 Pro على Replicate)
+# ===== Model choices =====
+# High-quality poster model (FLUX 1.1 Pro via Replicate)
 REPLICATE_MODEL_OWNER = "black-forest-labs"
 REPLICATE_MODEL_NAME  = "flux-1.1-pro"
 
-# خيار بديل واقعي:
+# Alternative example:
 # REPLICATE_MODEL_OWNER = "replicate"
 # REPLICATE_MODEL_NAME  = "realistic-vision-v5"
 
 HF_MODEL = "stabilityai/stable-diffusion-xl-base-1.0"
 
-# تهيئة Gemini (إن وُجد)
+# Configure Gemini if available
 if _GENAI_AVAILABLE and GEMINI_API_KEY:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
@@ -48,7 +47,7 @@ def _ensure_dir(path: str):
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
 def _auto_engine():
-    """اختيار المحرك تلقائياً: Replicate ثم HF ثم Gemini."""
+    """Pick engine automatically: Replicate → HF → Gemini."""
     if REPLICATE_TOKEN:
         return "replicate"
     if HF_TOKEN:
@@ -95,7 +94,7 @@ def _overlay_text(img: Image.Image, title: str = "", subtitle: str = "", footer:
     draw = ImageDraw.Draw(img)
     W, H = img.size
 
-    # ابحث عن خط متوفر (ويندوز/ماك/لينكس)
+    # Try common system fonts
     candidates = [
         "C:/Windows/Fonts/arialbd.ttf",
         "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
@@ -120,7 +119,7 @@ def _overlay_text(img: Image.Image, title: str = "", subtitle: str = "", footer:
         bbox = draw.textbbox((0, 0), text, font=font)
         w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
         x = (W - w) // 2
-        # خلفية نصف شفافة لزيادة وضوح النص
+        # Soft backdrop for contrast
         draw.rectangle([x - 24, y - 14, x + w + 24, y + h + 14], fill=(0, 0, 0, 160))
         draw.text((x, y), text, font=font, fill=fill)
 
@@ -163,7 +162,7 @@ def _sd_via_replicate(prompt: str) -> Image.Image:
         "version": version_id,
         "input": {
             "prompt": prompt,
-            "width": 1024, "height": 1536,           # أبعاد بوستر عمودية
+            "width": 1024, "height": 1536,           # Portrait poster size
             "num_inference_steps": 28,
             "guidance_scale": 7.0
         }
@@ -175,7 +174,7 @@ def _sd_via_replicate(prompt: str) -> Image.Image:
     if not status_url:
         raise RuntimeError("Prediction status URL missing")
 
-    # Polling
+    # Poll until done
     while True:
         pr = requests.get(status_url, headers=_replicate_headers(), timeout=60)
         pr.raise_for_status()
@@ -212,12 +211,12 @@ def _sd_via_hf(prompt: str) -> Image.Image:
 
 
 # ==============================
-# Gemini (اختياري – قد لا يكون ثابت لإرجاع صور inline)
+# Gemini (best-effort inline image)
 # ==============================
 def _sd_via_gemini(prompt: str) -> Image.Image:
     if not _GEMINI_READY:
         raise RuntimeError("Gemini not configured. Install google-generativeai and set GEMINI_API_KEY")
-    # قد تختلف طريقة الإرجاع حسب النسخة والمنطقة؛ هذا الفرع يعمل إذا رجع PNG inline
+    # API behavior can vary; this path assumes inline PNG
     model = genai.GenerativeModel("gemini-2.5-flash")
     result = model.generate_content([prompt], generation_config={"response_mime_type": "image/png"})
     try:
@@ -243,7 +242,7 @@ def generate_poster_for_event(
     footer: str = "",
     qr_text: str | None = None
 ) -> str:
-    """يولّد بوستر عالي الجودة ويضيف Overlay وعناصر اختيارية."""
+    """Generate a high-quality poster, add overlays, and save."""
     if output_path is None:
         safe = event_title.replace(" ", "_")
         output_path = f"data/posters/{safe}.png"
@@ -273,7 +272,7 @@ def generate_poster_for_event(
         img.save(output_path)
         return output_path
 
-    # Overlay
+    # Overlay and save
     final = _overlay_text(img, title=event_title, subtitle=subtitle, footer=footer_text, qr_text=qr_text)
     final.save(output_path)
     print(f"[Poster AI] Saved → {output_path}")

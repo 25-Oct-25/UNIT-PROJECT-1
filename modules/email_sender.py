@@ -1,4 +1,4 @@
-# modules/email_sender.py  (استبدل كامل send_email بهذا الإصدار)
+# (Replace entire send_email with this version)
 import os
 from dotenv import load_dotenv
 import smtplib
@@ -14,7 +14,7 @@ TEST_MODE = os.getenv('TEST_MODE','True').lower() in ('1','true','yes')
 def send_email(to_email, subject, body, attachments=None, html=False):
     """
     attachments: list of file paths
-    html: if True send as text/html, else text/plain
+    html: True → text/html, False → text/plain
     """
     if not SMTP_SERVER or not SMTP_PORT or not EMAIL_USER:
         print(f"[EMAIL CONFIG] Missing SMTP config. SMTP_SERVER={SMTP_SERVER}, SMTP_PORT={SMTP_PORT}, EMAIL_USER={EMAIL_USER}")

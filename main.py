@@ -1,28 +1,32 @@
-# main.py
 from dotenv import load_dotenv
 from colorama import init as colorama_init
 import os
 
-# واجهة مُحسّنة
+# Polished terminal UI
 from modules import ui
 
-# وظائف المشروع
+# Project features
 from modules.events import (
     create_event_cli,
     list_events_cli,
     delete_event_cli,
+    edit_event_cli,          # update event
+    load_events,             # used in UPDAT/Regenerate poster
 )
 from modules.reminders import start_reminder_loop, add_reminder_cli
-from modules.rsvp import add_attendee_cli, list_attendees_cli, mark_attendance_cli
+from modules.rsvp import (
+    add_attendee_cli,
+    list_attendees_cli,
+    mark_attendance_cli,
+    edit_attendee_cli,       # edit attendee
+    delete_attendee_cli,     # delete attendee
+)
 from modules.invites import send_invites_cli
 from modules.ai_email import draft_email
 from modules.email_sender import send_email
 from modules.ai_poster import generate_poster_for_event
 from modules.reports import generate_event_report, email_event_report
 from modules.rsvp_inbox import start_inbox_watcher
-from modules import ui
-
-
 
 load_dotenv()
 colorama_init(autoreset=True, convert=True)
@@ -37,7 +41,7 @@ def _auto_engine():
         return "hf"
     return None
 
-# -------------------- أفعال القائمة --------------------
+# -------------------- Menu actions --------------------
 
 def action_generate_poster():
     ui.section("Generate Poster")
@@ -96,6 +100,7 @@ def action_draft_sample_email():
     )
     ui.section("AI Email Preview")
     ui.boxed(body, color=ui.F.BLUE)
+
 def action_send_test_email():
     ui.section("Send Test Email (SMTP)")
     to = ui.prompt("To (email)")
@@ -126,25 +131,113 @@ def action_export_and_email_report():
         ui.error(f"Failed to email report: {e}")
     input("Press Enter to continue...")
 
-# -------------------- القائمة الرئيسية --------------------
+# -------------------- UPDAT — unified update hub --------------------
+def update_hub_cli():
+    """
+    UPDAT — Update Center:
+    - Update event info (title/date/location/description)
+    - Edit/Delete attendee
+    - Add/Update reminder
+    - Regenerate poster (optional)
+    """
+    while True:
+        choice = ui.menu(
+            "UPDAT — Update Center",
+            [
+                ("1", "Update Event info (title/date/location/description)"),
+                ("2", "Edit Attendee (name/email)"),
+                ("3", "Delete Attendee"),
+                ("4", "Add/Update Reminder (minutes before)"),
+                ("5", "Regenerate Poster (optional)"),
+                ("0", "Back"),
+            ],
+        )
 
+        if choice == "1":
+            edit_event_cli()
+            input("Press Enter to continue...")
+        elif choice == "2":
+            edit_attendee_cli()
+            input("Press Enter to continue...")
+        elif choice == "3":
+            delete_attendee_cli()
+            input("Press Enter to continue...")
+        elif choice == "4":
+            add_reminder_cli()
+            input("Press Enter to continue...")
+        elif choice == "5":
+            events = load_events()
+            if not events:
+                ui.warning("No events found.")
+                input("Press Enter to continue...")
+                continue
+
+            print("\nSelect an event to regenerate poster:")
+            for i, e in enumerate(events, 1):
+                print(f"{i}. {e['title']} | {e['date']}")
+
+            try:
+                idx = int(input("\nNumber: ").strip()) - 1
+            except ValueError:
+                ui.warning("Invalid input.")
+                input("Press Enter to continue...")
+                continue
+
+            if not (0 <= idx < len(events)):
+                ui.warning("Invalid choice.")
+                input("Press Enter to continue...")
+                continue
+
+            ev = events[idx]
+            title = ev["title"]
+            prompt = input("Poster prompt (leave empty for elegant default): ").strip()
+            if not prompt:
+                prompt = ("Elegant wedding/event poster, soft lights, gold accents, "
+                          "clean typography, centered composition, 4k, professional design")
+
+            subtitle = input("Subtitle (e.g., '2025-11-25 • Dammam'): ").strip()
+            footer   = input("Footer (optional): ").strip()
+            qr       = input("QR text/url (optional): ").strip() or None
+
+            try:
+                out_path = generate_poster_for_event(
+                    event_title=title,
+                    base_prompt=prompt,
+                    subtitle=subtitle,
+                    footer=footer,
+                    qr_text=qr,
+                    engine="auto",
+                )
+                ui.success(f"Poster saved at: {out_path}")
+            except Exception as e:
+                ui.error(f"Poster generation failed: {e}")
+            input("Press Enter to continue...")
+
+        elif choice == "0":
+            break
+        else:
+            ui.warning("Invalid choice.")
+            input("Press Enter to continue...")
+
+# -------------------- Main menu --------------------
 def print_menu_and_get_choice():
     items = [
         ("1", f"{ui.CAL}  Create Event"),
         ("2", "List Events"),
         ("3", "Delete Event"),
-        ("4", f"{ui.TIME} Start Reminder Service (background)"),
-        ("5", f"{ui.PEOPLE} Add Attendee to Event"),
-        ("6", "List Attendees for Event"),
-        ("7", "Add Reminder to Event (minutes before)"),
-        ("8", f"{ui.POSTER} Generate Poster for Event"),
-        ("9", f"{ui.MAIL} Send Invites (AI-written email)"),
-        ("10", "Draft a Sample Email (AI)"),
-        ("11", "Send Test Email (SMTP)"),
-        ("12", "Mark Attendance for Event"),
-        ("13", "Export Event Report (PDF)"),
-        ("14", "Export & Email Event Report (PDF)"),
-        ("15", "Start RSVP Auto-Sync (Inbox watcher)"),
+        ("4", "UPDAT — Update (event / attendees / reminders / poster)"),  # update hub
+        ("5", f"{ui.TIME} Start Reminder Service (background)"),
+        ("6", f"{ui.PEOPLE} Add Attendee to Event"),
+        ("7", "List Attendees for Event"),
+        ("8", "Mark Attendance for Event"),
+        ("9", "Add Reminder to Event (minutes before)"),
+        ("10", f"{ui.POSTER} Generate Poster for Event"),
+        ("11", f"{ui.MAIL} Send Invites (AI-written email)"),
+        ("12", "Draft a Sample Email (AI)"),
+        ("13", "Send Test Email (SMTP)"),
+        ("14", "Export Event Report (PDF)"),
+        ("15", "Export & Email Event Report (PDF)"),
+        ("16", "Start RSVP Auto-Sync (Inbox watcher)"),
         ("0", "Exit"),
     ]
     return ui.menu("Creative Smart Event Manager", items)
@@ -165,49 +258,51 @@ def main():
             ui.success("Event deleted (if existed).")
             input("Press Enter to continue...")
         elif choice == "4":
+            update_hub_cli()
+        elif choice == "5":
             ui.badge("Reminder loop started", bg=ui.B.GREEN)
             start_reminder_loop()
-        elif choice == "5":
+        elif choice == "6":
             add_attendee_cli()
             ui.success("Attendee added.")
             input("Press Enter to continue...")
-        elif choice == "6":
+        elif choice == "7":
             ui.section("Attendees")
             list_attendees_cli()
             input("Press Enter to continue...")
-        elif choice == "7":
+        elif choice == "8":
+            mark_attendance_cli()
+            input("Press Enter to continue...")
+        elif choice == "9":
             add_reminder_cli()
             ui.success("Reminder added.")
             input("Press Enter to continue...")
-        elif choice == "8":
+        elif choice == "10":
             action_generate_poster()
             input("Press Enter to continue...")
-        elif choice == "9":
+        elif choice == "11":
             send_invites_cli()
             input("Press Enter to continue...")
-        elif choice == "10":
+        elif choice == "12":
             action_draft_sample_email()
             input("Press Enter to continue...")
-        elif choice == "11":
+        elif choice == "13":
             action_send_test_email()
             input("Press Enter to continue...")
-        elif choice == "12":
-            mark_attendance_cli()
-            input("Press Enter to continue...")
-        elif choice == "13":
-            action_export_report()
         elif choice == "14":
+            action_export_report()
+        elif choice == "15":
             action_export_and_email_report()
-        elif choice in ("15"):
+        elif choice == "16":
             start_inbox_watcher()
             input("Press Enter to continue...")
-
         elif choice == "0":
             ui.success("Goodbye!")
             break
         else:
             ui.warning("Invalid choice.")
             input("Press Enter to continue...")
+
 
 if __name__ == "__main__":
     main()

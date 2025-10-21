@@ -1,4 +1,3 @@
-# modules/ai_email.py
 import os
 from textwrap import dedent
 from dotenv import load_dotenv
@@ -14,11 +13,11 @@ try:
         genai.configure(api_key=_API_KEY)
         _GEMINI_READY = True
 except Exception:
-    # مكتبة غير متوفرة أو مفتاح غير مضبوط — سنستخدم القوالب المحلية
+    # Library or key missing → use local templates
     _GEMINI_READY = False
 # ==================================
 
-# نفضّل موديلات flash (المتاحة غالباً في المجاني)
+# Prefer flash models (often available on free tiers)
 PREFERRED = [
     "gemini-2.5-flash-lite",
     "gemini-2.0-flash",
@@ -27,19 +26,20 @@ PREFERRED = [
 ]
 
 def _pick_gemini_model():
-    """اختيار موديل مناسب يدعم generateContent، مع تفضيل flash/flash-lite وتجنب pro/exp قدر الإمكان."""
+    """Pick a model that supports generateContent, prefer flash/flash-lite, avoid pro/exp if possible."""
     if not _GEMINI_READY:
         return None
+#
     try:
         models = [m for m in genai.list_models()
                   if "generateContent" in getattr(m, "supported_generation_methods", [])]
         names = [m.name for m in models]
-        # فضّل flash/flash-lite
+        # Prefer flash/flash-lite
         for pref in PREFERRED:
             for n in names:
                 if pref in n:
                     return n
-        # تجنّب pro/exp لو نقدر
+        # Avoid pro/exp if we can
         for n in names:
             if "pro" not in n and "exp" not in n:
                 return n
@@ -47,7 +47,7 @@ def _pick_gemini_model():
     except Exception:
         return None
 
-# -------- تصنيف نوع الحدث --------
+# -------- Event kind detection --------
 def _detect_kind(subject: str = "", title: str = "") -> str:
     s = f"{subject} {title}".lower()
     if any(k in s for k in ["birthday", "عيد ميلاد", "حفلة"]):
@@ -79,7 +79,7 @@ def _extract_info(bullet_points):
 
 def _apply_tone(base: str, tone: str) -> str:
     tone = (tone or "").lower()
-    # لمسات بسيطة حسب النغمة
+    # Small, friendly tone tweaks
     if any(k in tone for k in ["playful", "fun", "exciting", "cheerful"]):
         return base.replace("Warm regards,", "Can’t wait to celebrate!").replace("Best regards,", "Cheers,")
     if any(k in tone for k in ["polite", "elegant", "professional"]):
@@ -88,7 +88,7 @@ def _apply_tone(base: str, tone: str) -> str:
         return base.replace("Best regards,", "Warm wishes,")
     return base
 
-# -------- قوالب محلية (Fallback) --------
+# -------- Local templates (fallback) --------
 def _birthday_email(info, signature, rich=True):
     title = info["title"] or "Birthday Celebration"
     body = dedent(f"""
@@ -202,7 +202,7 @@ def _local_fallback(kind: str, info: dict, signature: str, tone: str, rich: bool
 
 # -------- Gemini drafting --------
 def _gemini_draft(subject, audience, tone, info, signature, kind) -> str:
-    """صياغة البريد عبر Gemini مع اختيار موديل مناسب وفلاتر للأخطاء الشائعة."""
+    """Draft with Gemini; pick a sensible model and guard against common errors."""
     if not _GEMINI_READY:
         raise RuntimeError("Gemini not configured")
 
@@ -232,7 +232,7 @@ Requirements:
 
     try:
         resp = model.generate_content(guidance)
-        # حاول قراءة النص بعدة طرق لضمان التوافق
+        # Try multiple access paths to stay compatible
         text = (getattr(resp, "text", None) or "").strip()
         if not text:
             try:
@@ -243,10 +243,10 @@ Requirements:
             raise RuntimeError("Empty response from Gemini")
         return text
     except ResourceExhausted as e:
-        # كوتا/ريت ليمت — رجّع سبب واضح ليستخدم القالب المحلي
+        # Clear cause so we fall back gracefully
         raise RuntimeError(f"Gemini quota/rate limit on {model_name}: {e.message}")
     except Exception as e:
-        # أي خطأ آخر — نسمح للطبقة العليا تسوي fallback
+        # Any other error → let caller fall back
         raise RuntimeError(f"Gemini draft error: {e}")
 
 # -------- Public API --------
@@ -261,24 +261,24 @@ def draft_email(
     rich: bool = True,
 ) -> str:
     """
-    يُرجع BODY فقط (بدون Subject).
-    - إن وجد GEMINI_API_KEY/GOOGLE_API_KEY سيستخدم Gemini لكتابة الإيميل بنبرة احترافية.
-    - إن لم يوجد أو فشل الاستدعاء، سيستخدم القوالب المحلية المحسّنة.
+    Returns BODY only (no Subject).
+    - If GEMINI_API_KEY/GOOGLE_API_KEY is present, use Gemini.
+    - Otherwise (or on failure) fall back to local templates.
     """
     info = _extract_info(bullet_points)
     kind = event_kind or _detect_kind(subject, info.get("title", ""))
 
-    # المطلوب إنجليزي لمشروعك؛ نتجاهل العربية هنا
+    # Force English for this project
     if language.lower().startswith("ar"):
         language = "en"
 
-    # جرّب Gemini أولاً لو متاح
+    # Try Gemini first
     if _GEMINI_READY:
         try:
             return _gemini_draft(subject, audience, tone, info, signature, kind)
         except Exception as e:
-            # سقوط لطيف على القالب المحلي
+            # Soft fall back to template
             print(f"⚠️ Gemini draft failed, using local template. Reason: {e}")
 
-    # رجوع للقوالب المحلية
+    # Local templates
     return _local_fallback(kind, info, signature, tone, rich)

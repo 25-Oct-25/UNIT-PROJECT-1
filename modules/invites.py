@@ -1,4 +1,3 @@
-# modules/invites.py
 import os
 import tempfile
 import subprocess
@@ -38,7 +37,7 @@ def _ensure_dir(p):
     os.makedirs(p, exist_ok=True)
 
 def _personalize_body(body: str, name: str, is_html: bool) -> str:
-    """يعدّل التحية في أول السطر إلى Dear {name} إن وُجد اسم"""
+    """Swap greeting to 'Dear {name},' when possible."""
     if not name:
         return body
     if is_html:
@@ -59,7 +58,7 @@ def _personalize_body(body: str, name: str, is_html: bool) -> str:
         return f"Dear {name},\n\n{body}"
 
 def _open_in_editor_with_text(initial_text: str) -> str:
-    """يفتح النص في محرر النظام (Windows: Notepad)، ثم يرجع النص بعد حفظ الملف وإغلاقه."""
+    """Open system editor for quick edits; return the edited text."""
     with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".txt", encoding="utf-8") as tmp:
         tmp.write(initial_text)
         tmp_path = tmp.name
@@ -95,10 +94,10 @@ def _open_in_editor_with_text(initial_text: str) -> str:
 
 def _load_attendees_anywhere(event_title: str, ev: dict):
     """
-    يحاول يجلب المدعوين من أكثر من مكان — بالترتيب:
-    1) data/attendees/<event>.json (الدوال الحديثة)
-    2) data/attendees.json بصيغة {"EventTitle": [..]} (دعم قديم)
-    3) داخل كائن الحدث ev['attendees'] إن وُجد
+    Find attendees from multiple sources in order:
+    1) data/attendees/<event>.json (new)
+    2) data/attendees.json legacy format {"EventTitle": [...]}
+    3) ev['attendees'] if present
     """
     attendees = load_attendees_for_event(event_title)
     if attendees:
@@ -189,17 +188,17 @@ def send_invites_for_event(
     attach = _poster_path(ev)
     attachments = [attach] if attach else None
 
-    # Final preview (generic)
+    # Final preview
     ui.section("Final Preview")
     ui.kv("Subject", subject)
     ui.boxed(body_text, color=ui.F.CYAN)
-    print()  # مسافة
+    print()  # spacer
 
     if input("Send now? (Y/n): ").strip().lower() == "n":
         ui.warning("Cancelled by user.")
         return
 
-    # 5) Send (personalized) + Inject RSVP mailto buttons/links per recipient
+    # 5) Send personalized emails + inject RSVP links/buttons
     sent = 0
     for a in attendees:
         name  = (a or {}).get('name', '').strip()
@@ -209,7 +208,7 @@ def send_invites_for_event(
 
         if use_html:
             rsvp_html = build_mailto_buttons_html(ev["title"], name, email)
-            # نحقن الأزرار قبل أول <hr> إن وُجد، وإلا في آخر الرسالة
+            # Insert buttons before first <hr> if possible, else append
             low = wrapped.lower()
             idx = low.find("<hr")
             if idx != -1:

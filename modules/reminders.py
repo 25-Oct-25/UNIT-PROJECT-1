@@ -1,35 +1,34 @@
-# modules/reminders.py
 import time, threading, os
 from datetime import datetime, timedelta
 from pathlib import Path
 
 from modules.events import load_events, save_events
-# نحتاج بعض الثوابت للتشخيص من مرسل البريد
+# Pull SMTP config for logs
 from modules.email_sender import send_email, SMTP_SERVER, SMTP_PORT, EMAIL_USER, TEST_MODE
 
-# draft_email اختياري: لو مو موجود ما نطيح
+# draft_email is optional; fall back if missing
 try:
-    from modules.ai_email import draft_email   # يحسّن المقدمة إن توفر
+    from modules.ai_email import draft_email   # nice intro if available
 except Exception:
     draft_email = None
 
-# 👈 اسحب الحضور من أي مكان (ملفات attendees/ أو legacy أو داخل الحدث)
+# Reuse attendee loader (new/legacy/in-event)
 from modules.invites import _load_attendees_anywhere
 
-CHECK_INTERVAL_SECONDS = 60   # افحص كل 60 ثانية
-FIRE_WINDOW_SECONDS    = 120  # نافذة إطلاق ±120 ثانية
+CHECK_INTERVAL_SECONDS = 60   # check every minute
+FIRE_WINDOW_SECONDS    = 120  # +/- 120s grace window
 ICS_DIR = Path("data/ics")
 ICS_DIR.mkdir(parents=True, exist_ok=True)
 
-_printed_boot_info = False  # نطبع معلومات الإعداد مرة واحدة فقط عند بدء الخدمة
+_printed_boot_info = False  # print env info once on boot
 
 
 def _ensure_reminder_objects(ev):
     """
-    يدعم شكلين لقائمة reminders:
-    - [10, 60] أرقام فقط (قديمة)
-    - [{"minutes_before": 10, "fired": false}, ...] (حديثة)
-    ويحوّل الأرقام إلى كائنات مع fired=False.
+    Support both formats:
+    - [10, 60] (old)
+    - [{"minutes_before": 10, "fired": false}, ...] (new)
+    Convert to objects with fired=False.
     """
     new_list = []
     for r in ev.get('reminders', []):
@@ -54,11 +53,11 @@ def _friendly_delta(minutes_before: int) -> str:
 
 def _make_ics(event) -> str:
     """
-    ينشئ ملف .ics للحدث ويرجع المسار.
-    توقّع تنسيق: event['date'] = "YYYY-MM-DD HH:MM"
+    Create a simple .ics file and return its path.
+    Expects event['date'] = "YYYY-MM-DD HH:MM"
     """
     start = datetime.strptime(event['date'], "%Y-%m-%d %H:%M")
-    end = start + timedelta(hours=1)  # مدة افتراضية ساعة
+    end = start + timedelta(hours=1)  # default 1h
 
     def fmt(dt: datetime) -> str:
         return dt.strftime("%Y%m%dT%H%M%S")
@@ -93,7 +92,7 @@ def _build_reminder_subject(event, minutes_before: int) -> str:
 
 def _build_reminder_body_html(event, minutes_before: int) -> str:
     """
-    قالب HTML للتذكير. إن توفر Gemini عبر draft_email نستخدمه لتحسين المقدمة.
+    Minimal HTML reminder body; use draft_email for a nicer intro when available.
     """
     title = event["title"]
     when = event["date"]
@@ -155,13 +154,12 @@ def _print_boot_info_once():
     print(f"  EMAIL_USER  = {EMAIL_USER}")
     print(f"  TEST_MODE   = {TEST_MODE}")
     if TEST_MODE:
-        print("  ⚠️ TEST_MODE=True → لن يتم إرسال بريد فعلي. غيّره إلى False في .env")
+        print("  ⚠️ TEST_MODE=True → no real emails. Set False in .env")
 
 
 def add_reminder_cli():
     """
-    واجهة CLI لإضافة تذكير (بالدقائق قبل الحدث) لحدث معيّن.
-    التخزين ككائنات: {"minutes_before": X, "fired": false}
+    CLI: add a reminder (minutes before event) and store as objects.
     """
     events = load_events()
     if not events:
@@ -208,7 +206,7 @@ def check_reminders_once():
     for ev in events:
         _ensure_reminder_objects(ev)
 
-        # وقت الحدث
+        # Event time
         try:
             event_dt = datetime.strptime(ev['date'], '%Y-%m-%d %H:%M')
         except Exception:
@@ -222,19 +220,19 @@ def check_reminders_once():
             reminder_time = event_dt - timedelta(minutes=minutes_before)
             delta = (reminder_time - now).total_seconds()
 
-            # طباعة توضيحية مفيدة
+            # Helpful debug print
             delta_s = int(delta)
             when_str = "now" if -1 <= delta_s <= 1 else \
                        (f"in {delta_s}s" if delta_s > 0 else f"{abs(delta_s)}s ago")
             print(f"[Reminder DEBUG] '{ev['title']}' @{minutes_before}m → fire at {reminder_time} ({when_str})")
 
-            # نافذة الإطلاق الموسعة: لو كنت متأخر/مبكّر إلى 120 ثانية ما يفوتك
+            # Fire within the grace window
             if -FIRE_WINDOW_SECONDS <= delta <= FIRE_WINDOW_SECONDS:
-                # مرفق ICS
+                # ICS attachment
                 ics_path = _make_ics(ev)
                 attachments = [ics_path] if os.path.exists(ics_path) else None
 
-                # إرسال لكل الحضور (من أي مصدر)
+                # Email attendees (any source)
                 attendees = _load_attendees_anywhere(ev["title"], ev)
                 print(f"[Reminder DEBUG] Found {len(attendees)} attendees for '{ev['title']}'")
                 if attendees:
