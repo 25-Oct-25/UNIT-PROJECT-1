@@ -1,24 +1,35 @@
-# modules/ui.py
+# modules/ui.py (نسخة Rich)
 import os, sys, shutil
-from colorama import init as colorama_init, Fore as F, Back as B, Style as S
+from colorama import init as colorama_init
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
+from rich.rule import Rule
+from rich.align import Align
+from rich.box import SIMPLE_HEAVY, MINIMAL_DOUBLE_HEAD
+from rich.text import Text
 
-# Windows: فعل ANSI تلقائي
+# نفعل Colorama لويندوز (للتوافق)
 colorama_init(autoreset=True, convert=True)
+console = Console()
 
-# رموز جميلة (مع بدائل لو ما دعمت الايموجي)
-OK = "✅"
-WARN = "⚠️"
-ERR = "❌"
-MAIL = "✉️"
-STAR = "⭐"
-TIME = "⏰"
-POSTER = "🖼️"
-PEOPLE = "👥"
-CAL = "📅"
-
-# لو ترميز الكونسول مو UTF-8 (إيموجي يطلع خرابيط)
-if os.name == "nt" and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+# أيقونات (مع بدائل لو ما يدعم الإيموجي)
+OK = "✅"; WARN = "⚠️"; ERR = "❌"; MAIL = "✉️"; STAR = "⭐"; TIME = "⏰"; POSTER = "🖼️"; PEOPLE = "👥"; CAL = "📅"
+if os.name == "nt" and (not sys.stdout.encoding or sys.stdout.encoding.lower() not in ("utf-8","utf8")):
     OK, WARN, ERR, MAIL, STAR, TIME, POSTER, PEOPLE, CAL = "[OK]", "[!]", "[X]", "[MAIL]", "[*]", "[TIME]", "[IMG]", "[PEOPLE]", "[CAL]"
+
+# ألوان مختصرة (متوافقة مع بقية الكود)
+class F:
+    BLUE   = "blue"
+    CYAN   = "cyan"
+    GREEN  = "green"
+    MAGENTA= "magenta"
+    YELLOW = "yellow"
+    WHITE  = "white"
+class B:
+    GREEN = "green"
+class S:
+    BRIGHT = ""
 
 def clear():
     os.system("cls" if os.name == "nt" else "clear")
@@ -30,54 +41,78 @@ def term_width():
         return 80
 
 def rule(char="─", color=F.BLUE):
-    w = term_width()
-    print(color + char * w + S.RESET_ALL)
+    console.print(Rule(character=char, style=color))
 
 def header(title: str):
-    w = term_width()
-    title = f" {title} ".upper()
-    pad = (w - len(title)) // 2
-    print(F.CYAN + ("─" * max(pad, 0)) + title + ("─" * max(pad, 0)) + S.RESET_ALL)
+    console.print(Rule(title.upper(), style="cyan bold"))
 
 def section(title: str):
-    print(F.MAGENTA + S.BRIGHT + f"• {title}" + S.RESET_ALL)
+    console.print(f"[magenta bold]• {title}[/]")
 
 def kv(key: str, val: str):
-    print(F.WHITE + S.BRIGHT + f"{key}: " + S.RESET_ALL + F.WHITE + f"{val}" + S.RESET_ALL)
+    t = Text.assemble((f"{key}: ", "bold white"), (val or "-", "white"))
+    console.print(t)
 
 def bullet(text: str):
-    print(F.WHITE + f" - {text}" + S.RESET_ALL)
+    console.print(f"[white]- {text}[/]")
 
 def success(msg: str):
-    print(F.GREEN + S.BRIGHT + f"{OK} {msg}" + S.RESET_ALL)
+    console.print(f"[bold green]{OK} {msg}[/]")
 
 def warning(msg: str):
-    print(F.YELLOW + S.BRIGHT + f"{WARN} {msg}" + S.RESET_ALL)
+    console.print(f"[bold yellow]{WARN} {msg}[/]")
 
 def error(msg: str):
-    print(F.RED + S.BRIGHT + f"{ERR} {msg}" + S.RESET_ALL)
+    console.print(f"[bold red]{ERR} {msg}[/]")
 
 def prompt(label: str) -> str:
-    return input(F.CYAN + S.BRIGHT + f"{label}: " + S.RESET_ALL).strip()
-
-def menu(title: str, items: list[tuple[str, str]]):
-    """items: list of (key, label)"""
-    clear()
-    header(title)
-    rule()
-    for k, label in items:
-        print(F.YELLOW + S.BRIGHT + f"{k:>2}. " + S.RESET_ALL + F.WHITE + f"{label}" + S.RESET_ALL)
-    rule()
-    return input(F.CYAN + S.BRIGHT + "Select option: " + S.RESET_ALL).strip()
+    return console.input(f"[bold cyan]{label}: [/]").strip()
 
 def boxed(text: str, color=F.WHITE):
-    w = term_width()
-    lines = [l.rstrip() for l in text.splitlines()] or [""]
-    maxw = min(max(len(l) for l in lines), w-6)
-    print(color + "┌" + "─"*(maxw+2) + "┐" + S.RESET_ALL)
-    for l in lines:
-        print(color + "│ " + S.RESET_ALL + l[:maxw] + " "*(maxw-len(l[:maxw])) + color + " │" + S.RESET_ALL)
-    print(color + "└" + "─"*(maxw+2) + "┘" + S.RESET_ALL)
+    console.print(Panel.fit(Text.from_markup(text) if isinstance(text, str) else text,
+                            border_style=color, padding=(1,2)))
 
-def badge(text: str, bg=B.BLUE, fg=F.WHITE):
-    print(bg + fg + S.BRIGHT + f" {text} " + S.RESET_ALL)
+def badge(text: str, bg=B.GREEN, fg=F.WHITE):
+    console.print(Panel.fit(f"[bold]{text}[/]", style="black on green", padding=(0,2)))
+
+# ===== جداول جاهزة للاستخدام =====
+def table(headers: list[str], rows: list[list[str]], title: str | None = None):
+    """جدول بسيط وأنيق."""
+    tbl = Table(title=title, box=SIMPLE_HEAVY, show_lines=False, header_style="bold cyan")
+    for h in headers:
+        tbl.add_column(h, overflow="fold")
+    for r in rows:
+        tbl.add_row(*[str(c) if c is not None else "-" for c in r])
+    console.print(tbl)
+
+def menu(title: str, items: list[tuple[str, str]]):
+    """items: list of (key, label) — يطبع جدول خيارات بشكل مرتب ويرجع اختيار المستخدم."""
+    clear()
+    header(title)
+    tbl = Table(box=MINIMAL_DOUBLE_HEAD, header_style="bold cyan")
+    tbl.add_column("Key", style="yellow", justify="right", no_wrap=True)
+    tbl.add_column("Action", style="white")
+    for k, label in items:
+        tbl.add_row(k, label)
+    console.print(tbl)
+    return console.input("[bold cyan]Select option: [/]").strip()
+
+# ===== عناصر عرض متخصصة للمشروع =====
+def events_table(events: list[dict]):
+    if not events:
+        warning("No events.")
+        return
+    rows = []
+    for e in events:
+        rows.append([e.get("title","-"), e.get("date","-"), e.get("location","-"),
+                     ", ".join([str(r) for r in e.get("reminders", [])]) or "-"])
+    table(["Title","Date","Location","Reminders"], rows, title="Your Events")
+
+def attendees_table(event_title: str, attendees: list[dict]):
+    if not attendees:
+        warning("No attendees found.")
+        return
+    rows = []
+    for a in attendees:
+        rows.append([a.get("name","-"), a.get("email","-"), "Attended ✅" if a.get("attended") else "Not attended ❌"])
+    table([f"Attendees for '{event_title}'","Email","Status"], rows)

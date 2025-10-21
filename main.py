@@ -19,6 +19,7 @@ from modules.ai_email import draft_email
 from modules.email_sender import send_email
 from modules.ai_poster import generate_poster_for_event
 from modules.reports import generate_event_report, email_event_report
+from modules.rsvp_inbox import start_inbox_watcher
 from modules import ui
 
 
@@ -143,6 +144,7 @@ def print_menu_and_get_choice():
         ("12", "Mark Attendance for Event"),
         ("13", "Export Event Report (PDF)"),
         ("14", "Export & Email Event Report (PDF)"),
+        ("15", "Start RSVP Auto-Sync (Inbox watcher)"),
         ("0", "Exit"),
     ]
     return ui.menu("Creative Smart Event Manager", items)
@@ -196,6 +198,10 @@ def main():
             action_export_report()
         elif choice == "14":
             action_export_and_email_report()
+        elif choice in ("15"):
+            start_inbox_watcher()
+            input("Press Enter to continue...")
+
         elif choice == "0":
             ui.success("Goodbye!")
             break

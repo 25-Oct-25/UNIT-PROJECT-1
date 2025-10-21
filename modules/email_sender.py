@@ -1,3 +1,4 @@
+# modules/email_sender.py  (استبدل كامل send_email بهذا الإصدار)
 import os
 from dotenv import load_dotenv
 import smtplib
@@ -15,8 +16,17 @@ def send_email(to_email, subject, body, attachments=None, html=False):
     attachments: list of file paths
     html: if True send as text/html, else text/plain
     """
+    if not SMTP_SERVER or not SMTP_PORT or not EMAIL_USER:
+        print(f"[EMAIL CONFIG] Missing SMTP config. SMTP_SERVER={SMTP_SERVER}, SMTP_PORT={SMTP_PORT}, EMAIL_USER={EMAIL_USER}")
+        return False
+
     if TEST_MODE:
-        print(f"[TEST MODE] Would send email to {to_email}: {subject}\nHTML={html}\n{body[:400]}...\nAttachments: {attachments}")
+        print(f"[TEST MODE] Would send email")
+        print(f"  SMTP: {SMTP_SERVER}:{SMTP_PORT}")
+        print(f"  FROM: {EMAIL_USER}")
+        print(f"  TO  : {to_email}")
+        print(f"  HTML: {html}  Attachments: {attachments}")
+        print(f"  Subject: {subject}\n  Body(1st 400 chars): {body[:400]}...")
         return True
 
     msg = EmailMessage()
@@ -29,7 +39,6 @@ def send_email(to_email, subject, body, attachments=None, html=False):
     else:
         msg.set_content(body)
 
-
     if attachments:
         for path in attachments:
             try:
@@ -37,15 +46,18 @@ def send_email(to_email, subject, body, attachments=None, html=False):
                     data = f.read()
                 msg.add_attachment(data, maintype='application', subtype='octet-stream', filename=os.path.basename(path))
             except Exception as e:
-                print(f"Attachment error: {e}")
+                print(f"[Attachment error] {path}: {e}")
 
     try:
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+        print(f"[SMTP] Connecting {SMTP_SERVER}:{SMTP_PORT} as {EMAIL_USER} -> {to_email} (html={html})")
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=60) as server:
+            server.ehlo()
             server.starttls()
+            server.ehlo()
             server.login(EMAIL_USER, EMAIL_PASS)
             server.send_message(msg)
-        print(f"Email sent to {to_email}")
+        print(f"[SMTP] Email sent to {to_email}")
         return True
     except Exception as e:
-        print(f"Error sending email: {e}")
+        print(f"[SMTP ERROR] {type(e).__name__}: {e}")
         return False

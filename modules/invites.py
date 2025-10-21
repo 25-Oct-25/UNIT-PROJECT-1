@@ -5,10 +5,12 @@ import subprocess
 import platform
 import json
 
+from modules.rsvp_mailto import build_mailto_buttons_html, build_mailto_text
 from modules.events import load_events
 from modules.email_sender import send_email
 from modules.ai_email import draft_email
 from modules.rsvp import load_attendees as load_attendees_for_event
+from modules import ui
 
 # -------- Helpers --------
 def _event_kind(title: str) -> str:
@@ -98,25 +100,21 @@ def _load_attendees_anywhere(event_title: str, ev: dict):
     2) data/attendees.json بصيغة {"EventTitle": [..]} (دعم قديم)
     3) داخل كائن الحدث ev['attendees'] إن وُجد
     """
-    # 1) الملف الخاص بالحدث
     attendees = load_attendees_for_event(event_title)
     if attendees:
         return attendees
 
-    # 2) الملف القديم الموحّد
     legacy_path = os.path.join("data", "attendees.json")
     if os.path.exists(legacy_path):
         try:
             with open(legacy_path, "r", encoding="utf-8") as f:
                 legacy = json.load(f)
-            # جرّب باسم المستخدم المدخل، ثم باسم الحدث من json (للاحتياط باختلاف الحالة)
             attendees = legacy.get(event_title) or legacy.get(ev.get("title", ""))
             if attendees:
                 return attendees
         except Exception:
             pass
 
-    # 3) داخل الحدث نفسه
     return ev.get("attendees", [])
 
 # -------- Core sending --------
@@ -129,18 +127,17 @@ def send_invites_for_event(
     events = load_events()
     ev = next((e for e in events if e['title'].lower() == event_title.lower()), None)
     if not ev:
-        print("Event not found.")
+        ui.error("Event not found.")
         return
 
-    # احضر الحضور من أي مصدر متاح
     attendees = _load_attendees_anywhere(event_title, ev)
     if not attendees:
-        print("No attendees to invite.")
+        ui.warning("No attendees to invite.")
         return
 
     subject = _subject_for(ev)
 
-    # 1) Gemini draft (BODY only)
+    # 1) AI draft (BODY only)
     body_text = draft_email(
         subject=subject,
         audience="attendees",
@@ -156,11 +153,9 @@ def send_invites_for_event(
 
     # 2) Preview + optional edit
     if preview_and_edit:
-        print("\n--- AI Generated Email Preview ---\n")
-        print(body_text)
-        print("\n----------------------------------\n")
+        ui.section("AI Generated Email Preview")
+        ui.boxed(body_text, color=ui.F.BLUE)
 
-        # Edit subject?
         subj_edit = input(f"Edit subject? (current: '{subject}') (y/N): ").strip().lower()
         if subj_edit == "y":
             new_subj = input("New subject: ").strip()
@@ -176,7 +171,7 @@ def send_invites_for_event(
     with open(os.path.join("outputs", "last_invite_preview.txt"), "w", encoding="utf-8") as f:
         f.write(f"Subject: {subject}\n\n{body_text}")
 
-    # 3) Build final body (HTML or plain)
+    # 3) Build base body (HTML or plain)
     if use_html:
         wrapped = (
             '<div style="font-family:Segoe UI,Arial,sans-serif;line-height:1.7;color:#111827">'
@@ -194,28 +189,43 @@ def send_invites_for_event(
     attach = _poster_path(ev)
     attachments = [attach] if attach else None
 
-    # Final preview + confirm
-    print("\n======= Final Preview =======")
-    print("Subject:", subject)
-    print("\nBody:\n", body_text)
-    print("=============================\n")
+    # Final preview (generic)
+    ui.section("Final Preview")
+    ui.kv("Subject", subject)
+    ui.boxed(body_text, color=ui.F.CYAN)
+    print()  # مسافة
+
     if input("Send now? (Y/n): ").strip().lower() == "n":
-        print("Cancelled by user.")
+        ui.warning("Cancelled by user.")
         return
 
-    # 5) Send (personalized)
+    # 5) Send (personalized) + Inject RSVP mailto buttons/links per recipient
     sent = 0
     for a in attendees:
-        name = (a or {}).get('name', '').strip()
+        name  = (a or {}).get('name', '').strip()
         email = (a or {}).get('email', '').strip()
         if not email:
             continue
-        final_body = _personalize_body(wrapped, name, is_html=is_html)
-        ok = send_email(email, subject, final_body, attachments=attachments)
+
+        if use_html:
+            rsvp_html = build_mailto_buttons_html(ev["title"], name, email)
+            # نحقن الأزرار قبل أول <hr> إن وُجد، وإلا في آخر الرسالة
+            low = wrapped.lower()
+            idx = low.find("<hr")
+            if idx != -1:
+                recipient_wrapped = wrapped[:idx] + rsvp_html + wrapped[idx:]
+            else:
+                recipient_wrapped = wrapped + rsvp_html
+            final_body = _personalize_body(recipient_wrapped, name, is_html=True)
+        else:
+            rsvp_text = "\n\n" + build_mailto_text(ev["title"], name, email)
+            final_body = _personalize_body(wrapped + rsvp_text, name, is_html=False)
+
+        ok = send_email(email, subject, final_body, attachments=attachments, html=use_html)
         if ok:
             sent += 1
 
-    print(f"Invites sent: {sent}/{len(attendees)}")
+    ui.success(f"Invites sent: {sent}/{len(attendees)}")
 
 # -------- CLI --------
 def send_invites_cli():

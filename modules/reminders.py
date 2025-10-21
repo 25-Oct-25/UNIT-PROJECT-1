@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from modules.events import load_events, save_events
-from modules.email_sender import send_email
+# نحتاج بعض الثوابت للتشخيص من مرسل البريد
+from modules.email_sender import send_email, SMTP_SERVER, SMTP_PORT, EMAIL_USER, TEST_MODE
 
 # draft_email اختياري: لو مو موجود ما نطيح
 try:
@@ -12,9 +13,15 @@ try:
 except Exception:
     draft_email = None
 
-CHECK_INTERVAL_SECONDS = 60  # افحص كل 60 ثانية
+# 👈 اسحب الحضور من أي مكان (ملفات attendees/ أو legacy أو داخل الحدث)
+from modules.invites import _load_attendees_anywhere
+
+CHECK_INTERVAL_SECONDS = 60   # افحص كل 60 ثانية
+FIRE_WINDOW_SECONDS    = 120  # نافذة إطلاق ±120 ثانية
 ICS_DIR = Path("data/ics")
 ICS_DIR.mkdir(parents=True, exist_ok=True)
+
+_printed_boot_info = False  # نطبع معلومات الإعداد مرة واحدة فقط عند بدء الخدمة
 
 
 def _ensure_reminder_objects(ev):
@@ -137,6 +144,20 @@ def _build_reminder_body_html(event, minutes_before: int) -> str:
     """
 
 
+def _print_boot_info_once():
+    global _printed_boot_info
+    if _printed_boot_info:
+        return
+    _printed_boot_info = True
+    print("[Reminder BOOT] SMTP config:")
+    print(f"  SMTP_SERVER = {SMTP_SERVER}")
+    print(f"  SMTP_PORT   = {SMTP_PORT}")
+    print(f"  EMAIL_USER  = {EMAIL_USER}")
+    print(f"  TEST_MODE   = {TEST_MODE}")
+    if TEST_MODE:
+        print("  ⚠️ TEST_MODE=True → لن يتم إرسال بريد فعلي. غيّره إلى False في .env")
+
+
 def add_reminder_cli():
     """
     واجهة CLI لإضافة تذكير (بالدقائق قبل الحدث) لحدث معيّن.
@@ -167,10 +188,8 @@ def add_reminder_cli():
         print("Invalid minutes.")
         return
 
-    # طبّق التطبيع للشكل الحديث
     _ensure_reminder_objects(events[idx])
 
-    # تحقّق من عدم التكرار
     for r in events[idx]["reminders"]:
         if int(r.get("minutes_before", -1)) == minutes:
             print("ℹ️ This reminder already exists for the event.")
@@ -203,22 +222,33 @@ def check_reminders_once():
             reminder_time = event_dt - timedelta(minutes=minutes_before)
             delta = (reminder_time - now).total_seconds()
 
-            if 0 <= delta <= CHECK_INTERVAL_SECONDS:
-                # جهّز رسالة التذكير
-                subject = _build_reminder_subject(ev, minutes_before)
-                body_html = _build_reminder_body_html(ev, minutes_before)
+            # طباعة توضيحية مفيدة
+            delta_s = int(delta)
+            when_str = "now" if -1 <= delta_s <= 1 else \
+                       (f"in {delta_s}s" if delta_s > 0 else f"{abs(delta_s)}s ago")
+            print(f"[Reminder DEBUG] '{ev['title']}' @{minutes_before}m → fire at {reminder_time} ({when_str})")
 
+            # نافذة الإطلاق الموسعة: لو كنت متأخر/مبكّر إلى 120 ثانية ما يفوتك
+            if -FIRE_WINDOW_SECONDS <= delta <= FIRE_WINDOW_SECONDS:
                 # مرفق ICS
                 ics_path = _make_ics(ev)
                 attachments = [ics_path] if os.path.exists(ics_path) else None
 
-                # إرسال لكل الحضور
-                attendees = ev.get('attendees', [])
+                # إرسال لكل الحضور (من أي مصدر)
+                attendees = _load_attendees_anywhere(ev["title"], ev)
+                print(f"[Reminder DEBUG] Found {len(attendees)} attendees for '{ev['title']}'")
+                if attendees:
+                    emails_preview = ", ".join([(p or {}).get('email','') for p in attendees if (p or {}).get('email')])
+                    print(f"[Reminder DEBUG] Will email → {emails_preview}")
+
+                subject = _build_reminder_subject(ev, minutes_before)
+                body_html = _build_reminder_body_html(ev, minutes_before)
+
                 sent_to = 0
                 for person in attendees:
-                    email = (person or {}).get('email')
-                    if email:
-                        if send_email(email, subject, body_html, attachments=attachments, html=True):
+                    email_addr = (person or {}).get('email')
+                    if email_addr:
+                        if send_email(email_addr, subject, body_html, attachments=attachments, html=True):
                             sent_to += 1
 
                 print(f"[Reminder] {ev['title']} — {minutes_before} minutes before (sent to {sent_to} attendees)")
@@ -230,6 +260,7 @@ def check_reminders_once():
 
 
 def _loop():
+    _print_boot_info_once()
     while True:
         check_reminders_once()
         time.sleep(CHECK_INTERVAL_SECONDS)

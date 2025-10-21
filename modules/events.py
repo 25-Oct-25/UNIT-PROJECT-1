@@ -1,6 +1,11 @@
 # modules/events.py
 import json, os, re
+from modules import ui
 from datetime import datetime
+
+def list_events_cli():
+    events = load_events()
+    ui.events_table(events)
 
 DATA_DIR  = 'data'
 DATA_FILE = os.path.join(DATA_DIR, 'events.json')

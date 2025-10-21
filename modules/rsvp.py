@@ -1,6 +1,9 @@
 # modules/rsvp.py
 import json, os
 from modules.events import load_events, save_events
+from modules import ui  
+
+
 
 def _attendees_path(event_title):
     os.makedirs("data/attendees", exist_ok=True)
@@ -33,26 +36,17 @@ def add_attendee_cli():
 def list_attendees_cli():
     event_title = input("Event title: ").strip()
     attendees = load_attendees(event_title)
-    if not attendees:
-        print("No attendees found.")
-        return
-    print(f"\nAttendees for '{event_title}':")
-    for i, a in enumerate(attendees, 1):
-        status = "✅ Attended" if a.get("attended") else "❌ Not attended"
-        print(f"{i}. {a['name']} - {a['email']} ({status})")
+    ui.attendees_table(event_title, attendees)
 
 def mark_attendance_cli():
-    """تحديث حالة الحضور"""
     event_title = input("Event title: ").strip()
     attendees = load_attendees(event_title)
     if not attendees:
         print("No attendees found for this event.")
         return
 
-    print(f"\nAttendees for '{event_title}':")
-    for i, a in enumerate(attendees, 1):
-        status = "✅" if a.get("attended") else "❌"
-        print(f"{i}. {a['name']} - {a['email']} ({status})")
+    # طباعة جدول قبل الاختيار
+    ui.attendees_table(event_title, attendees)
 
     try:
         index = int(input("\nSelect attendee number to toggle attendance: ")) - 1
@@ -60,8 +54,8 @@ def mark_attendance_cli():
             attendees[index]["attended"] = not attendees[index].get("attended", False)
             save_attendees(event_title, attendees)
             new_status = "Attended" if attendees[index]["attended"] else "Absent"
-            print(f"Updated {attendees[index]['name']} → {new_status}")
+            ui.success(f"Updated {attendees[index]['name']} → {new_status}")
         else:
-            print("Invalid number.")
+            ui.warning("Invalid number.")
     except ValueError:
-        print("Invalid input. Please enter a number.")
+        ui.error("Invalid input. Please enter a number.")
