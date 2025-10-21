@@ -4,14 +4,15 @@ from community import CommunityUser
 class Translator(CommunityUser):
 
     #Initilize constructor
-    def __init__(self, user_id, name,location, email, password_number, gender:str, major:str,language:str,  official_certificate:bool,years_of_experience:int=0):
-        super().__init__(user_id, name, location,email, password_number)
+    def __init__(self, name,location, email, gender:str, major:str,language:str,  official_certificate:bool, rate:int, years_of_experience:int=0 , more_language=[]):
+        super().__init__(name, location,email)
         self.gender = gender
         self.major = major
         self.language = language
-        self.language_list = []
+        self.language_list = more_language
         self.years_of_experience = years_of_experience
-        self.official_certificate = official_certificate
+        self.official_certificate = False
+        self.rate = rate
     
     #Convert the characterstic of the user to dictionary to help us in json
     def to_dict(self):
@@ -20,38 +21,32 @@ class Translator(CommunityUser):
             "gender": self.gender,
             "major": self.major,
             "language": self.language,
+            "more_language": self.language_list,
+            "years_of_experience": self.years_of_experience,
             "official_certificate": self.official_certificate,
-            "years_of_experience": self.years_of_experience
-        }
+            "rate":self.rate
+            }
     
     #To add more than one language can traslate
     def add_language(self,lang:str):
        
-         #is every time run the code set to empty?!! or if i call the method twice?!!
-        self.language = lang
-        self.language_list.append(self.language)
+        self.language_list.append(lang)
     
-    #Method to return a language list
-    def get_language(self):
-        return self.language_list #Should i write self.language_list?!!
+    #Method to print a language list
+    def show_language_list(self):
+        if len(self.language_list) == 0 :
+            print("Nothing")
+        else:
+            print(self.language_list)
 
-    '''   
-        def add_certificate(self, certificate:str):
-            global certificate_list 
-            self.official_certificate = certificate
-            certificate_list.append(self.official_certificate)
-        
-        def get_certificate(self):
-            return certificate_list #Should I write self.language_list?!!
-    '''
 
     #Method for print Translator information
     def user_information(self):
-        return f"User ID: {self.user_id}, Name: {self.name}, Location: {self.location},Gender: {self.gender}, Major: {self.major}, Languages: {self.get_language()}, Offical certificates: {self.get_certificate()}, Years of exoerience: {self.years_of_experience}"
+        return f"User name: {self.name}, Location: {self.location}, Gender: {self.gender}, Major: {self.major}, Mother language: {self.language}, and other languages: {self.show_language_list()}, Offical certificates: {self.official_certificate}, Years of exoerience: {self.years_of_experience}, Rate: {self.rate}"
 
 
 #Test
-user = Translator("Bora_94", "Bora","Riyadh","bora@gmail.com","123a123","Female", "IT", "Arabic", True, 1)
+user = Translator("Bora","Riyadh","bora@gmail.com","Female","clinc", "Arabic", True, 4, 2, "Korean")
 print(user.user_information())
-user.add_language("Korean")
+user.add_language("English")
 print(user.user_information())
