@@ -46,20 +46,139 @@ from ..auth.roles import (
     login as auth_login, logout as auth_logout,
     current_role, require_role
 )
-from fitcoach_cli.notifications.emailer import send_email_smtp
 
-send_email_smtp(
-    to=["test@recipient.com"],
-    subject="تجربة إرسال – UTF-8 ✅",
-    text="هذه نسخة نصية (fallback).",
-    html="""
-      <h2 style="margin:0">مرحبًا 👋</h2>
-      <p>هذه رسالة <b>HTML</b> بترميز UTF-8 وتتنسيق صحيح.</p>
-    """,
-    from_name="فريق FitCoach",
-    # attachments=["/path/to/report.pdf"],  # اختياري
-)
+# =====================================================================
+# Tab Completion for REPL (إكمال بالأزرار Tab داخل حلقة الإدخال)
+# - نستخدم readline (أو pyreadline3 على ويندوز) لإكمال:
+#   * الأمر الأساسي، ثم الساب-أمر، ثم الفلاقز المناسبة.
+# - هذه الطريقة مناسبة لأن التطبيق REPL ويستخدم shlex وليس argparse.
+# =====================================================================
+try:
+    import readline  # متوفر على macOS/Linux و Git Bash غالبًا
+except Exception:
+    try:
+        import pyreadline3 as readline  # بديل ويندوز
+    except Exception:
+        readline = None  # إن لم يتوفر، يستمر البرنامج بدون إكمال
 
+# قائمة الأوامر والساب-أوامر المتاحة (للاقتراح)
+_REPL_COMMANDS = {
+    "help": [],
+    "exit": [],
+    "quit": [],
+    "q": [],
+
+    "auth": ["add-user", "login", "logout", "whoami", "list-users", "role", "delete-user"],
+    "profile": ["show", "set"],
+    "calories": ["calc"],
+    "plan": ["generate", "show", "volume", "groceries"],
+    "export": ["csv"],
+    "recipes": ["suggest", "build-day"],
+    "advice": ["daily"],
+    "habits": ["log", "score"],
+    "nudge": [],
+    "progress": ["log", "analyze", "plot"],
+    "workout": ["log", "suggest"],
+    "report": ["pdf", "send", "schedule", "brand"],
+    "email": ["config", "test"],
+    "app": ["lang"],
+}
+
+# الفلاقز المقترحة لكل (أمر، ساب-أمر)
+_REPL_FLAGS = {
+    ("auth", "add-user"): ["--username=", "--role=", "--password="],
+    ("auth", "login"):    ["--username=", "--password="],
+    ("auth", "role"):     ["set", "--username=", "--role="],
+    ("profile", "set"):   ["--sex=", "--age=", "--height=", "--weight=", "--activity=", "--goal="],
+
+    ("plan", "generate"): ["--split=", "--days="],
+    ("plan", "groceries"):["--target=", "--P=", "--C=", "--F=", "--filters="],
+
+    ("export", "csv"):    ["--file="],
+
+    ("recipes", "suggest"):   ["--kcal=", "--protein=", "--filters="],
+    ("recipes", "build-day"): ["--target=", "--P=", "--C=", "--F=", "--filters="],
+
+    ("habits", "log"):    ["--water=", "--sleep=", "--steps="],
+    ("nudge", None):      ["--type="],
+
+    ("progress", "log"):  ["--weight="],
+
+    ("workout", "log"):   ["--day=", "--ex=", "--weight=", "--reps=", "--RPE="],
+    ("workout", "suggest"): ["--ex="],
+
+    ("report", "pdf"):    ["--file=", "--days="],
+    ("report", "send"):   ["--file=", "--subject=", "--text="],
+    ("report", "schedule"): ["add", "list", "remove"],
+    ("report", "schedule add"): ["--time=", "--day=", "--file=", "--text=", "--days="],
+    ("report", "schedule remove"): ["--id="],
+    ("report", "brand"):  ["--title=", "--color=", "--logo="],
+
+    ("email", "config"):  ["--to=", "--from="],
+    ("email", "test"):    ["--subject=", "--text="],
+
+    ("app", "lang"):      ["--set="],
+}
+
+def _complete_repl(text: str, state: int):
+    """الدالة التي يستدعيها readline لإكمال التبويب (Tab Completion)."""
+    if readline is None:
+        return None
+    try:
+        buffer = readline.get_line_buffer()
+    except Exception:
+        buffer = ""
+    try:
+        tokens = shlex.split(buffer)
+        if buffer.endswith(" "):
+            tokens.append("")  # يسمح بإكمال التوكن التالي بعد مسافة
+    except Exception:
+        tokens = buffer.split()
+
+    # 1) أول كلمة: الأمر الأساسي
+    if len(tokens) <= 1:
+        options = sorted([c for c in _REPL_COMMANDS.keys() if c.startswith(text)])
+    # 2) ثاني كلمة: الساب-أمر
+    elif len(tokens) == 2:
+        cmd = tokens[0]
+        subs = _REPL_COMMANDS.get(cmd, [])
+        options = sorted([s for s in subs if s.startswith(text)])
+    # 3) بقية الكلمات: الفلاقز حسب (cmd, subcmd)
+    else:
+        cmd = tokens[0]
+        sub = tokens[1] if tokens[1] in _REPL_COMMANDS.get(cmd, []) else None
+
+        # حالة خاصة: report schedule لها طبقة ثالثة
+        if cmd == "report" and tokens[1:2] == ["schedule"] and len(tokens) >= 3:
+            sub2 = tokens[2]
+            key = ("report", "schedule " + sub2)
+            flags = _REPL_FLAGS.get(key, [])
+        else:
+            key = (cmd, sub)
+            flags = _REPL_FLAGS.get(key, [])
+
+        options = sorted([f for f in flags if f.startswith(text)])
+
+    try:
+        return options[state]
+    except IndexError:
+        return None
+
+def _enable_tab_completion():
+    """تفعيل الإكمال بالـTab داخل REPL (Linux/macOS/Git Bash، وعلى Windows عبر pyreadline3)."""
+    if readline is None:
+        return
+    try:
+        readline.set_completer_delims(' \t\n')  # اعتبر المسافات فقط فواصل للتوكن
+        readline.set_completer(_complete_repl)
+        # ربط مفتاح Tab بالإكمال (قد يختلف binding في بعض البيئات)
+        try:
+            readline.parse_and_bind("tab: complete")
+        except Exception:
+            readline.parse_and_bind("bind ^I rl_complete")
+    except Exception:
+        pass
+# =================== End of Tab Completion block =====================
 
 
 def cmd_help(*, box: bool = False, wide: bool = True) -> None:
@@ -142,7 +261,6 @@ def cmd_help(*, box: bool = False, wide: bool = True) -> None:
     add_section("App Language",
       "app lang --set=ar|en",
       color=Fore.MAGENTA)
-
 
 
 # ====== State ======
@@ -523,6 +641,9 @@ def main() -> None:
 
     # Start background scheduler
     start_report_scheduler_email(lambda: STATE, build_weekly_pdf, send_email_smtp, interval_sec=30)
+
+    # 🔽 تفعيل إكمال الأوامر بالـTab داخل REPL
+    _enable_tab_completion()  # يربط completer بالـreadline (يدعم Git Bash/Unix؛ على ويندوز عبر pyreadline3)
 
     try:
         while True:
