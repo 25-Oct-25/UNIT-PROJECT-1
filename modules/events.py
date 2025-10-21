@@ -1,19 +1,38 @@
-import json, os
+# modules/events.py
+import json, os, re
 from datetime import datetime
 
-DATA_FILE = os.path.join('data', 'events.json')
-os.makedirs('data', exist_ok=True)
+DATA_DIR  = 'data'
+DATA_FILE = os.path.join(DATA_DIR, 'events.json')
+ATT_DIR   = os.path.join(DATA_DIR, 'attendees')
+
+os.makedirs(DATA_DIR, exist_ok=True)
+os.makedirs(ATT_DIR, exist_ok=True)
+
 if not os.path.exists(DATA_FILE):
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump([], f)
+
+
+def _slugify_title(title: str) -> str:
+    """
+    نحول العنوان إلى اسم ملف آمن: أحرف صغيرة + شرطة سفلية
+    """
+    t = title.strip().lower()
+    t = re.sub(r'\s+', '_', t)           # مسافات -> _
+    t = re.sub(r'[^\w\-]+', '', t)       # احذف غير الحروف/الأرقام/الشرطة السفلية
+    return t or "event"
+
 
 def load_events():
     with open(DATA_FILE, 'r', encoding='utf-8') as f:
         return json.load(f)
 
+
 def save_events(events):
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(events, f, ensure_ascii=False, indent=2)
+
 
 def create_event(title, date_str, description, location):
     events = load_events()
@@ -25,6 +44,7 @@ def create_event(title, date_str, description, location):
     except ValueError:
         print("Invalid date format. Use YYYY-MM-DD HH:MM")
         return False
+
     event = {
         "title": title,
         "date": date_str,
@@ -39,14 +59,16 @@ def create_event(title, date_str, description, location):
     print(f"Event '{title}' created for {date_str}")
     return True
 
+
 # === CLI Functions ===
 
 def create_event_cli():
     title = input("Title: ").strip()
     date = input("Date (YYYY-MM-DD HH:MM): ").strip()
     desc = input("Description: ").strip()
-    loc = input("Location: ").strip()
+    loc  = input("Location: ").strip()
     create_event(title, date, desc, loc)
+
 
 def list_events_cli():
     events = load_events()
@@ -54,49 +76,40 @@ def list_events_cli():
         print("No events.")
         return
     for i, e in enumerate(events, 1):
-        print(f"{i}. {e['title']} | {e['date']} | {e['location']} | Reminders: {e.get('reminders', [])}")
+        rlist = e.get('reminders', [])
+        print(f"{i}. {e['title']} | {e['date']} | {e.get('location','')} | Reminders: {rlist}")
+
 
 def delete_event_cli():
     events = load_events()
     if not events:
-        print("No events.")
+        print("No events found.")
         return
-    for i, e in enumerate(events, 1):
-        print(f"{i}. {e['title']} | {e['date']}")
-    idx = input("Enter number to delete: ").strip()
-    try:
-        idx = int(idx) - 1
-        if 0 <= idx < len(events):
-            removed = events.pop(idx)
-            save_events(events)
-            print(f"Deleted: {removed['title']}")
-        else:
-            print("Invalid index.")
-    except ValueError:
-        print("Invalid input.")
 
-def add_reminder_cli():
-    events = load_events()
-    if not events:
-        print("No events.")
-        return
-    for i, e in enumerate(events, 1):
-        print(f"{i}. {e['title']} | {e['date']}")
-    idx = input("Select event #: ").strip()
+    for i, event in enumerate(events, start=1):
+        print(f"{i}. {event['title']} | {event['date']}")
+
     try:
-        idx = int(idx) - 1
-        if not (0 <= idx < len(events)):
-            print("Invalid index.")
-            return
+        choice = int(input("\nEnter the number of the event to delete: ").strip()) - 1
     except ValueError:
         print("Invalid input.")
         return
-    minutes = input("Reminder (minutes before): ").strip()
-    try:
-        m = int(minutes)
-    except ValueError:
-        print("Invalid minutes.")
-        return
-    events[idx].setdefault('reminders', []).append(m)
-    save_events(events)
-    print(f"Added reminder {m} min before for '{events[idx]['title']}'")
+
+    if 0 <= choice < len(events):
+        deleted_event = events.pop(choice)
+        save_events(events)
+        print(f"✅ Event '{deleted_event['title']}' deleted successfully!")
+
+        # حذف ملف الحضور المطابق لعنوان الحدث (slug)
+        slug = _slugify_title(deleted_event['title'])
+        attendees_path = os.path.join(ATT_DIR, f"{slug}.json")
+        if os.path.exists(attendees_path):
+            try:
+                os.remove(attendees_path)
+                print(f"🗑️ Deleted attendees file: {attendees_path}")
+            except Exception as e:
+                print(f"⚠️ Could not delete attendees file: {e}")
+        else:
+            print("ℹ️ No attendees file found for this event.")
+    else:
+        print("Invalid choice.")

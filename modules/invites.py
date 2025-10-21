@@ -1,9 +1,16 @@
 # modules/invites.py
 import os
+import tempfile
+import subprocess
+import platform
+import json
+
 from modules.events import load_events
 from modules.email_sender import send_email
 from modules.ai_email import draft_email
+from modules.rsvp import load_attendees as load_attendees_for_event
 
+# -------- Helpers --------
 def _event_kind(title: str) -> str:
     t = (title or "").lower()
     if any(k in t for k in ["eid", "عيد"]): return "eid"
@@ -15,9 +22,9 @@ def _event_kind(title: str) -> str:
 def _subject_for(event):
     kind = _event_kind(event['title'])
     title = event['title']
-    if kind == "eid":       return f"Eid Mubarak! You're invited: {title}"
-    if kind == "birthday":  return f"🎂 You're invited: {title}"
-    if kind == "graduation":return f"🎓 You're invited: {title}"
+    if kind == "eid":        return f"Eid Mubarak! You're invited: {title}"
+    if kind == "birthday":   return f"🎂 You're invited: {title}"
+    if kind == "graduation": return f"🎓 You're invited: {title}"
     return f"You're invited: {title}"
 
 def _poster_path(event):
@@ -25,18 +32,115 @@ def _poster_path(event):
     path = os.path.join("data", "posters", filename)
     return path if os.path.exists(path) else None
 
-def send_invites_for_event(event_title: str, tone: str = "polite, friendly", use_html: bool = True):
+def _ensure_dir(p):
+    os.makedirs(p, exist_ok=True)
+
+def _personalize_body(body: str, name: str, is_html: bool) -> str:
+    """يعدّل التحية في أول السطر إلى Dear {name} إن وُجد اسم"""
+    if not name:
+        return body
+    if is_html:
+        lower = body.lower()
+        if lower.strip().startswith("dear"):
+            parts = body.split("<br>", 1)
+            head = f"Dear {name},"
+            if len(parts) == 1:
+                return head + "<br>" + parts[0]
+            return head + "<br>" + parts[1]
+        else:
+            return f"Dear {name},<br><br>{body}"
+    else:
+        if body.lower().startswith("dear"):
+            lines = body.splitlines()
+            lines[0] = f"Dear {name},"
+            return "\n".join(lines)
+        return f"Dear {name},\n\n{body}"
+
+def _open_in_editor_with_text(initial_text: str) -> str:
+    """يفتح النص في محرر النظام (Windows: Notepad)، ثم يرجع النص بعد حفظ الملف وإغلاقه."""
+    with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".txt", encoding="utf-8") as tmp:
+        tmp.write(initial_text)
+        tmp_path = tmp.name
+
+    system = platform.system()
+    try:
+        if system == "Windows":
+            os.system(f'notepad "{tmp_path}"')
+        elif system == "Darwin":
+            subprocess.call(["open", tmp_path])
+        else:
+            subprocess.call(["xdg-open", tmp_path])
+    except Exception as e:
+        print(f"⚠️ Failed to open editor: {e}")
+        print("Paste your edits manually below. Finish with an empty line.\n")
+        edited = []
+        while True:
+            line = input()
+            if line == "":
+                break
+            edited.append(line)
+        return "\n".join(edited).strip()
+
+    try:
+        with open(tmp_path, "r", encoding="utf-8") as f:
+            edited_text = f.read().strip()
+    finally:
+        try:
+            os.remove(tmp_path)
+        except:
+            pass
+    return edited_text or initial_text
+
+def _load_attendees_anywhere(event_title: str, ev: dict):
+    """
+    يحاول يجلب المدعوين من أكثر من مكان — بالترتيب:
+    1) data/attendees/<event>.json (الدوال الحديثة)
+    2) data/attendees.json بصيغة {"EventTitle": [..]} (دعم قديم)
+    3) داخل كائن الحدث ev['attendees'] إن وُجد
+    """
+    # 1) الملف الخاص بالحدث
+    attendees = load_attendees_for_event(event_title)
+    if attendees:
+        return attendees
+
+    # 2) الملف القديم الموحّد
+    legacy_path = os.path.join("data", "attendees.json")
+    if os.path.exists(legacy_path):
+        try:
+            with open(legacy_path, "r", encoding="utf-8") as f:
+                legacy = json.load(f)
+            # جرّب باسم المستخدم المدخل، ثم باسم الحدث من json (للاحتياط باختلاف الحالة)
+            attendees = legacy.get(event_title) or legacy.get(ev.get("title", ""))
+            if attendees:
+                return attendees
+        except Exception:
+            pass
+
+    # 3) داخل الحدث نفسه
+    return ev.get("attendees", [])
+
+# -------- Core sending --------
+def send_invites_for_event(
+    event_title: str,
+    tone: str = "polite, friendly",
+    use_html: bool = True,
+    preview_and_edit: bool = True
+):
     events = load_events()
-    ev = next((e for e in events if e['title'].lower()==event_title.lower()), None)
+    ev = next((e for e in events if e['title'].lower() == event_title.lower()), None)
     if not ev:
-        print("Event not found."); return
-    attendees = ev.get('attendees', [])
+        print("Event not found.")
+        return
+
+    # احضر الحضور من أي مصدر متاح
+    attendees = _load_attendees_anywhere(event_title, ev)
     if not attendees:
-        print("No attendees to invite."); return
+        print("No attendees to invite.")
+        return
 
     subject = _subject_for(ev)
 
-    # Gemini يصيغ البودي (BODY فقط)
+    # 1) Gemini draft (BODY only)
     body_text = draft_email(
         subject=subject,
         audience="attendees",
@@ -45,52 +149,81 @@ def send_invites_for_event(event_title: str, tone: str = "polite, friendly", use
             f"Event: {ev['title']}",
             f"When: {ev['date']}",
             f"Where: {ev.get('location','')}",
-            ev.get('description',''),
+            ev.get('description','')
         ],
-        signature="Ziyad",
+        signature="Ziyad"
     )
 
+    # 2) Preview + optional edit
+    if preview_and_edit:
+        print("\n--- AI Generated Email Preview ---\n")
+        print(body_text)
+        print("\n----------------------------------\n")
+
+        # Edit subject?
+        subj_edit = input(f"Edit subject? (current: '{subject}') (y/N): ").strip().lower()
+        if subj_edit == "y":
+            new_subj = input("New subject: ").strip()
+            if new_subj:
+                subject = new_subj
+
+        choice = input("Edit body in editor? (Y/n): ").strip().lower()
+        if choice != "n":
+            body_text = _open_in_editor_with_text(body_text)
+
+    # Save preview copy
+    _ensure_dir("outputs")
+    with open(os.path.join("outputs", "last_invite_preview.txt"), "w", encoding="utf-8") as f:
+        f.write(f"Subject: {subject}\n\n{body_text}")
+
+    # 3) Build final body (HTML or plain)
     if use_html:
-        body = f"""
-        <div style="font-family:Segoe UI,Arial,sans-serif;line-height:1.7;color:#111827">
-          <div style="font-size:18px; margin-bottom:8px;">{body_text.replace('\n','<br>')}</div>
-          <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0">
-          <div style="font-size:12px;color:#6b7280">Sent by Smart Event Manager</div>
-        </div>
-        """
+        wrapped = (
+            '<div style="font-family:Segoe UI,Arial,sans-serif;line-height:1.7;color:#111827">'
+            f'<div style="font-size:16px">{body_text.replace("\n","<br>")}</div>'
+            '<hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0">'
+            '<div style="font-size:12px;color:#6b7280">Sent by Smart Event Manager</div>'
+            '</div>'
+        )
         is_html = True
     else:
-        body = body_text
+        wrapped = body_text
         is_html = False
 
+    # 4) Attachment (poster)
     attach = _poster_path(ev)
     attachments = [attach] if attach else None
 
+    # Final preview + confirm
+    print("\n======= Final Preview =======")
+    print("Subject:", subject)
+    print("\nBody:\n", body_text)
+    print("=============================\n")
+    if input("Send now? (Y/n): ").strip().lower() == "n":
+        print("Cancelled by user.")
+        return
+
+    # 5) Send (personalized)
     sent = 0
     for a in attendees:
         name = (a or {}).get('name', '').strip()
         email = (a or {}).get('email', '').strip()
         if not email:
             continue
-
-        # إنشاء نسخة مخصصة من النص لكل مستلم
-        personalized_body = body_text
-        if name:
-            if personalized_body.lower().startswith("dear"):
-                # استبدال السطر الأول فقط
-                lines = personalized_body.splitlines()
-                lines[0] = f"Dear {name},"
-                personalized_body = "\n".join(lines)
-            else:
-                personalized_body = f"Dear {name},\n\n{personalized_body}"
-
-        ok = send_email(email, subject, personalized_body, attachments=attachments)
+        final_body = _personalize_body(wrapped, name, is_html=is_html)
+        ok = send_email(email, subject, final_body, attachments=attachments)
         if ok:
             sent += 1
 
     print(f"Invites sent: {sent}/{len(attendees)}")
 
-
+# -------- CLI --------
 def send_invites_cli():
     title = input("Event title to invite: ").strip()
-    send_invites_for_event(title, use_html=True)
+    default_tone = "polite, friendly"
+    tone = input(f"Tone (default: {default_tone}): ").strip() or default_tone
+    html_choice = input("Send as HTML? (Y/n): ").strip().lower()
+    use_html = (html_choice != "n")
+    edit_choice = input("Preview & edit before sending? (Y/n): ").strip().lower()
+    preview_and_edit = (edit_choice != "n")
+    send_invites_for_event(title, tone=tone, use_html=use_html, preview_and_edit=preview_and_edit)

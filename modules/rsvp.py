@@ -1,37 +1,67 @@
+# modules/rsvp.py
 import json, os
 from modules.events import load_events, save_events
 
-def add_attendee(event_title, name, email):
-    events = load_events()
-    for ev in events:
-        if ev['title'].lower() == event_title.lower():
-            ev.setdefault('attendees', []).append({'name': name, 'email': email, 'status':'pending'})
-            save_events(events)
-            print(f"Added attendee {name} <{email}> to {event_title}")
-            return True
-    print("Event not found.")
-    return False
+def _attendees_path(event_title):
+    os.makedirs("data/attendees", exist_ok=True)
+    safe = event_title.replace(" ", "_").lower()
+    return f"data/attendees/{safe}.json"
 
-def list_attendees(event_title):
-    events = load_events()
-    for ev in events:
-        if ev['title'].lower() == event_title.lower():
-            atts = ev.get('attendees', [])
-            if not atts:
-                print("No attendees yet.")
-                return
-            for a in atts:
-                print(f"- {a.get('name')} | {a.get('email')} | {a.get('status')}")
-            return
-    print("Event not found.")
+def load_attendees(event_title):
+    """تحميل قائمة الحضور من ملف JSON"""
+    path = _attendees_path(event_title)
+    if not os.path.exists(path):
+        return []
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
-# CLI wrappers
+def save_attendees(event_title, attendees):
+    """حفظ قائمة الحضور بعد التعديل"""
+    path = _attendees_path(event_title)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(attendees, f, ensure_ascii=False, indent=2)
+
 def add_attendee_cli():
-    title = input("Event title: ").strip()
-    name  = input("Attendee name: ").strip()
+    event_title = input("Event title: ").strip()
+    name = input("Attendee name: ").strip()
     email = input("Attendee email: ").strip()
-    add_attendee(title, name, email)
+    attendees = load_attendees(event_title)
+    attendees.append({"name": name, "email": email, "attended": False})
+    save_attendees(event_title, attendees)
+    print(f"✅ Added attendee: {name} ({email})")
 
 def list_attendees_cli():
-    title = input("Event title: ").strip()
-    list_attendees(title)
+    event_title = input("Event title: ").strip()
+    attendees = load_attendees(event_title)
+    if not attendees:
+        print("No attendees found.")
+        return
+    print(f"\nAttendees for '{event_title}':")
+    for i, a in enumerate(attendees, 1):
+        status = "✅ Attended" if a.get("attended") else "❌ Not attended"
+        print(f"{i}. {a['name']} - {a['email']} ({status})")
+
+def mark_attendance_cli():
+    """تحديث حالة الحضور"""
+    event_title = input("Event title: ").strip()
+    attendees = load_attendees(event_title)
+    if not attendees:
+        print("No attendees found for this event.")
+        return
+
+    print(f"\nAttendees for '{event_title}':")
+    for i, a in enumerate(attendees, 1):
+        status = "✅" if a.get("attended") else "❌"
+        print(f"{i}. {a['name']} - {a['email']} ({status})")
+
+    try:
+        index = int(input("\nSelect attendee number to toggle attendance: ")) - 1
+        if 0 <= index < len(attendees):
+            attendees[index]["attended"] = not attendees[index].get("attended", False)
+            save_attendees(event_title, attendees)
+            new_status = "Attended" if attendees[index]["attended"] else "Absent"
+            print(f"Updated {attendees[index]['name']} → {new_status}")
+        else:
+            print("Invalid number.")
+    except ValueError:
+        print("Invalid input. Please enter a number.")

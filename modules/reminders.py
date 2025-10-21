@@ -1,20 +1,27 @@
 # modules/reminders.py
 import time, threading, os
 from datetime import datetime, timedelta
+from pathlib import Path
+
 from modules.events import load_events, save_events
 from modules.email_sender import send_email
-from modules.ai_email import draft_email   # نستخدمه كـ (خياري) لصياغة ألطف
-from pathlib import Path
+
+# draft_email اختياري: لو مو موجود ما نطيح
+try:
+    from modules.ai_email import draft_email   # يحسّن المقدمة إن توفر
+except Exception:
+    draft_email = None
 
 CHECK_INTERVAL_SECONDS = 60  # افحص كل 60 ثانية
 ICS_DIR = Path("data/ics")
 ICS_DIR.mkdir(parents=True, exist_ok=True)
 
+
 def _ensure_reminder_objects(ev):
     """
     يدعم شكلين لقائمة reminders:
-    - [10, 60] أرقام فقط (قديم)
-    - [{"minutes_before": 10, "fired": false}, ...] (جديد)
+    - [10, 60] أرقام فقط (قديمة)
+    - [{"minutes_before": 10, "fired": false}, ...] (حديثة)
     ويحوّل الأرقام إلى كائنات مع fired=False.
     """
     new_list = []
@@ -27,6 +34,7 @@ def _ensure_reminder_objects(ev):
             new_list.append({'minutes_before': int(r), 'fired': False})
     ev['reminders'] = new_list
 
+
 def _friendly_delta(minutes_before: int) -> str:
     if minutes_before < 60:
         return f"in {minutes_before} min"
@@ -36,18 +44,16 @@ def _friendly_delta(minutes_before: int) -> str:
         return f"in {hours} hour{'s' if hours > 1 else ''}"
     return f"in {hours}h {rem}m"
 
+
 def _make_ics(event) -> str:
     """
     ينشئ ملف .ics للحدث ويرجع المسار.
-    الحدث مخزن كوقت محلي (naive). بنسجله كتاريخ محلي.
+    توقّع تنسيق: event['date'] = "YYYY-MM-DD HH:MM"
     """
-    # توقّع تنسيق: YYYY-MM-DD HH:MM
     start = datetime.strptime(event['date'], "%Y-%m-%d %H:%M")
-    # لنفترض مدة افتراضية ساعة إذا ما عندنا مدة
-    end = start + timedelta(hours=1)
+    end = start + timedelta(hours=1)  # مدة افتراضية ساعة
 
     def fmt(dt: datetime) -> str:
-        # صيغة ICS: YYYYMMDDTHHMMSS
         return dt.strftime("%Y%m%dT%H%M%S")
 
     uid = f"{event['title'].replace(' ', '_')}-{fmt(start)}@smart-event-manager"
@@ -73,12 +79,14 @@ def _make_ics(event) -> str:
         f.write("\n".join(lines))
     return str(path)
 
+
 def _build_reminder_subject(event, minutes_before: int) -> str:
     return f"⏰ Reminder: {event['title']} { _friendly_delta(minutes_before) }"
 
+
 def _build_reminder_body_html(event, minutes_before: int) -> str:
     """
-    قالب HTML أنيق للتذكير. إن توفر Gemini، نستخدمه لتوليد فقرة مقدمة ألطف.
+    قالب HTML للتذكير. إن توفر Gemini عبر draft_email نستخدمه لتحسين المقدمة.
     """
     title = event["title"]
     when = event["date"]
@@ -86,26 +94,30 @@ def _build_reminder_body_html(event, minutes_before: int) -> str:
     desc  = event.get("description", "")
     friendly = _friendly_delta(minutes_before)
 
-    # مقدمة محسّنة عبر Gemini (اختياري) – وإلا fallback بسيط
-    intro = draft_email(
-        subject=f"Reminder: {title}",
-        audience="attendees",
-        tone="friendly, concise",
-        bullet_points=[
-            f"Event: {title}",
-            f"When: {when}",
-            f"Where: {where}",
-            "Short reminder before the event.",
-        ],
-        signature="",
-        # language يحدد تلقائيًا حسب اللغة المكتوبة
-    ) or f"This is a quick reminder for <strong>{title}</strong> happening {friendly}."
+    intro = None
+    if callable(draft_email):
+        try:
+            intro = draft_email(
+                subject=f"Reminder: {title}",
+                audience="attendees",
+                tone="friendly, concise",
+                bullet_points=[
+                    f"Event: {title}",
+                    f"When: {when}",
+                    f"Where: {where}",
+                    "Short reminder before the event.",
+                ],
+                signature="",
+            )
+        except Exception:
+            intro = None
 
-    # نحذف أي "Subject:" لو ظهرت من الموديل بالخطأ
+    if not intro:
+        intro = f"This is a quick reminder for <strong>{title}</strong> happening {friendly}."
+
     if intro.lower().startswith("subject:"):
         intro = "\n".join([ln for ln in intro.splitlines() if not ln.lower().startswith("subject:")]).strip()
 
-    # حوّل الأسطر لـ <br>
     intro_html = intro.replace("\n", "<br>")
 
     return f"""
@@ -117,13 +129,57 @@ def _build_reminder_body_html(event, minutes_before: int) -> str:
         {"<div style='margin-top:8px'><strong>ℹ️ Details:</strong> " + desc + "</div>" if desc else ""}
       </div>
       <div style="margin-top:14px">
-        <a href="#" style="display:inline-block;background:#2563eb;color:#fff;text-decoration:none;padding:10px 14px;border-radius:8px">View Details</a>
-        <span style="color:#6b7280;margin-left:8px">Add to calendar via attached .ics</span>
+        <span style="color:#6b7280;">Add to calendar via attached .ics</span>
       </div>
       <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0">
       <div style="font-size:12px;color:#6b7280">Sent by Smart Event Manager</div>
     </div>
     """
+
+
+def add_reminder_cli():
+    """
+    واجهة CLI لإضافة تذكير (بالدقائق قبل الحدث) لحدث معيّن.
+    التخزين ككائنات: {"minutes_before": X, "fired": false}
+    """
+    events = load_events()
+    if not events:
+        print("No events found.")
+        return
+
+    print("\nSelect an event to add a reminder:")
+    for i, e in enumerate(events, start=1):
+        print(f"{i}. {e.get('title','(untitled)')}  —  {e.get('date','?')}")
+
+    try:
+        idx = int(input("\nEnter number: ").strip()) - 1
+    except ValueError:
+        print("Invalid input.")
+        return
+
+    if not (0 <= idx < len(events)):
+        print("Invalid choice.")
+        return
+
+    try:
+        minutes = int(input("Notify how many minutes before? (e.g., 30): ").strip() or "30")
+    except ValueError:
+        print("Invalid minutes.")
+        return
+
+    # طبّق التطبيع للشكل الحديث
+    _ensure_reminder_objects(events[idx])
+
+    # تحقّق من عدم التكرار
+    for r in events[idx]["reminders"]:
+        if int(r.get("minutes_before", -1)) == minutes:
+            print("ℹ️ This reminder already exists for the event.")
+            break
+    else:
+        events[idx]["reminders"].append({"minutes_before": minutes, "fired": False})
+        save_events(events)
+        print(f"✅ Reminder ({minutes} min before) added to '{events[idx].get('title','event')}'.")
+
 
 def check_reminders_once():
     events = load_events()
@@ -172,10 +228,12 @@ def check_reminders_once():
     if changed:
         save_events(events)
 
+
 def _loop():
     while True:
         check_reminders_once()
         time.sleep(CHECK_INTERVAL_SECONDS)
+
 
 def start_reminder_loop():
     t = threading.Thread(target=_loop, daemon=True)

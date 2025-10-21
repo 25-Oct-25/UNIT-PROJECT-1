@@ -1,4 +1,3 @@
-# modules/email_sender.py
 import os
 from dotenv import load_dotenv
 import smtplib
@@ -30,7 +29,7 @@ def send_email(to_email, subject, body, attachments=None, html=False):
     else:
         msg.set_content(body)
 
-    # attach files
+
     if attachments:
         for path in attachments:
             try:
