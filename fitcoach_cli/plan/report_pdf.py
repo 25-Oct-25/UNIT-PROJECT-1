@@ -1,186 +1,116 @@
-# Path: UNIT-PROJECT-1/fitcoach_cli/plan/report_pdf.py
-"""Weekly PDF report generator.
+# Path: fitcoach_cli/plan/report_pdf.py
+from __future__ import annotations
 
-Builds a branded A4 PDF summarizing the user's goal, calorie targets,
-training plan, recent progress, habits, and short coach advice. Uses
-`fpdf2` and a light wrapper class to simplify section rendering.
-"""
-
-from fpdf import FPDF
+from pathlib import Path
 import datetime, os
-from ..core.models import AppState
-from ..nutrition.calculator import bmr_mifflin_st_jeor, tdee, macro_targets
+from fpdf import FPDF
+import arabic_reshaper
+from bidi.algorithm import get_display
 
+# مسار مجلد المشروع ثم الخطوط
+ROOT_DIR = Path(__file__).resolve().parents[2]
+FONT_DIR = ROOT_DIR / "assets" / "fonts"
+FONT_REG = FONT_DIR / "NotoSansArabic-Regular.ttf"
+FONT_BOLD = FONT_DIR / "NotoSansArabic-Bold.ttf"
 
-def _brand(state: AppState):
-    """Resolve branding settings (color/title/logo) from app state.
-
-    Args:
-        state (AppState): Application state containing `settings["brand"]`.
-
-    Returns:
-        Tuple[Tuple[int, int, int], str, str]:
-            A tuple ``(rgb, title, logo_path)`` where:
-            - ``rgb`` is a 3-tuple of ints (0–255).
-            - ``title`` is the report title string.
-            - ``logo_path`` is a filesystem path to an optional logo.
+def shape_ar(text: str) -> str:
     """
-    brand = state.settings.get("brand", {}) if getattr(state, "settings", None) else {}
-    color = brand.get("color", "#0A84FF"); title = brand.get("title", "FitCoach — Weekly Report")
-    logo = brand.get("logo", "")
-    color = color.lstrip("#"); r, g, b = int(color[0:2],16), int(color[2:4],16), int(color[4:6],16)
-    return (r,g,b), title, logo
+    يهيّئ العربية (ligatures) ويعكس الاتجاه (RTL) حتى تظهر صحيحة في PDF.
+    مرّر النص العربي عبرها قبل الكتابة.
+    نصوص إنجليزية/أرقام ما تحتاج هذا عادة.
+    """
+    if not text:
+        return ""
+    reshaped = arabic_reshaper.reshape(text)
+    return get_display(reshaped)
 
+def _ascii_sanitize(s: str) -> str:
+    """استبدال رموز Unicode الشائعة بنسخ ASCII (حل احتياطي للعنوانين فقط)."""
+    if not s: return s
+    repl = {"—": "-", "–": "-", "…": "...", "“": '"', "”": '"', "’": "'", "‘": "'"}
+    for k, v in repl.items():
+        s = s.replace(k, v)
+    return s
 
 class ReportPDF(FPDF):
-    """Small helper over FPDF with branded header and section helpers."""
-
-    def __init__(self, *a, **kw):
-        """Initialize with default brand placeholders, then call super()."""
-        self.brand_rgb = (10,132,255); self.brand_title = "FitCoach — Weekly Report"; self.brand_logo = ""
-        super().__init__(*a, **kw)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # تحميل الخطوط اليونيكود مرة واحدة
+        # uni=True ضروري لدعم Unicode
+        self.add_font("NotoArabic", "", str(FONT_REG), uni=True)
+        self.add_font("NotoArabic", "B", str(FONT_BOLD), uni=True)
+        self.set_auto_page_break(auto=True, margin=12)
 
     def header(self):
-        """Draw a colored header bar with optional logo and title."""
-        self.set_fill_color(*self.brand_rgb); self.rect(0,0,self.w,18,"F")
-        if self.brand_logo and os.path.exists(self.brand_logo):
-            try: self.image(self.brand_logo, x=self.l_margin, y=3, h=12)
-            except Exception: pass
-        self.set_text_color(255,255,255); self.set_font("Helvetica","B",14); self.set_y(5)
-        self.cell(0,8,self.brand_title,align="C"); self.ln(12); self.set_text_color(0,0,0)
+        self.set_font("NotoArabic", "B", 16)
+        # استخدم عنوان ASCII-safe لتجنّب مشاكل لو نسيت الخط
+        title = _ascii_sanitize("FitCoach — Weekly Report")
+        # لو تبي عربي:
+        # title = shape_ar("تقرير FitCoach الأسبوعي")
+        self.cell(0, 10, title, new_x="LMARGIN", new_y="NEXT", align="C")
+        self.set_font("NotoArabic", "", 11)
+        self.ln(2)
 
-    def section_title(self, title: str):
-        """Print a colored section title.
+    def footer(self):
+        self.set_y(-12)
+        self.set_font("NotoArabic", "", 9)
+        txt = f"Page {self.page_no()} / {{nb}}"
+        self.cell(0, 10, txt, align="C")
 
-        Args:
-            title (str): The section title text.
-        """
-        self.set_font("Helvetica","B",12); self.set_text_color(*self.brand_rgb)
-        self.cell(0,8,title,new_x="LMARGIN", new_y="NEXT"); self.set_text_color(0,0,0)
-
-    def kv(self, k: str, v: str):
-        """Print a key–value line.
-
-        Args:
-            k (str): Label on the left.
-            v (str): Value on the right.
-        """
-        self.set_font("Helvetica","",11); self.cell(50,6,k+":",align="L"); self.cell(0,6,v,new_x="LMARGIN", new_y="NEXT")
-
-    def bullet(self, text: str):
-        """Print a single bullet line with wrapped text.
-
-        Args:
-            text (str): The bullet content.
-        """
-        self.set_font("Helvetica","",11); self.cell(5,6,u"•"); self.multi_cell(0,6,text)
-
-
-def _week_range(days:int=7):
-    """Compute inclusive start/end dates for a trailing window.
-
-    Args:
-        days (int): Number of days to include (default 7).
-
-    Returns:
-        Tuple[date, date]: (start_date, end_date) inclusive.
+def build_weekly_pdf(state, file_path: str, days: int = 7) -> None:
     """
-    end = datetime.date.today(); start = end - datetime.timedelta(days=days-1); return start, end
-
-
-def _table(pdf: FPDF, headers, rows, col_w=None):
-    """Render a simple table.
-
-    Args:
-        pdf (FPDF): The active PDF object.
-        headers (List[str]): Column headers.
-        rows (Iterable[Iterable[Any]]): Row values.
-        col_w (Optional[List[float]]): Column widths in mm; if None, auto-fit.
+    يبني تقرير أسبوعي إلى PDF.
+    state: كائن الحالة العام (نفس الذي تستخدمه في بقية المشروع).
+    file_path: مسار ملف الإخراج.
+    days: كم يوم يشمل التقرير (افتراضي 7).
     """
-    pdf.set_font("Helvetica","B",10); col_w = col_w or [pdf.w/len(headers)-20]*len(headers)
-    for h,w in zip(headers,col_w): pdf.cell(w,7,h,border=1,align="C")
-    pdf.ln(7); pdf.set_font("Helvetica","",9)
-    for r in rows:
-        for cell,w in zip(r,col_w): pdf.cell(w,6,str(cell),border=1)
-        pdf.ln(6)
+    # إشارة اختيارية: لو حاب تفرض ASCII فقط من المجدول
+    ascii_only = os.environ.get("FITCOACH_PDF_ASCII_FALLBACK") == "1"
 
-
-def build_weekly_pdf(state: AppState, out_file: str, days: int = 7) -> str:
-    """Build a branded weekly report PDF.
-
-    Sections:
-      - Summary (date range, goal, activity, height/weight)
-      - Calories & Macros (BMR, TDEE, target kcal, macro targets)
-      - Training Plan (table)
-      - Progress (weight table + trend)
-      - Habits (averages)
-      - Coach Advice (bullets)
-
-    Args:
-        state (AppState): Application state with profile, plan, logs, and settings.
-        out_file (str): Output PDF path.
-        days (int): Trailing number of days to summarize (default 7).
-
-    Returns:
-        str: The output file path.
-
-    Raises:
-        OSError: If the PDF cannot be written to the given path.
-    """
-    start, end = _week_range(days); p = state.profile
-    brand_rgb, brand_title, brand_logo = _brand(state)
     pdf = ReportPDF(orientation="P", unit="mm", format="A4")
-    pdf.brand_rgb, pdf.brand_title, pdf.brand_logo = brand_rgb, brand_title, brand_logo
-    pdf.set_auto_page_break(auto=True, margin=12); pdf.add_page()
+    pdf.alias_nb_pages()
+    pdf.add_page()
+    pdf.set_font("NotoArabic", "", 12)
 
-    pdf.section_title("Summary")
-    pdf.kv("Date Range", f"{start.isoformat()} to {end.isoformat()}")
-    pdf.kv("Goal", p.goal); pdf.kv("Activity", p.activity)
-    pdf.kv("Height/Weight", f"{p.height_cm:.0f} cm / {p.weight_kg:.1f} kg"); pdf.ln(2)
+    # مثال: عنوان/ملخص عربي
+    summary_title = "ملخص الأسبوع"
+    summary_body  = "هذا تقرير موجز لنشاطك خلال الأيام الماضية."
 
-    pdf.section_title("Calories & Macros")
-    b = bmr_mifflin_st_jeor(p.sex,p.weight_kg,p.height_cm,p.age); t = tdee(b,p.activity)
-    target = t - 400 if p.goal=="cut" else t + 250 if p.goal=="bulk" else t
-    prot, carbs, fat = macro_targets(p.goal,p.weight_kg,target)
-    pdf.kv("BMR", f"{b:.0f} kcal"); pdf.kv("TDEE", f"{t:.0f} kcal")
-    pdf.kv("Target kcal", f"{target:.0f} kcal")
-    pdf.kv("Macros", f"Protein {prot} g | Carbs {carbs} g | Fat {fat} g"); pdf.ln(2)
-
-    pdf.section_title("Training Plan")
-    if state.plan:
-        headers = ["Day","Focus","Exercises (name x sets)"]; rows=[]
-        for wk in state.plan.workouts:
-            exs = "; ".join([f"{ex['name']} ({ex['sets']})" for ex in wk.Exercises[:6]])
-            rows.append([wk.Day, wk.Focus, exs])
-        _table(pdf, headers, rows, col_w=[25,30,125])
+    if ascii_only:
+        # إن احتجت إجبار ASCII لأي سبب
+        summary_title = _ascii_sanitize(summary_title)
+        summary_body  = _ascii_sanitize(summary_body)
+        writer_title  = summary_title
+        writer_body   = summary_body
     else:
-        pdf.bullet("No plan yet. Use: plan generate --split=upper-lower --days=4")
+        writer_title  = shape_ar(summary_title)
+        writer_body   = shape_ar(summary_body)
 
-    pdf.section_title("Progress (Weight)")
-    if state.progress:
-        entries = state.progress[-days:]
-        headers, rows = ["Date","Weight (kg)"], [[e["date"], f"{e['weight']}"] for e in entries]
-        _table(pdf, headers, rows, col_w=[40,30])
-        diff = float(entries[-1]["weight"]) - float(entries[0]["weight"])
-        pdf.kv("Trend", f"{diff:+.2f} kg in {len(entries)} entries")
-    else:
-        pdf.bullet("No weight entries yet. Log with: progress log --weight=...")
+    # عنوان القسم
+    pdf.set_font("NotoArabic", "B", 14)
+    pdf.cell(0, 8, writer_title, ln=1, align="R")  # R للاتجاه من اليمين
+    pdf.set_font("NotoArabic", "", 12)
+    pdf.multi_cell(0, 7, writer_body, align="R")
+    pdf.ln(2)
 
-    pdf.section_title("Habits")
-    if state.habits_log:
-        logs = state.habits_log[-days:]
-        avg_water = sum(float(d.get("water",0)) for d in logs)/len(logs)
-        avg_sleep = sum(float(d.get("sleep",0)) for d in logs)/len(logs)
-        avg_steps = sum(int(d.get("steps",0)) for d in logs)/len(logs)
-        pdf.kv("Avg Water", f"{avg_water:.1f} L/day")
-        pdf.kv("Avg Sleep", f"{avg_sleep:.1f} h/day")
-        pdf.kv("Avg Steps", f"{avg_steps:.0f} /day")
-    else:
-        pdf.bullet("No habits logged. Use: habits log --water=3 --sleep=7.5 --steps=9000")
+    # أمثلة بيانات (استبدلها ببياناتك الفعلية من state)
+    today = datetime.date.today()
+    period = f"{(today - datetime.timedelta(days=days-1)).isoformat()} → {today.isoformat()}"
+    pdf.set_font("NotoArabic", "B", 12)
+    pdf.cell(0, 7, _ascii_sanitize(f"Period: {period}"), ln=1)
 
-    from ..advice.recommend import daily_tips
-    pdf.section_title("Coach Advice")
-    for tip in daily_tips(p)[:6]: pdf.bullet(tip)
+    # مثال جدول بسيط
+    pdf.set_font("NotoArabic", "", 11)
+    rows = [
+        ("Weight trend", "−0.4 kg"),   # لاحظ الإشارة السالبة؛ مدعومة في Unicode
+        ("Workouts", "4 sessions"),
+        ("Best lift", "Bench 80×8 @ RPE 8"),
+    ]
+    for k, v in rows:
+        pdf.cell(60, 7, _ascii_sanitize(k))
+        pdf.cell(0, 7, _ascii_sanitize(v), ln=1)
 
-    pdf.ln(3); pdf.set_font("Helvetica","I",9); pdf.cell(0,6,"Generated by FitCoach CLI",align="R")
-    pdf.output(out_file); return out_file
+    # في نهاية الوثيقة
+    out_path = Path(file_path).resolve()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    pdf.output(str(out_path))
