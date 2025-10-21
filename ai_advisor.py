@@ -3,9 +3,6 @@ import os
 import google.generativeai as genai
 
 class AIAdvisor:
-    """
-    An AI assistant using Google Gemini to provide advice on imported cars.
-    """
     @staticmethod
     def get_advice(car,cost):
         """
