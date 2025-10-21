@@ -1,7 +1,8 @@
 import json
-from car_profile import Car
+import os
+from .car_profile import Car
 
-DATA_FILE= "/Users/nawaf/Documents/python-camp/UNIT-PROJECT-1/DATA.json"
+DATA_FILE= "/Users/nawaf/Documents/python-camp/UNIT-PROJECT-1/data/DATA.json"
 
 def save_cars(cars_list):
 

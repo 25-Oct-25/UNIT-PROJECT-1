@@ -49,16 +49,16 @@ class Calculator:
         #Get shipping cost
         shipping = Calculator.get_shipping_cost(car.origin_country)
 
-        #zCalculate insurance
+        #Calculate insurance
         insurance = Calculator.calculate_insurance(car.price_usd)
 
-        #zCalculate customs
+        #Calculate customs
         customs = Calculator.calculate_customs(car.price_usd, shipping)
 
-        #zCalculate VAT
+        #Calculate VAT
         vat = Calculator.calculate_vat(car.price_usd, shipping, insurance, customs)
 
-        #zSum up everything
+        #Sum up everything
         total_cost_usd = car.price_usd + shipping + insurance + customs + vat
 
         #Convert all to SAR

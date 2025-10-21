@@ -1,4 +1,3 @@
-import getpass
 ADMIN_CREDIT ={
     "admin": "PassPass12124"
 }

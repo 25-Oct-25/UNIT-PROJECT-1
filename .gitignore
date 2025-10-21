@@ -144,6 +144,10 @@ ENV/
 env.bak/
 venv.bak/
 
+#CustomFiles
+.pdf-files
+.data
+
 # Spyder project settings
 .spyderproject
 .spyproject
