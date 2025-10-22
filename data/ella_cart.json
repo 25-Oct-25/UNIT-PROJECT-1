@@ -1,0 +1,14 @@
+[
+    {
+        "service": "chibi",
+        "price": 50,
+        "discount": 0,
+        "final_price": 50
+    },
+    {
+        "service": "sketch",
+        "price": 30,
+        "discount": 15.0,
+        "final_price": 15.0
+    }
+]
