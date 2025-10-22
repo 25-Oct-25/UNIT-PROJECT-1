@@ -205,3 +205,20 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# ───────────────────────────────────────────────
+# Custom ignore rules for UNIT-PROJECT-1
+# ───────────────────────────────────────────────
+
+# Environment secrets
+.env
+.env.*
+
+# Local data & results
+data/
+results/
+reports/
+
+# Optional logs or debug outputs
+*.log
+*.tmp

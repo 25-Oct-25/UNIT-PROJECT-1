@@ -6,3 +6,9 @@ tldextract
 rapidfuzz
 python-whois
 requests
+dnspython>=2.0.0
+python-dotenv>=1.0.0
+rich>=10.0.0
+requests>=2.0.0
+
+
