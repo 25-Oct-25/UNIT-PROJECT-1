@@ -3,45 +3,28 @@ import os
 import hashlib
 import hmac
 from dotenv import load_dotenv
+from colorama import Fore, Style, init
 
-# Load environment variables from .env file
+# Initialize colorama
+init(autoreset=True)
 load_dotenv()
 
 
 class User:
-    """
-    Represents a registered user who can log in and save stories.
-    Handles secure password hashing using a secret key from .env.
-    """
+
 
     USERS_FILE = "data/users.json"
 
     def __init__(self, username, password_hash):
-        """
-        Initialize a new user instance.
-
-        Args:
-            username (str): The user's name.
-            password_hash (str): The hashed password.
-        """
+        """Initialize a new user instance."""
         self.username = username
         self._password_hash = password_hash
 
-    # ============================================================
-    # PASSWORD HANDLING
-    # ============================================================
+    # PASSWORD HANDLING 
 
     @staticmethod
     def _hash_password(password):
-        """
-        Hashes a password using HMAC with a secret key from .env.
-
-        Args:
-            password (str): The plain text password.
-
-        Returns:
-            str: The hashed password string.
-        """
+        """Hash password using HMAC with a secret key from .env."""
         secret_key = os.getenv("ENCRYPTION_KEY")
         if not secret_key:
             raise ValueError("Missing ENCRYPTION_KEY in .env file.")
@@ -49,24 +32,19 @@ class User:
 
     @property
     def password_hash(self):
-        """Return the hashed password."""
+        """Return hashed password."""
         return self._password_hash
 
     @password_hash.setter
     def password_hash(self, new_password):
-        """Update the stored password hash securely."""
+        """Update stored password securely."""
         self._password_hash = self._hash_password(new_password)
 
-    # ============================================================
-    # USER DATA FILE HANDLING
-    # ============================================================
+    # USER DATA FILE HANDLING 
 
     @staticmethod
     def _load_users():
-        """
-        Load all users from JSON file.
-        Returns an empty dict if file doesn't exist or is corrupted.
-        """
+        """Load all users from JSON file."""
         if not os.path.exists(User.USERS_FILE):
             return {}
         try:
@@ -82,44 +60,49 @@ class User:
         with open(User.USERS_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
-    # ============================================================
-    # AUTHENTICATION LOGIC
-    # ============================================================
+    # AUTHENTICATION LOGIC 
 
     @classmethod
     def signup(cls):
-        """
-        Register a new user.
-        Ensures usernames are unique and passwords securely hashed.
-        """
+        """Register a new user securely."""
         users = cls._load_users()
+        print(Fore.CYAN + "\n📝 Create a new account" + Fore.RESET)
         username = input("Enter a new username: ").strip().lower()
 
         if username in users:
-            print("⚠️ Username already exists! Please choose another one.")
+            print(Fore.YELLOW + "⚠️ Username already exists! Please choose another one.")
             return None
 
         password = input("Enter a password: ").strip()
+        confirm = input("Confirm password: ").strip()
+        if confirm != password:
+            print(Fore.RED + "❌ Passwords do not match. Try again.")
+            print(Fore.CYAN + "--------------------------------------" + Fore.RESET)
+            return None
+
         hashed = cls._hash_password(password)
         users[username] = {"password": hashed}
         cls._save_users(users)
-        print("✅ Signup successful! You can log in now.")
+
+        print(Fore.GREEN + f"✅ Signup successful! Welcome, {username.capitalize()}!")
+        print(Fore.CYAN + "--------------------------------------" + Fore.RESET)
         return cls(username, hashed)
 
     @classmethod
     def login(cls):
-        """
-        Log in an existing user by verifying credentials.
-        Returns a User instance if successful, otherwise None.
-        """
+        """Authenticate existing user."""
         users = cls._load_users()
+        print(Fore.CYAN + "\n🔐 Login to your account" + Fore.RESET)
         username = input("Username: ").strip().lower()
         password = input("Password: ").strip()
         hashed = cls._hash_password(password)
 
         if username in users and users[username]["password"] == hashed:
-            print(f"✅ Welcome back, {username}!")
-            return cls(username, hashed)
+            print(Fore.LIGHTGREEN_EX + f"✅ Welcome back, {username.capitalize()}!")
         else:
-            print("❌ Invalid username or password. Please try again.")
+            print(Fore.RED + "❌ Invalid username or password. Please try again.")
+            print(Fore.CYAN + "--------------------------------------" + Fore.RESET)
             return None
+
+        print(Fore.CYAN + "--------------------------------------" + Fore.RESET)
+        return cls(username, hashed)

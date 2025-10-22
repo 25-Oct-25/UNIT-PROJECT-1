@@ -28,7 +28,7 @@ class AIHelper:
         )
 
         try:
-            # 🔮 Generate story continuation
+            # Generate story continuation
             response = self.client.chat_completion(
                 model="mistralai/Mixtral-8x7B-Instruct-v0.1",
                 messages=[
@@ -36,18 +36,18 @@ class AIHelper:
                     {"role": "user", "content": prompt},
                 ],
                 max_tokens=750 if length == "short" else 1100,
-                temperature=0.7,  # أقل شوي لتقليل الحشو
+                temperature=0.7,  
                 top_p=0.9,
             )
 
-            # 📝 Extract response text
+            #  Extract response text
             story_text = response.choices[0].message["content"].strip()
 
-            # ✅ Detect numbered options (1–3)
+            #  Detect numbered options (1–3)
             lines = story_text.split("\n")
             options = [line.strip() for line in lines if line.strip().startswith(("1.", "2.", "3."))]
 
-            # ⚙️ Add fallback if missing
+            #  Add fallback if missing
             if not options:
                 options = [
                     "1. The hero takes a bold action to change the situation.",
@@ -56,7 +56,7 @@ class AIHelper:
                 ]
                 story_text += "\n\n" + "\n".join(options)
 
-            # 🧹 Clean up unwanted endings or empty lines
+            #  Clean up unwanted endings or empty lines
             story_text = story_text.replace("THE END", "").strip()
             story_text = "\n".join([line for line in story_text.split("\n") if line.strip()])
 
@@ -64,7 +64,7 @@ class AIHelper:
             return {"text": story_text, "options": options}
 
         except Exception as e:
-            # 💥 Safe fallback
+            #  Safe fallback
             fallback_text = (
                 f"⚠️ HF API Error: {str(e)}\n"
                 "The connection to the AI service was interrupted.\n"

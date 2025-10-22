@@ -1,14 +1,5 @@
-class Story:
-    """
-    Represents an interactive story created by the user.
 
-    Attributes:
-        title (str): The story title.
-        genre (str): The story genre (e.g., Drama, Adventure, Fantasy, Romance).
-        length (str): The desired story length ('short' or 'long').
-        parts (list): List of text segments representing the story's parts.
-        last_choice (str or None): The user's last selected choice, if applicable.
-    """
+class Story:
 
     def __init__(self, title, genre, length, parts=None, last_choice=None):
         """
@@ -27,7 +18,6 @@ class Story:
         self.parts = parts if parts else []
         self.last_choice = last_choice  # Tracks user's most recent decision
 
-    # ----------------------------------------------------------
 
     def add_part(self, text):
         """
@@ -41,7 +31,6 @@ class Story:
         else:
             print("⚠️ Duplicate story part detected, skipping addition.")
 
-    # ----------------------------------------------------------
 
     def get_summary(self):
         """
@@ -52,7 +41,6 @@ class Story:
         """
         return f"{self.title} ({self.genre}, {len(self.parts)} parts)"
 
-    # ----------------------------------------------------------
 
     def to_dict(self):
         """
@@ -69,7 +57,6 @@ class Story:
             "last_choice": self.last_choice,
         }
 
-    # ----------------------------------------------------------
 
     @staticmethod
     def from_dict(data):

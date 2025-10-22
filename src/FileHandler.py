@@ -3,10 +3,10 @@ import os
 
 
 class FileHandler:
-    """Handles saving, loading, and managing story data for each user."""
+    
     STORIES_FILE = "data/stories.json"
 
-    # ---------- Internal Helper Methods ----------
+    # Internal Helper Methods
 
     @staticmethod
     def _read_data():
@@ -34,7 +34,7 @@ class FileHandler:
         with open(FileHandler.STORIES_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
-    # ---------- Public Methods ----------
+    # Public Methods 
 
     @staticmethod
     def load_stories(username):
