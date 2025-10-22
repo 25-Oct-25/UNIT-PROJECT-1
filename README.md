@@ -8,37 +8,43 @@
 - Organize Your Code into modules & (or packages)
 - Use git & Github to track changes in your code.
 
-## Example Project :  An online Grocery Store :
+## Example Project :  art commission
 
-#### Overview : An online store that sells fruits to customers. This online store has 2 main users. The customer and the manager of the store . Each one of them should be able to do the following tasks for the store to function properly . 
+#### Overview : Art Commission Store is a command-line based mini shop designed for freelance illustrators to manage art commission requests easily. It allows clients to browse available art styles, place customized orders (such as Chibi, Half-body, Full-body,)and even add extra characters with a discounted price
 
 ### Features & User Stories
 #### As a customer I should be able to do the following :
-- Browse  Products . 
-- View the product info (summary, specs, price, quantity , etc.)
-- Search for Products.
-- Get recommendations for my next purchase based on my purchase history.
-- Add Products to the shopping cart .
-- Remove a product from the shopping cart.
-- List the products in my shopping cart. 
+Browse  servisec . 
+- View the services info (chibi, half body, fullbody,fullbody with bg, scetch , head only.)
+- Search for example of art .
+- Get recommendations if you want add new character and you get half price.
+- Add services about what you want to draw for you to the cart .
+- Remove a services from the shopping cart.
+- List the services in my cart. 
 - Continue to checkout . 
 - Fill in my address for delivery.
-- Get receipt of my purchases.
-- Check delivery status . 
+- Provide payment options.
+- Check  the email if my commission is finish . 
+
 
 
 
 #### Usage :
  Explain to the user how to use your project . 
- for example:
- - type in search product_name to search for a product.
- - type in list_products to show all the products in the grocery.
- - type in show product_name to get information about this product.
- - type in buy product_name to buy the product . 
- - and so on...
+ when i run the code , will first ask me for my name an email
+ - enter (1) if you want Show Gallery
+ -  enter (2) if you want see the list of service
+ - enter (3) if you want Choose Service ### if u choose some service will ask you if you want add another service or  you done 
+ - enter (4) if you want Show Cart
+ - enter (5) if you want Clear Cart
+ - enter (6) if you want Checkout
+ - enter (7) if you want show orders
+ - enter (8) if you want some Help
+ - enter (0) if you want Exit
+ 
 
 
-### For your project. Edit this README.md file to include your own project name,  overview, user stories, and usage. 
+
 
 ### NOTE: before submitting the final project, please do the following command:
 `pip freeze > requirements.txt` to enable use to know & use the packages used in your project.

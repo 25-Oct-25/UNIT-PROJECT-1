@@ -1,0 +1,9 @@
+🖌️ Invoice for ella
+----------------------------------------
+Chibi                | Base:    50 SAR | Discount:     0 | Final:    50 SAR
+Sketch               | Base:    30 SAR | Discount:  15.0 | Final:  15.0 SAR
+----------------------------------------
+Total: 65.0 SAR
+Payment method: bank
+Notes: i want some details
+Date: 2025-10-22 21:11:16
