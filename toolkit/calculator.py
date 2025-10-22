@@ -36,7 +36,6 @@ class Calculator:
     def get_shipping_cost(origin_country):
         """
         Returns the shipping cost based on the origin country.
-        Uses a default value if the country is not listed.
         """
         return SHIPPING_COSTS.get(origin_country.upper(), DEFAULT_SHIPPING_COST)
 
@@ -44,7 +43,6 @@ class Calculator:
     def calculate_total_cost(car):
         """
         Calculates the total landed cost for a given car object.
-        Expected car object to have: price_usd, origin_country.
         """
         #Get shipping cost
         shipping = Calculator.get_shipping_cost(car.origin_country)
@@ -72,9 +70,11 @@ class Calculator:
         }
     
     def print_colored_summary(cost_details):
-        """Prints The Car's cost in a table"""
+        """
+        Prints The Car's cost in a table.
+        """
         console = Console()
-        table = Table(title="🚗 Car Import Cost Summary", style="bold cyan")
+        table = Table(title="Car Import Cost Summary", style="bold cyan")
 
         table.add_column("Item", style="bold white")
         table.add_column("Amount (SAR)", justify="right")

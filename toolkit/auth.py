@@ -5,7 +5,7 @@ ADMIN_CREDIT ={
 def login():
     """
     Prompts the user for a username and password, validates them,
-    and returns True for a successful login, False otherwise.
+    returns True for a successful login, False otherwise.
     """
     
     username =input("Enter the user name")

@@ -14,5 +14,13 @@
         "price_usd": 70000.0,
         "origin_country": "USA",
         "status": "Sold"
+    },
+    {
+        "make": "Toyota",
+        "model": "Land Crusier",
+        "year": 2024,
+        "price_usd": 70000.0,
+        "origin_country": "japan",
+        "status": "For Sale"
     }
 ]

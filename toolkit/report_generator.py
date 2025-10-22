@@ -1,5 +1,7 @@
 from fpdf import FPDF
 import datetime
+from rich.console import Console
+from rich.table import Table
 import os
 
 script_dir = os.path.dirname(__file__)
@@ -10,17 +12,26 @@ if not os.path.exists(PDF_DIR):
 
 class PDF(FPDF):
     def header(self):
+        """
+        Sets the header for the PDF file.
+        """
         self.set_font('Arial', 'B', 12)
         self.cell(0, 10, 'Car Importer Toolkit - AI Analysis Report', 0, 1, 'C')
         self.ln(5)
 
     def footer(self):
+        """
+        Sets the footer for the PDF file.
+        """
         self.set_y(-15)
         self.set_font('Arial', 'I', 8)
         page_num = self.page_no()
         self.cell(0, 10, f'Page {page_num}', 0, 0, 'C')
 
 def save_ai_report_to_pdf(car, cost, ai_advice, base_filename):
+    """
+    Creates the PDF file and save it into 'pdf-files' folder.
+    """
     try:
         pdf = PDF(orientation='P', unit='mm', format='A4')
         pdf.add_page()
@@ -62,3 +73,19 @@ def save_ai_report_to_pdf(car, cost, ai_advice, base_filename):
         
     except Exception as e:
         print(f"\n❌ Error creating PDF: {e}")
+
+def print_business_dashboard (total_cars_sold, total_revenue, total_stock_value):
+    """
+    Prints the businesss dashboard in a table (cars sold, revenue and stock value)
+    """
+    console = Console()
+    table = Table(title="Dashboard", style="bold green")
+
+    table.add_column("Attribute", style="bold white")
+    table.add_column("Value", style="white")
+    
+    table.add_row("Cars sold", f"[magenta]{total_cars_sold}[/magenta]")
+    table.add_row("Revenue", f"[magenta]${total_revenue}[/magenta]")
+    table.add_row("Stock value", f"[magenta]${total_stock_value}[/magenta]")
+
+    console.print(table)

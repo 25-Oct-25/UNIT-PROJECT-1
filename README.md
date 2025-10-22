@@ -60,4 +60,5 @@ python main.py
 * `type in 3` to calculate the detailed import cost for any car.
 * `type in 4` to get an AI analysis on any car.
 * `type in 5` to update the price of a car.
-* `type in 6` to log out and return to the Guest menu.
+* `type in 6` to print the business dachboard. 
+* `type in 7` to log out and return to the Guest menu.

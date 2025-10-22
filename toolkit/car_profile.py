@@ -10,7 +10,9 @@ class Car:
         self.status = status
     
     def display(self):
-        """Prints the car's details in a clean format."""
+        """
+        Prints the car's details in a clean format.
+        """
         print(f"--- {self.year} {self.make} {self.model} ---")
         print(f"  Price: ${self.price_usd:,.2f}")
         print(f"  Origin: {self.origin_country}")
@@ -18,9 +20,11 @@ class Car:
 
 
     def print_car_info(self):
-        """Prints the car's details in a table"""
+        """
+        Prints the car's details in a table.
+        """
         console = Console()
-        table = Table(title="🚘 Car Information", style="bold blue")
+        table = Table(title="Car Information", style="bold blue")
 
         table.add_column("Attribute", style="bold white")
         table.add_column("Value", style="white")
@@ -30,12 +34,19 @@ class Car:
             status_style = "bold green"
         elif self.status == "Sold":
             status_style = "bold red"
-
+        table.add_row("Make", f"[white]{self.make}[/white]")
+        table.add_row("Model", f"[magenta]{self.model}[/magenta]")
+        table.add_row("Year", f"[yellow]{self.year}[/yellow]")
         table.add_row("Status", f"[{status_style}]{self.status}[/{status_style}]")
         table.add_row("Origin Country", f"[cyan]{self.origin_country}[/cyan]")
         table.add_row("Base Price (USD)", f"[green]{self.price_usd:,.2f}[/green]")
-        table.add_row("Year", f"[yellow]{self.year}[/yellow]")
-        table.add_row("Make", f"[white]{self.make}[/white]")
-        table.add_row("Model", f"[magenta]{self.model}[/magenta]")
+       
+       
 
         console.print(table)
+    
+
+
+
+
+    

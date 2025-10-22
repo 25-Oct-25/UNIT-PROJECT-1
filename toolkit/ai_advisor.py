@@ -3,23 +3,22 @@ import os
 import google.generativeai as genai
 
 class AIAdvisor:
-    @staticmethod
     def get_advice(car,cost):
         """
         Asks Google Gemini for a brief purchasing advice on a specific car model.
         """
         try:
-            #check if theres an API KEY
+            #Check if theres an API KEY
             api_key = os.getenv("GOOGLE_API_KEY")
             if not api_key:
                 return "Error: GOOGLE_API_KEY environment variable not set."
             
             genai.configure(api_key=api_key)
 
-            #use the model
+            #Use the model
             model = genai.GenerativeModel('models/gemini-2.5-flash')
 
-            #create the prompt
+            #Create the prompt
             prompt = (
                 f"Act as a car import analyst for the Saudi Arabian market.\n"
                 f"I have a deal for a {car.year} {car.make} {car.model} imported from {car.origin_country}.\n"
@@ -30,7 +29,7 @@ class AIAdvisor:
                 f"Provide the analysis in English."
             )
 
-            #the API call
+            #The API call
             response = model.generate_content(prompt)
             
             return response.text.strip()

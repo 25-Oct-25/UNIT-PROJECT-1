@@ -5,7 +5,9 @@ from .car_profile import Car
 DATA_FILE= "/Users/nawaf/Documents/python-camp/UNIT-PROJECT-1/data/DATA.json"
 
 def save_cars(cars_list):
-
+    """
+    Saves the car obejct in a JSON format.
+    """
     cars_data =[]
     for car in cars_list:
         cars_data.append(car.__dict__)
@@ -13,6 +15,9 @@ def save_cars(cars_list):
         json.dump(cars_data,f, indent=4)
 
 def load_cars():
+    """
+    Load the cars back into a list.
+    """
     try:
         with open (DATA_FILE,"r") as f:
             cars_data = json.load(f)
