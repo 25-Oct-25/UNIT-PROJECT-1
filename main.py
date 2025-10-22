@@ -1,5 +1,5 @@
-from User import User
-from StoryManager import StoryManager
+from src.User import User
+from src.StoryManager import StoryManager
 
 
 def main():
@@ -29,6 +29,7 @@ def main():
                     else:
                         print("Goodbye!")
                         return
+                    
         elif choice == "2":
             user = User.signup()
         elif choice == "3":
@@ -37,24 +38,24 @@ def main():
         else:
             print("⚠️ Invalid option. Please choose 1, 2, or 3.")
 
-    # If user logged in or signed up successfully
-    #print(f"\n✅ Welcome, {user.username}!")
+    # ✅ User logged in successfully
     manager = StoryManager(user.username)
 
     # Check if there is a previously saved story
     print("\nChecking if you have a previous story...")
     manager.resume_last_story()
 
-    # Main story menu loop
+    # ====================== MAIN MENU ======================
     while True:
         print("\n=== 📚 Story Menu ===")
         print("1. Start a new story")
         print("2. Continue a saved story")
         print("3. View old stories")
-        print("4. Export a story")
-        print("5. Exit")
+        print("4. Delete a story")   # ✅ New feature
+        print("5. Export a story")
+        print("6. Exit")
 
-        option = input("Choose (1-5): ").strip()
+        option = input("Choose (1-6): ").strip()
 
         if option == "1":
             manager.start_new_story()
@@ -62,13 +63,15 @@ def main():
             manager.load_old_stories()
         elif option == "3":
             manager.view_old_story()
-        elif option == "4":
-            manager.export_story()
+        elif option == "4":   # 🆕 Delete feature
+            manager.delete_story()
         elif option == "5":
+            manager.export_story()
+        elif option == "6":
             print(f"\n👋 Goodbye, {user.username}! Thanks for creating stories with us.")
             break
         else:
-            print("⚠️ Invalid option. Please choose between 1-5.")
+            print("⚠️ Invalid option. Please choose between 1-6.")
 
 
 if __name__ == "__main__":

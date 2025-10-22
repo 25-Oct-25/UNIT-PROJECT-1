@@ -1,13 +1,13 @@
-from FileHandler import FileHandler
-from AiHelper import AIHelper
-from Story import Story
-from EmailHelper import EmailHelper
+from src.FileHandler import FileHandler
+from src.AiHelper import AIHelper
+from src.Story import Story
+from src.EmailHelper import EmailHelper
 import os
 from datetime import datetime
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
-from EmailHelper import EmailHelper
+from src.EmailHelper import EmailHelper
 
 class StoryManager:
     def __init__(self, username):
@@ -169,6 +169,54 @@ class StoryManager:
         print("\n📚 Your old stories:")
         for s in stories_data:
             print(f"• {s['title']} ({s['genre']}, {len(s['parts'])} parts)")
+
+            
+    def delete_story(self):
+        """Allow the user to delete one of their saved stories (with confirmation)."""
+        stories_data = self.file_handler.load_stories(self.username)
+
+        if not stories_data:
+            print("📭 No saved stories found.")
+            return
+
+        stories = [Story.from_dict(s) for s in stories_data]
+        print("\n🗑️ Your saved stories:")
+        for i, s in enumerate(stories, start=1):
+            print(f"{i}. {s.get_summary()}")
+
+        choice = input("\nEnter the number of the story to delete (or 0 to cancel): ").strip()
+
+        if choice == "0":
+            print("❎ Deletion canceled. Returning to main menu...")
+            return
+
+        if not choice.isdigit() or int(choice) not in range(1, len(stories) + 1):
+            print("⚠️ Invalid choice.")
+            return
+
+        selected_story = stories[int(choice) - 1]
+
+        # 🔐 تأكيد قبل الحذف
+        confirm = input(f"Are you sure you want to delete '{selected_story.title}'? (y/n): ").strip().lower()
+        if confirm != "y":
+            print("❎ Deletion canceled. Returning to main menu...")
+            return
+
+        # 🧹 تنفيذ الحذف
+        deleted_story = stories.pop(int(choice) - 1)
+        self.file_handler.save_stories(self.username, [s.to_dict() for s in stories])
+
+        # 🧩 تحديث last_story إذا كانت نفس القصة المحذوفة
+        last_story = self.file_handler.get_last_story(self.username)
+        if last_story == deleted_story.title:
+            data = self.file_handler._read_data()
+            if self.username in data and "last_story" in data[self.username]:
+                del data[self.username]["last_story"]
+                self.file_handler._write_data(data)
+            print("🗒️ Removed from recent story record.")
+
+        print(f"✅ Story '{deleted_story.title}' has been deleted successfully!")
+
 
     def export_story(self):
 
