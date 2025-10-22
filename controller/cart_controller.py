@@ -9,6 +9,8 @@ import os
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
+import datetime
+
 
 # ======= FILE PATHS =======
 cart_path = "C:/Users/PC/Desktop/شهادات/Tuwaiq Academy/Python Labs/Unit-1/UNIT-PROJECT-1/database/carts.json"
@@ -194,11 +196,16 @@ def payments(user_email: str) -> bool:
         else:
             print("❌ Invalid discount code. Proceeding without discount.")
 
-    # Create directory for invoices
+    # ===== Create directory for invoices =====
     os.makedirs("EMAILS_PDF/invoices", exist_ok=True)
 
-    # Create PDF
-    pdf_path = f"EMAILS_PDF/invoices/{user_email}_invoice.pdf"
+    # ===== Create unique invoice file =====
+    import datetime
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    pdf_filename = f"{user_email}_invoice_{timestamp}.pdf"
+    pdf_path = os.path.join("EMAILS_PDF/invoices", pdf_filename)
+
+    # ===== Create PDF =====
     c = canvas.Canvas(pdf_path, pagesize=A4)
     width, height = A4
 
@@ -257,6 +264,8 @@ def payments(user_email: str) -> bool:
     c.setFont("Helvetica-Bold", 14)
     c.drawString(400, y - 70, f"Grand Total: ${total_price:.2f}")
     y -= 40 # Adjust y for the footer
+
+    c.save()
 
     return send_email(user_email, pdf_path, total_price)
 
