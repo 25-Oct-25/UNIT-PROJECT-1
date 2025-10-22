@@ -36,3 +36,57 @@ def my_courses(user_id: int):
         FROM enrollments e JOIN courses c ON c.id=e.course_id
         WHERE e.user_id=? ORDER BY c.title
     """, (user_id,))
+
+def update_progress(user_id: int, course_id: int, delta: int):
+    row = storage.query_one("SELECT progress FROM enrollments WHERE user_id=? AND course_id=?",
+                            (user_id, course_id))
+    if not row: return 0
+    newp = max(0, min(100, row[0] + delta))
+    storage.execute("UPDATE enrollments SET progress=? WHERE user_id=? AND course_id=?",
+                    (newp, user_id, course_id))
+    return newp
+
+def recommend(user_id: int, limit: int = 3):
+    top_level = storage.query_one("""
+        SELECT c.level, COUNT(*) cnt
+        FROM enrollments e JOIN courses c ON c.id=e.course_id
+        WHERE e.user_id=? GROUP BY c.level ORDER BY cnt DESC LIMIT 1
+    """, (user_id,))
+    level = top_level[0] if top_level else None
+    if level:
+        return storage.query_all("""
+            SELECT id, title, level, price, summary
+            FROM courses
+            WHERE level=? AND id NOT IN (SELECT course_id FROM enrollments WHERE user_id=?)
+            LIMIT ?
+        """, (level, user_id, limit))
+    return storage.query_all("SELECT id,title,level,price,summary FROM courses ORDER BY price ASC LIMIT ?",(limit,))
+
+# --- Certificate helpers ---
+def get_enrollment(user_id: int, course_id: int):
+    return storage.query_one(
+        "SELECT id, user_id, course_id, progress FROM enrollments WHERE user_id=? AND course_id=?",
+        (user_id, course_id)
+    )
+
+def can_issue_certificate(user_id: int, course_id: int):
+    row = get_enrollment(user_id, course_id)
+    if not row:
+        return False, "Not enrolled in this course."
+    if row[3] < 100:
+        return False, f"Current progress is {row[3]}% — need 100%."
+    return True, None
+
+# --- Course resources (links) ---
+def add_resource_link(course_id: int, title: str, url: str) -> int:
+    cr = storage.query_one("SELECT id FROM courses WHERE id=?", (course_id,))
+    if not cr:
+        raise ValueError("Course does not exist.")
+    return storage.execute("INSERT INTO resources(course_id, title, url) VALUES(?,?,?)",
+                           (course_id, title.strip(), url.strip()))
+
+def list_resource_links(course_id: int):
+    return storage.query_all(
+        "SELECT id, title, url, created_at FROM resources WHERE course_id=? ORDER BY created_at DESC", (course_id,)
+    )
+
