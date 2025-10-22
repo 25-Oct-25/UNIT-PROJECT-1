@@ -1,6 +1,7 @@
 import json
 
 file_path ='C:/Users/PC/Desktop/شهادات/Tuwaiq Academy/Python Labs/Unit-1/UNIT-PROJECT-1/database/products.json'
+discounts_path = 'C:/Users/PC/Desktop/شهادات/Tuwaiq Academy/Python Labs/Unit-1/UNIT-PROJECT-1/database/discounts.json'
 
 # ------- Admin Add Product -------
 def add_products () -> bool :
@@ -72,4 +73,53 @@ def edit_products() -> bool:
         return True
     except Exception as e:
         print(f"Error saving product: {e}")
+        return False
+    
+
+def add_discounts() -> bool:
+    """
+    Allows the admin to add a new discount code and rate to the database.
+    """
+    print("\n--- ADD NEW DISCOUNT COUPON ---")
+    
+    coupon_code = input("Enter new coupon code (e.g., SAVE15): ").strip().upper()
+    
+    if not coupon_code:
+        print("❌ Coupon code cannot be empty.")
+        return False
+
+    try:
+        rate_input = input("Enter discount rate (as a percentage, e.g., 15 for 15%): ").strip()
+        discount_rate = float(rate_input) / 100
+        
+        if not (0.01 <= discount_rate <= 1.0):
+            print("❌ Discount rate must be between 1% and 100%.")
+            return False
+            
+    except ValueError:
+        print("❌ Invalid rate. Please enter a valid number.")
+        return False
+        
+    try:
+        with open(discounts_path, 'r', encoding='utf-8') as file:
+            discounts = json.load(file)
+            if not isinstance(discounts, dict):
+                discounts = {}
+    except (FileNotFoundError, json.JSONDecodeError):
+        discounts = {}
+
+    if coupon_code in discounts:
+        print(f"⚠️ Coupon '{coupon_code}' already exists. Updating its rate.")
+    
+    discounts[coupon_code] = discount_rate 
+    
+    try:
+        with open(discounts_path, 'w', encoding='utf-8') as file:
+            json.dump(discounts, file, indent=4, ensure_ascii=False)
+        
+        print(f"✅ Coupon '{coupon_code}' with {discount_rate * 100:.0f}% rate added/updated successfully.")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error saving discount data: {e}")
         return False

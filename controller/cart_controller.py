@@ -8,11 +8,13 @@ from dotenv import load_dotenv
 import os
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from reportlab.lib import colors
 
 # ======= FILE PATHS =======
 cart_path = "C:/Users/PC/Desktop/شهادات/Tuwaiq Academy/Python Labs/Unit-1/UNIT-PROJECT-1/database/carts.json"
 user_path = "C:/Users/PC/Desktop/شهادات/Tuwaiq Academy/Python Labs/Unit-1/UNIT-PROJECT-1/database/users.json"
 products_most_solds = 'C:/Users/PC/Desktop/شهادات/Tuwaiq Academy/Python Labs/Unit-1/UNIT-PROJECT-1/database/products_most_sold.json'
+discounts_path = 'C:/Users/PC/Desktop/شهادات/Tuwaiq Academy/Python Labs/Unit-1/UNIT-PROJECT-1/database/discounts.json'
 
 
 load_dotenv()
@@ -137,6 +139,17 @@ def delete_product(user_email: str) -> bool:
     return False
 
 
+# ======= DISCOUNTS =======
+def load_discounts() -> dict:
+    """Loads discount codes and rates from the JSON file."""
+    try:
+        with open(discounts_path, 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        # Return an empty dictionary if the file is missing or empty
+        return {}
+    
+
 # ======= PAYMENTS =======
 def payments(user_email: str) -> bool:
     """Generate a PDF invoice for the user's cart and send it via email."""
@@ -164,6 +177,22 @@ def payments(user_email: str) -> bool:
         return False
 
     total_price = cart_total_price(user_email)
+    discount_rate = 0.0
+    discount_amount = 0.0
+
+    print(f"\nYour current total is: ${total_price:.2f}")
+    coupon_code = input("Enter discount code (or press Enter to skip): ").strip().upper()
+
+    if coupon_code:
+        discounts = load_discounts()
+        if coupon_code in discounts:
+            discount_rate = discounts[coupon_code]
+            discount_amount = total_price * discount_rate
+            total_price -= discount_amount 
+            print(f"🎉 Discount '{coupon_code}' applied successfully!")
+            print(f"Discount amount: -${discount_amount:.2f} ({discount_rate*100:.0f}%)")
+        else:
+            print("❌ Invalid discount code. Proceeding without discount.")
 
     # Create directory for invoices
     os.makedirs("EMAILS_PDF/invoices", exist_ok=True)
@@ -213,14 +242,27 @@ def payments(user_email: str) -> bool:
     # ===== TOTAL =====
     c.line(50, y - 10, 550, y - 10)
     c.setFont("Helvetica-Bold", 13)
-    c.drawString(400, y - 30, f"Grand Total: ${total_price:.2f}")
+    c.drawString(400, y - 30, f"Subtotal: ${total_price + discount_amount:.2f}")
 
-    c.save()
+    # Displaying Discount (if any)
+    if discount_amount > 0:
+        c.setFont("Helvetica", 12)
+        c.setFillColor(colors.red)
+        c.drawString(400, y - 50, f"Discount ({coupon_code}): -${discount_amount:.2f}")
+        c.setFillColor(colors.black)
+        c.line(400, y - 65, 550, y - 65)
+        y -= 20
+    
+    # Displaying Grand Total (Final Price)
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(400, y - 70, f"Grand Total: ${total_price:.2f}")
+    y -= 40 # Adjust y for the footer
 
-    return send_email(user_email, pdf_path)
+    return send_email(user_email, pdf_path, total_price)
+
 
 # ======= SEND EMAIL =======
-def send_email(user_email: str, pdf_path: str) -> bool:
+def send_email(user_email: str, pdf_path: str,final_price:float) -> bool:
     
     """Send invoice as an email attachment."""
     
@@ -236,7 +278,7 @@ def send_email(user_email: str, pdf_path: str) -> bool:
         Thank you for shopping at E-Store!
         Your invoice is attached as a PDF.
         
-        Total: ${cart_total_price(user_email)}
+        Total: ${final_price:.2f}
         
         Best regards,
         E-Store Team

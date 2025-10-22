@@ -133,6 +133,7 @@ def admin_menu():
         print(f"""
     {GREEN}[1]{RESET} ➕ Add New Product
     {GREEN}[2]{RESET} ✏️  Edit Existing Product
+    {GREEN}[3]{RESET}  ➕ Add Discounts 
     {RED}[0]{RESET} 🚪 Logout
 """)
 
@@ -151,6 +152,8 @@ def admin_menu():
             admin_controllar.add_products()
         elif choice == 2:
             admin_controllar.edit_products()
+        elif choice == 3:
+            admin_controllar.add_discounts()
         else:
             print(f"{RED}❌ Invalid choice. Try again.{RESET}")
             time.sleep(1.5)
