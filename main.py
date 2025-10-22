@@ -1,10 +1,11 @@
 from email_validator import validate_email, EmailNotValidError
-#from collections.abc import Sized
+from collections.abc import Sized
 from art import *
 import json
 from simultaneous_translation import quick_translator
-from translator import Translator
+from translator import TranslatorUser
 from company import Company
+
 """
 
 welcome message shows in the begining of the program
@@ -89,29 +90,38 @@ while True:
 
     if user_input == "1":
 
-        #Print translators pre info  
+
         if len(translator_list) == 0:
             print("The list is empty, there is not translator available ..\n" \
             "Try later.")
-        # for more specific kind of search choose one of the list below
+        
+        else: 
+            #Print translators pre info  
+            for user_list in translator_list:
+                print(user_list.user_information())
+            # for more specific kind of search choose one of the list below (Y/N)
 
-        search_type = input("What kind of translator are you looking for ?\n"
-        "1- Searching by type.\n"
-        "2- Searching by major.\n"
-        "3.Searching by location.\n") 
+            specific_search = input("Do you want more specific search? 'y' for yes, 'n' for no ")
+            if specific_search == 'y': 
+                search_type = input("What kind of translator are you looking for ?\n"
+                "1- Searching by type.\n"
+                "2- Searching by major.\n"
+                "3.Searching by location.\n") 
 
-        if search_type == "1":
-            search_phrase = input("Enter searching type: ")
-            search_result = list(filter(lambda translator: search_phrase ))
-            for index, trans_list in enumerate (translator_list):
+                if search_type == "1":
+                    search_phrase = input("Enter searching type: ")
+                    search_result = list(filter(lambda translator: translator. s == search_phrase pass)) #هنا توقفت _راح اضيف نوع الترجمة و مجالها في الكلاس الأم ، بعدها أرجع هنا أكمل
+                    for index, trans_list in enumerate (translator_list):
 
-                pass
-        elif search_type == "2":
-            pass
-        elif search_type == "3":
-            pass
-        else: print("Wrong input, please enter a valid choice.")
-
+                        pass
+                elif search_type == "2":
+                    pass
+                elif search_type == "3":
+                    pass
+                else: print("Wrong input, please enter a valid choice.")
+            elif specific_search == 'n':
+                continue
+            else: print("Wrong input, please enter a valid choice.")
     elif user_input == "2":
         pass
     elif user_input == "3":
@@ -125,7 +135,7 @@ while True:
             #Add user information
 
             #Print a menu to tell the user what will be enter in the next
-            print("To add a user name we need a following information:\n" \
+            print("To add a user translator we need a following information:\n" \
             "1- Translator name.\n" \
             "2- Translator location.\n" \
             "3- Translator email.\n" \
@@ -137,40 +147,60 @@ while True:
 
             
             #Add translator information
-            user_name = input("Enter your name: ")
-            user_location = input("Where are you live? ")
-            user_email = input("Enter your email: ")  
+            translator_name = input("Enter your name: ")
+            translator_location = input("Where are you live? ")
+            translator_email = input("Enter your email: ")  
             
             #if statement to check if the user entered a right email or not
             #email check function
-            if check_email(user_email):
+            if check_email(translator_email):
                 continue
             else: 
-                user_email = input("Enter your email again: ")
+                translator_email = input("Enter your email again: ")
             
-            user_gender = input("Enter your gender: ")
-            user_major = input("Enter your major: ")
-            user_mother_tongue = input ("Enter your mother tongue: ")
-            user_certificate = input ("Enter 'True' or 'False' if you have official certificate: ")
-            user_experience_years = int( input("Enter a number of years of experience do you have: "))
+            translator_gender = input("Enter your gender: ")
+            translator_major = input("Enter your major: ")
+            translator_mother_tongue = input ("Enter your mother tongue: ")
+            translator_certificate = input ("Enter 'True' or 'False' if you have official certificate: ")
+            translator_experience_years = int( input("Enter a number of years of experience do you have: "))
             
 
     
             #name, location, email, gender, major, language,  official_certificate, years_of_experience 
-            user = Translator(user_name, user_location, user_email, user_gender, user_major, user_mother_tongue, user_certificate, user_experience_years)
-            translator_list.append(user)
+            translator_user = TranslatorUser(translator_name, translator_location, translator_email, translator_gender, translator_major, translator_mother_tongue, translator_certificate, translator_experience_years)
+            translator_list.append(translator_user)
             print("New Translator added Successfully ...")
             
         elif user_type == "2":
-            #Add user information
-            user_name = input("Enter your name: ")
-            user_location = input("Where are you live? ")
-            user_email = input("Enter your email: ")#I should check if the email format is valid or not
-            user_password = input("Enter your password: ")
+            #Add a company user  information
+            print("To add a user company we need a following information:\n" \
+            "1- Company name.\n" \
+            "2- Company location.\n" \
+            "3- Company email.\n" \
+            "4- The language want translator translate to it.\n" \
+            "5- Company translator type. ( face to face, document, voice )\n" \
+            "6- Company translator major.\n" \
+            "7- Company price offer for translator per hour\n" )
+                        
+            company_name = input("Enter Company name: ")
+            company_location = input("Enter the company location: ")
+            company_email = input("Enter your email: ")#I should check if the email format is valid or not
             
+            #if statement to check if the user entered a right email or not
+            #email check function
+            if check_email(company_email):
+                continue
+            else: 
+                company_email = input("Enter your email again: ")
+            
+            company_translator_language = input("Enter the company translator language: (the language want translate it to)")
+            company_translator_type = input("Enter the company translator type: ")
+            company_translator_major = input ("Enter the translator major: ")
+            company_price_offer = input("Enter the company price offer: ")
+
             #name, location, email, translate_to:str, translator_type:str, translator_major:str, price_offer:float
-            user = Company( user_name, user_location, user_email, user_password)
-            company_list.append(user)
+            company_user = Company( company_name, company_location, company_email, company_translator_language, company_translator_type, company_translator_major,company_price_offer)
+            company_list.append(company_user)
             
           
         else: print("Wrong input, please enter a valid choice.")

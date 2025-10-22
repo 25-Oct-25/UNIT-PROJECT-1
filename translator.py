@@ -1,15 +1,16 @@
 from community import CommunityUser
 
 #Create translator class
-class Translator(CommunityUser):
+class TranslatorUser(CommunityUser):
 
     #Initilize constructor
-    def __init__(self, name,location, email, gender:str, major:str,language:str,  official_certificate:bool,  years_of_experience:int=0 ,rate:int = 0, more_language=[]):
-        super().__init__(name, location,email)
+    def __init__(self, name ,location ,email ,translation_major ,translation_type ,registration_date , gender:str, major:str,language:str,  official_certificate:bool,  years_of_experience:int=0 ,rate:int = 0, more_language_list=[]):
+        super().__init__(name, location,email, translation_major, translation_type,registration_date )
         self.gender = gender
         self.major = major
         self.language = language
-        self.language_list = more_language
+        self.more_language_list = more_language_list
+        self.more_language_list = []
         self.years_of_experience = years_of_experience
         self.official_certificate = False
         self.rate = rate
@@ -21,24 +22,25 @@ class Translator(CommunityUser):
             "gender": self.gender,
             "major": self.major,
             "language": self.language,
-            "more_language": self.language_list,
+            "more_language_list": self.more_language_list,
             "years_of_experience": self.years_of_experience,
             "official_certificate": self.official_certificate,
             "rate":self.rate
             }
     
     #To add more than one language can traslate
-    def add_language(self,lang:str):
+    def add_language(self,lang):
        
-        self.language_list.append(lang)
+        self.more_language_list.append(lang)
     
     #Method to print a language list
     def show_language_list(self):
-        if len(self.language_list) == 0 :
-            print("Nothing")
-        else:
-            print(self.language_list)
-
+        i = 0 
+        while self.more_language_list:
+            if i == len(self.more_language_list):
+                break
+            print(self.more_language_list[i], end=" ")
+            i +=1
 
     #Method for print Translator information
     def user_information(self):
@@ -46,7 +48,7 @@ class Translator(CommunityUser):
 
 
 #Test
-user = Translator("Bora","Riyadh","bora@gmail.com","Female","clinc", "Arabic", True, 4, 2, "Korean")
-print(user.user_information())
-user.add_language("English")
-print(user.user_information())
+#user = TranslatorUser("Bora","Riyadh","bora@gmail.com","Female","clinc", "Arabic", True, 4, 2, "Korean")
+#print(user.user_information())
+#user.add_language("English")
+#print(user.user_information())
