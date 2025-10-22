@@ -15,12 +15,12 @@ def load_data(filepath: str) -> dict:
     Load JSON data from a file.
     Returns an empty dict if the file does not exist or is invalid.
     """
-    if not os.path.exists(filepath):
-        return {}
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except json.JSONDecodeError:
+        if not os.path.exists(filepath):
+            return {}
+        with open(filepath, "r", encoding="UTF-8") as f:
+                return json.load(f)
+    except Exception:
         print(RED + f"⚠️ Error reading {filepath}. Returning empty data." + RESET)
         return {}
 
@@ -29,8 +29,12 @@ def save_data(filepath: str, data: dict):
     """
     Save data to a JSON file with indentation for readability.
     """
-    with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
+    try:
+        os.makedirs(os.path.dirname(filepath) or ".", exist_ok=True)    
+        with open(filepath, "w", encoding="UTF-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception:
+        raise
 
 
 # -------------------------------
@@ -50,16 +54,16 @@ def animated_welcome():
     Works on Windows, Linux, Mac.
     """
     print(CYAN + TIME_ARCADE_LOGO + RESET)
-    time.sleep(0.8)
-
-    print(BLUE+""+RESET)
-    line = "⚡ Where History Becomes Your Playground ⚡"
-    for char in line:
-        sys.stdout.write(char)
+    
+    time.sleep(0.6)
+    tagline = "⚡ Where History Becomes Your Playground ⚡"
+    for ch in tagline:
+        sys.stdout.write(ch)
         sys.stdout.flush()
-        time.sleep(0.05)
+        time.sleep(0.02)
     print("\n")
-    time.sleep(0.5)
+    time.sleep(0.4)
+    
 
     try:
         if platform.system() == "Darwin":

@@ -1,13 +1,14 @@
 import os
 import json
 import random
+import logging
 from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
 
 API_KEY = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=API_KEY)
+client = OpenAI(api_key=API_KEY) if API_KEY else None
 
 # ----------------------------
 #        Time Traveler 
@@ -15,6 +16,8 @@ client = OpenAI(api_key=API_KEY)
 
 def get_historical_event(year, month=None, day=None):
     '''Generate Event For Game Time Traveler'''
+    if not client:
+        return f"In {year}, a notable fun event happened (fallback)."
     date_str = f"{year}"
     if month:
         date_str += f"-{month}"
@@ -39,25 +42,26 @@ def get_historical_event(year, month=None, day=None):
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
-        return f"⚠️ Error fetching event: {e}"
+        logging.error("OpenAI get_historical_event error: %s", e)
+        return f"In {year}, something interesting happened."
     
 
 # ----------------------------
 #        Escape Room 
 # ----------------------------
 
-def generate_puzzle(difficulty="medium", theme="mystery mansion"):
+def generate_puzzle(difficulty="easy", theme="mystery mansion"):
     """
     Generate a dynamic escape room puzzle using OpenAI.
     Returns a dictionary with puzzle text, hint, answer, points, and achievement.
     """
-
-    difficulty_points = {
-        "easy": random.randint(10, 20),
-        "medium": random.randint(25, 40),
-        "hard": random.randint(45, 60)
-    }
-
+    if not client:
+        return {
+            "puzzle": "I speak without a mouth and hear without ears. What am I?",
+            "hint": "It repeats you.",
+            "answer": "echo",
+            "type": "riddle"
+        }
     prompt = f"""
     You are a creative Escape Room puzzle generator.
     Create a {difficulty}-level puzzle set in a {theme}.
@@ -72,7 +76,8 @@ def generate_puzzle(difficulty="medium", theme="mystery mansion"):
     {{
         "puzzle": "The riddle or puzzle text here...",
         "hint": "A small helpful clue...",
-        "answer": "The correct answer."
+        "answer": "one-word-answer"
+        "type": "riddle|cipher|math|pattern"
     }}
     """
 
@@ -98,30 +103,19 @@ def generate_puzzle(difficulty="medium", theme="mystery mansion"):
             else:
                 raise ValueError("Invalid JSON format from AI")
 
-        # Calculate points based on difficulty and randomness
-        points = difficulty_points.get(difficulty, 20)
-
-        # Generate fun achievements
-        achievements = {
-            "easy": ["🗝️ Beginner Solver", "✨ Quick Thinker"],
-            "medium": ["🧠 Logic Master", "🔍 Puzzle Explorer"],
-            "hard": ["🏆 Mind Bender", "💎 Genius Escapist"]
-        }
-        achievement = random.choice(achievements[difficulty])
-
+        
         return {
-            "puzzle": data["puzzle"],
-            "hint": data["hint"],
-            "answer": data["answer"].strip().lower(),
-            "points": points,
-            "achievement": achievement
+            "puzzle": data.get("puzzle","(no puzzle)"),
+            "hint": data.get("hint","(no hint)"),
+            "answer": str(data.get("answer","")).strip().lower(),
+            "type": data.get("type","riddle")
         }
 
     except Exception as e:
+        logging.error("OpenAI generate_puzzle error: %s", e)
         return {
-            "puzzle": "⚠️ Error generating puzzle.",
+            "puzzle": "⚠️ Error generating puzzle.(fallback)",
             "hint": "Try again later.",
-            "answer": None,
-            "points": 0,
-            "achievement": None
+            "answer": "",
+            "type": "riddle"
         }

@@ -2,10 +2,6 @@ from termcolor import colored
 import pyfiglet 
 
 
-ascii_text = pyfiglet.figlet_format("TIME ARCADE", font="mono12")
-colored_text = colored(ascii_text, color="cyan")
-print(colored_text)
-
 TIME_ARCADE_LOGO = """
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ░           ░   ░   ░░░░░░░   ░         ░░░░░░░░░░░░░  ░░░░░░░░        ░░░░░░░░░   ░░░░░░░░░░  ░░░░░░░░      ░░░░░         
@@ -17,3 +13,11 @@ TIME_ARCADE_LOGO = """
 █████   █████   █   ███████   █         ███████   █████████   █   ██████   ████     ███   █████████   █      █████         
 ███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 """
+
+
+
+traveler_text = pyfiglet.figlet_format("Time\nTraveler", font="mono12")
+TRAVELER_LOGO = colored(traveler_text, color="dark_grey")
+
+escaperoom_text = pyfiglet.figlet_format("Escape\nRoom", font="mono12")
+ESCAPEROOM_LOGO = colored(escaperoom_text, color="light_magenta")

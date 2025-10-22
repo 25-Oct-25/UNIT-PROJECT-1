@@ -1,4 +1,6 @@
+from datetime import datetime
 from utils.openai_helper import get_historical_event
+from utils.art_assets import TRAVELER_LOGO
 from utils.colors import *
 
 class TimeTraveler :
@@ -6,39 +8,56 @@ class TimeTraveler :
         self.user = user
         self.points = 0
 
+    def safe_int_input(prompt, min_val=None, max_val=None, allow_blank=False):
+        """
+        Reads an integer input safely with optional bounds and blank allowance.
+        """
+        while True:
+            value = input(prompt).strip()
+            if allow_blank and value == "":
+                return None
+            if not value.isdigit():
+                print(RED + "⚠️ Please enter numbers only." + RESET)
+                continue
+            value = int(value)
+            if min_val is not None and value < min_val:
+                print(RED + f"⚠️ Value must be >= {min_val}." + RESET)
+                continue
+            if max_val is not None and value > max_val:
+                print(RED + f"⚠️ Value must be <= {max_val}." + RESET)
+                continue
+            return value
+
     def play(self):
         """
-    Play the Time Traveler game.
+        Play the Time Traveler game.
 
-    Workflow:
-    - Prompts the user to enter a year (required) and optionally month and day.
-    - Retrieves a real historical event corresponding to the entered date.
-    - Awards the user points for completing a time travel trip.
-    - Updates the user's score for the "TimeTraveler" game.
-    - Checks and unlocks achievements based on points earned or specific year ranges:
-        - "Master Time Traveler" for reaching 50 points.
-        - "Time Explorer 1980s" for traveling to any year in the 1980s.
-        - "Time Explorer 1990s" for traveling to any year in the 1990s.
-        - "Time Explorer 2000s" for traveling to any year in the 2000s.
-    - Asks the user if they want to play again and repeats if confirmed.
+        Workflow:
+        - Prompts the user to enter a year (required) and optionally month and day.
+        - Validates inputs to ensure valid date.
+        - Retrieves a historical event for that date.
+        - Awards points and handles achievements.
+        - Offers replay option.
+        """
+        
+        print(TRAVELER_LOGO)
 
-    User Feedback:
-        - Displays the historical event found.
-        - Shows points earned and total score.
-        - Notifies when an achievement is unlocked.
+        year = self.safe_int_input("Enter a year to travel to: ", min_val=1000, max_val=2100)
+        month = self.safe_int_input("Enter month (1-12) or leave blank: ", min_val=1, max_val=12, allow_blank=True)
+        day = self.safe_int_input("Enter day (1-31) or leave blank: ", min_val=1, max_val=31, allow_blank=True)
 
-    Input:
-        - year (int): The year to travel to.
-        - month (int, optional): The month to travel to.
-        - day (int, optional): The day to travel to.
-        - again (str): User input to play again ("yes" or "no").
 
-    Returns:
-        None
-    """
-        print(PURPLE + "\n🕰️ Time Traveler!" + RESET)
+        if month and day:
+            try:
+                datetime(year, month, day)
+            except ValueError:
+                print(RED + "⚠️ Invalid date! Please enter a valid day/month combination." + RESET)
+                return self.play()
+            
 
-        while True:
+        print(YELLOW + "\nTraveling through time..." + RESET)
+
+        """while True:
             try:
                 year = int(input("Enter a year to travel to: "))
                 break
@@ -49,7 +68,7 @@ class TimeTraveler :
         month = int(month) if month.isdigit() else None
 
         day = input("Enter day (1-31) or leave blank: ").strip()
-        day = int(day) if day.isdigit() else None
+        day = int(day) if day.isdigit() else None"""
 
         print(YELLOW + "\nTraveling through time..." + RESET)
 
@@ -81,3 +100,5 @@ class TimeTraveler :
         again = input("Do you want to travel again? (yes/no): ").lower()
         if again == "yes":
             self.play()
+        else:
+            print(CYAN + "Returning to the main menu..." + RESET)

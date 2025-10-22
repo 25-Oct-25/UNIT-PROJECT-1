@@ -1,6 +1,8 @@
 import time
+import sys
 from utils.openai_helper import generate_puzzle
 from utils.colors import *
+from utils.art_assets import ESCAPEROOM_LOGO
 
 class EscapeRoom:
     """
@@ -60,7 +62,14 @@ class EscapeRoom:
 
     
     def play(self):
+        print(ESCAPEROOM_LOGO)
         """Main game logic"""
+        print("Loading", end="", flush=True)
+        for _ in range(3):
+            sys.stdout.write(".")
+            sys.stdout.flush()
+            time.sleep(0.5)
+        print("\n")
         self.room = generate_puzzle("easy", "mystery room")
         print(CYAN + "\n🔐 You enter a mysterious chamber..." + RESET)
         print(YELLOW + f"Puzzle Type: {self.room.get('type', 'logic').upper()}" + RESET)
@@ -112,11 +121,3 @@ class EscapeRoom:
 
         input("\nPress Enter to continue...")
         return points
-
-
-# test
-'''if __name__ == "__main__":
-    from users.user import User
-    test_user = User("Ghala", "1234")
-    game = EscapeRoom(test_user)
-    game.play()'''
