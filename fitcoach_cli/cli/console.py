@@ -1,4 +1,5 @@
 # fitcoach_cli/cli/console.py
+# -*- coding: utf-8 -*-
 """
 Console helpers for colored, well-formatted CLI output.
 
@@ -20,11 +21,11 @@ Functions (12):
 Key features:
   * Works on Windows and VS Code terminal (Colorama init with convert=True).
   * Honors NO_COLOR / FORCE_COLOR env vars + manual toggle via set_color_enabled().
-  * Wide headings and optional boxed sections for better scannability.
+  * Wide headings and optional boxed sections with **accurate visible width** (wcwidth).
 """
 
 from colorama import init, Fore, Style
-import os, sys, shutil, textwrap
+import os, sys, shutil, textwrap, re
 
 # Enable ANSI colors on Windows / VS Code; autoreset style after every print.
 init(autoreset=True, convert=True, strip=False)
@@ -35,17 +36,12 @@ _COLOR_ENABLED = (os.getenv("FORCE_COLOR") == "1") or (
 )
 
 def set_color_enabled(enabled: bool) -> None:
-    """Enable/disable colorized output at runtime.
-
-    Intended to be toggled by a CLI flag like ``--no-color``.
-
-    Args:
-        enabled: ``True`` to enable ANSI colors, ``False`` to disable.
-    """
+    """Enable/disable colorized output at runtime."""
     global _COLOR_ENABLED
     _COLOR_ENABLED = bool(enabled)
 
-# Default theme.
+# ------------------------------ Theme -----------------------------------------
+
 _THEME = {
     "primary": Fore.CYAN,
     "success": Fore.GREEN,
@@ -55,76 +51,38 @@ _THEME = {
 }
 
 def set_theme(**kwargs) -> None:
-    """Override theme colors selectively.
-
-    Recognized keys: ``primary``, ``success``, ``warning``, ``danger``, ``muted``.
-
-    Example:
-        >>> set_theme(primary=Fore.MAGENTA, muted=Fore.WHITE)
-
-    Args:
-        **kwargs: Color values (Colorama constants) keyed by theme name.
-    """
+    """Override theme colors selectively (primary/success/warning/danger/muted)."""
     for k, v in kwargs.items():
         if k in _THEME:
             _THEME[k] = v
 
 def _colorize(s: str, color: str, bright: bool = False) -> str:
-    """Apply color and optional bright style if colors are enabled.
-
-    Args:
-        s: Text to colorize.
-        color: A Colorama foreground color (e.g., ``Fore.CYAN``).
-        bright: If ``True``, applies ``Style.BRIGHT``.
-
-    Returns:
-        The possibly colorized string (plain text if colors are disabled).
-    """
+    """Apply color and optional bright style if colors are enabled."""
     if not _COLOR_ENABLED:
         return s
     return (Style.BRIGHT if bright else "") + color + s + Style.RESET_ALL
 
-# ---- Shorthand message helpers ------------------------------------------------
+# ----------------------- Shorthand message helpers ----------------------------
 
 def info(msg: str) -> None:
-    """Print an informational message (primary color)."""
     print(_colorize(f"› {msg}", _THEME["primary"], True))
 
 def success(msg: str) -> None:
-    """Print a success message (green check)."""
     print(_colorize(f"✔ {msg}", _THEME["success"], True))
 
 def warn(msg: str) -> None:
-    """Print a warning message (yellow triangle)."""
     print(_colorize(f"⚠ {msg}", _THEME["warning"], True))
 
 def error(msg: str) -> None:
-    """Print an error message (red cross)."""
     print(_colorize(f"✖ {msg}", _THEME["danger"], True))
 
 def ask(prompt: str) -> str:
-    """Prompt the user for input using the primary color.
-
-    Args:
-        prompt: Prompt text to display.
-
-    Returns:
-        The user input string (without trailing newline).
-    """
     return input(_colorize(prompt, _THEME["primary"], True))
 
-# ---- Layout utilities ----------------------------------------------------------
+# ----------------------------- Layout utils -----------------------------------
 
 def _term_width(min_w: int = 50, max_w: int = 120) -> int:
-    """Return a safe terminal width within [min_w, max_w].
-
-    Args:
-        min_w: Minimum width to use if the terminal is very small.
-        max_w: Maximum width to avoid overly long lines.
-
-    Returns:
-        An integer width clamped to the provided bounds.
-    """
+    """Return a safe terminal width within [min_w, max_w]."""
     try:
         w = shutil.get_terminal_size((80, 20)).columns
     except Exception:
@@ -132,16 +90,7 @@ def _term_width(min_w: int = 50, max_w: int = 120) -> int:
     return max(min_w, min(max_w, w))
 
 def wrap(text: str, width: int | None = None, indent: str = "") -> str:
-    """Wrap text to the given width while preserving blank lines.
-
-    Args:
-        text: The multi-line string to wrap.
-        width: Target width; if ``None``, uses detected terminal width.
-        indent: Indentation applied to the first and subsequent lines.
-
-    Returns:
-        A string with lines wrapped and indentation applied.
-    """
+    """Wrap text to the given width while preserving blank lines."""
     if width is None:
         width = _term_width()
     out: list[str] = []
@@ -161,15 +110,82 @@ def wrap(text: str, width: int | None = None, indent: str = "") -> str:
         )
     return "\n".join(out)
 
-# ---- High-level renderers ------------------------------------------------------
+# -------- Visible-length helpers (ANSI/bidi aware using wcwidth) --------------
+
+try:
+    from wcwidth import wcwidth  # accurate terminal cell width
+except Exception:
+    wcwidth = None  # fallback to len()
+
+_ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
+# bidi/zero-width control chars (LRM/RLM + embedding/override/isolate range)
+_ZW_RE   = re.compile(r"[\u200e\u200f\u202a-\u202e\u2066-\u2069]")
+
+def _cells(s: str) -> int:
+    """Number of terminal cells after stripping ANSI and bidi controls."""
+    clean = _ZW_RE.sub("", _ANSI_RE.sub("", s.replace("\t", "    ")))
+    if wcwidth:
+        w = 0
+        for ch in clean:
+            cw = wcwidth(ch)
+            if cw is None:
+                cw = 0
+            w += max(cw, 0)
+        return w
+    return len(clean)
+
+def _clip_visible(s: str, width: int) -> str:
+    """Clip string to <= width terminal cells without breaking ANSI sequences."""
+    if width <= 0:
+        return ""
+    out = []
+    w = 0
+    i = 0
+    while i < len(s) and w < width:
+        # pass ANSI escape sequences through untouched
+        if s[i] == "\x1b":
+            m = _ANSI_RE.match(s, i)
+            if m:
+                out.append(m.group(0))
+                i = m.end()
+                continue
+        ch = s[i]
+        if ch == "\t":
+            ch = "    "
+        # keep zero-width/bidi controls but don't count them
+        if _ZW_RE.match(ch):
+            out.append(ch)
+            i += 1
+            continue
+        cw = wcwidth(ch) if wcwidth else 1
+        if cw is None:
+            cw = 0
+        if w + max(cw, 0) > width:
+            break
+        out.append(ch)
+        w += max(cw, 0)
+        i += 1
+    return "".join(out)
+
+def _pad_visible(s: str, width: int, align: str = "left") -> str:
+    """Pad spaces based on terminal cells. Clips first, then pads."""
+    s = _clip_visible(s, width)
+    vis = _cells(s)
+    if vis >= width:
+        return s
+    pad = width - vis
+    if align == "left":
+        return s + " " * pad
+    elif align == "right":
+        return " " * pad + s
+    else:  # center
+        left = pad // 2
+        right = pad - left
+        return " " * left + s + " " * right
+
+# --------------------------- High-level renderers ------------------------------
 
 def banner(text: str, subtitle: str | None = None) -> None:
-    """Print a primary-colored banner (optionally with a subtitle).
-
-    Args:
-        text: Main banner text.
-        subtitle: Optional secondary line rendered in a dimmer style.
-    """
     print(_colorize(text, _THEME["primary"], True))
     if subtitle:
         print(_colorize(subtitle, _THEME["primary"], False))
@@ -181,14 +197,7 @@ def heading(
     wide: bool = True,
     bright: bool = True,
 ) -> None:
-    """Print a wide section heading with an underline.
-
-    Args:
-        title: Heading text.
-        color: Colorama color to use; defaults to theme ``primary``.
-        wide: If ``True``, underline spans the terminal width; otherwise, the title length.
-        bright: If ``True``, applies bold (bright) style to the title.
-    """
+    """Print a wide section heading with an underline."""
     if color is None:
         color = _THEME["primary"]
     W = _term_width()
@@ -210,15 +219,7 @@ def section(
 
     When ``box`` is ``False`` (default), prints a wide heading followed by wrapped
     body text. When ``box`` is ``True``, draws a framed box around the title and
-    content to improve visual separation.
-
-    Args:
-        title: Section title.
-        body: Section body text (can be multi-line).
-        color: Colorama color to use; defaults to theme ``primary``.
-        bright: If ``True``, applies bold (bright) style to the title.
-        wide: If ``True``, underline/box content spans terminal width.
-        box: If ``True``, render a full bordered box around the section.
+    content with visible-length padding (wcwidth) to keep borders aligned.
     """
     if color is None:
         color = _THEME["primary"]
@@ -233,16 +234,23 @@ def section(
         print(_colorize(body_wrapped, color, False), end="\n\n")
         return
 
-    # Boxed style.
-    top    = "╔" + "═" * (W - 2) + "╗"
-    tline  = "║ " + text.center(W - 4) + " ║"
-    sep    = "╟" + "─" * (W - 2) + "╢"
-    bottom = "╚" + "═" * (W - 2) + "╝"
+    # Boxed style (accurate cell width so borders never overflow).
+    inner = W - 2
+    top    = "╔" + "═" * inner + "╗"
+    sep    = "╟" + "─" * inner + "╢"
+    bottom = "╚" + "═" * inner + "╝"
 
     print(_colorize(top, color, bright))
-    print(_colorize(tline, color, bright))
+
+    # Title centered inside box with visible padding
+    title_field = _pad_visible(text, W - 4, align="center")
+    print(_colorize("║ " + title_field + " ║", color, bright))
+
     print(_colorize(sep, color, False))
+
     for ln in body_wrapped.splitlines():
-        print(_colorize("║ " + ln.ljust(W - 4) + " ║", color, False))
+        line_field = _pad_visible(ln, W - 4, align="left")
+        print(_colorize("║ " + line_field + " ║", color, False))
+
     print(_colorize(bottom, color, False))
     print()  # trailing spacer

@@ -49,9 +49,6 @@ from ..auth.roles import (
 
 # =====================================================================
 # Tab Completion for REPL (إكمال بالأزرار Tab داخل حلقة الإدخال)
-# - نستخدم readline (أو pyreadline3 على ويندوز) لإكمال:
-#   * الأمر الأساسي، ثم الساب-أمر، ثم الفلاقز المناسبة.
-# - هذه الطريقة مناسبة لأن التطبيق REPL ويستخدم shlex وليس argparse.
 # =====================================================================
 try:
     import readline  # متوفر على macOS/Linux و Git Bash غالبًا
@@ -80,7 +77,8 @@ _REPL_COMMANDS = {
     "progress": ["log", "analyze", "plot"],
     "workout": ["log", "suggest"],
     "report": ["pdf", "send", "schedule", "brand"],
-    "email": ["config", "test"],
+    # 👇 أضفنا send هنا
+    "email": ["config", "test", "send"],
     "app": ["lang"],
 }
 
@@ -116,6 +114,8 @@ _REPL_FLAGS = {
 
     ("email", "config"):  ["--to=", "--from="],
     ("email", "test"):    ["--subject=", "--text="],
+    # 👇 فلاقز send
+    ("email", "send"):    ["--to=", "--subject=", "--text=", "--attach="],
 
     ("app", "lang"):      ["--set="],
 }
@@ -179,6 +179,7 @@ def _enable_tab_completion():
     except Exception:
         pass
 # =================== End of Tab Completion block =====================
+
 
 
 def cmd_help(*, box: bool = False, wide: bool = True) -> None:
@@ -253,10 +254,15 @@ def cmd_help(*, box: bool = False, wide: bool = True) -> None:
       "report schedule remove --id=1",
       color=Fore.BLUE)
 
-    add_section("Email",
-      "email config --to=user@example.com [--from=coach@fitcoach.dev]\n"
-      "email test --subject=\"Test\" --text=\"Hello from FitCoach\"",
-      color=Fore.CYAN)
+    add_section(
+        "Email",
+        "email config --to=user@example.com [--from=coach@fitcoach.dev]\n"
+        "email test  --subject=\"Test\"          --text=\"Hello from FitCoach\"\n"
+        # 👇 مثال يوضح الإرفاق مع المساواة =
+        "email send  --to=user@example.com       --subject=\"Weekly Report\" "
+        "--text=\"مرحبًا! مرفق تقريرك.\" --attach=week_report.pdf",
+        color=Fore.CYAN,
+    )
 
     add_section("App Language",
       "app lang --set=ar|en",
@@ -267,14 +273,7 @@ def cmd_help(*, box: bool = False, wide: bool = True) -> None:
 STATE = AppState()
 
 def _load() -> None:
-    """Load the persisted application state (if available) into the global STATE.
-
-    Populates profile, plan, progress, logs, settings, email endpoints, RBAC users,
-    current user, and report schedules from the storage backend.
-
-    Side Effects:
-        Mutates the global ``STATE`` object with loaded values.
-    """
+    """Load the persisted application state (if available) into the global STATE."""
     d = load_state()
     global STATE
     if d:
@@ -299,13 +298,7 @@ def _load() -> None:
         STATE.report_schedules = d.get("report_schedules", [])
 
 def _save() -> None:
-    """Persist the current STATE to storage.
-
-    Serializes all mutable parts of the global ``STATE`` and invokes ``save_state``.
-
-    Side Effects:
-        Writes the serialized state via the storage layer.
-    """
+    """Persist the current STATE to storage."""
     d: Dict[str, Any] = {
         "profile": asdict(STATE.profile),
         "plan": asdict(STATE.plan) if STATE.plan else None,
@@ -322,19 +315,7 @@ def _save() -> None:
     save_state(d)
 
 def handle(cmd: str) -> str:
-    """Route a single CLI command line to its handler and return the output.
-
-    The router splits the input line with ``shlex`` (so quoted strings are respected),
-    matches the primary verb (e.g., ``auth``, ``profile``, ``plan``), parses ``--key=value``
-    options into a dictionary where needed, performs RBAC checks, and returns user-friendly
-    text results. Returning an empty string means "no additional text to print".
-
-    Args:
-        cmd: The raw line entered by the user.
-
-    Returns:
-        str: A printable message for the user; empty string for purely-informational actions.
-    """
+    """Route a single CLI command line to its handler and return the output."""
     tokens = shlex.split(cmd)
     if not tokens:
         return ""
@@ -580,6 +561,7 @@ def handle(cmd: str) -> str:
 
     # ---------- EMAIL ----------
     if tokens[0] == "email":
+        # email config
         if len(tokens) > 1 and tokens[1] == "config":
             err = require_role(STATE, ["admin"])
             if err: return err
@@ -587,12 +569,40 @@ def handle(cmd: str) -> str:
             STATE.email_to = opts.get("--to", STATE.email_to)
             STATE.email_from = opts.get("--from", STATE.email_from)
             _save(); return f"Email set. To={STATE.email_to} From={STATE.email_from or '(env FROM_EMAIL)'}"
+
+        # email test
         if len(tokens) > 1 and tokens[1] == "test":
             opts = {k: v for k, v in (t.split("=", 1) for t in tokens[2:] if "=" in t)}
             subj = opts.get("--subject", "FitCoach Test"); text = opts.get("--text", "Hello from FitCoach")
             if not STATE.email_to: return "Please set recipient first: email config --to=user@example.com"
             send_email_smtp(STATE.email_to, subj, text, attachments=[], from_addr=STATE.email_from)
             return "Test email sent."
+
+        # ✅ email send (جديد): يدعم --attach= (متعدد)
+        if len(tokens) > 1 and tokens[1] == "send":
+            to = None
+            subject = "No subject"
+            text = ""
+            attachments = []
+            # يدعم --opt=value و --attach=<file> المتكرر
+            for t in tokens[2:]:
+                if t.startswith("--attach="):
+                    attachments.append(t.split("=", 1)[1])
+                elif t.startswith("--to="):
+                    to = t.split("=", 1)[1]
+                elif t.startswith("--subject="):
+                    subject = t.split("=", 1)[1]
+                elif t.startswith("--text="):
+                    text = t.split("=", 1)[1]
+
+            if not to:
+                return ('Usage: email send --to=<email> [--subject="..."] [--text="..."] '
+                        '--attach=<file> [--attach=<file> ...]')
+            if not attachments:
+                return "Please provide at least one attachment via --attach=<file>"
+            send_email_smtp(to, subject, text, attachments=attachments, from_addr=STATE.email_from)
+            return f"Email sent with {len(attachments)} attachment(s)."
+
         return "Unknown email command."
 
     # ---------- APP ----------
@@ -605,19 +615,7 @@ def handle(cmd: str) -> str:
     return "Unknown command. Type 'help'."
 
 def main() -> None:
-    """Application entrypoint: bootstrap theme, show first-run help, start scheduler, and REPL loop.
-
-    Behavior:
-        - Loads persisted state.
-        - Honors ``--no-color`` flag to disable colored output.
-        - Applies a color theme.
-        - Prints banner + colored help (boxed).
-        - Starts the weekly report email scheduler (non-blocking).
-        - Enters a simple REPL (read-eval-print loop) until EOF or 'exit'.
-
-    Side Effects:
-        Reads from stdin, writes to stdout, and persists state on exit.
-    """
+    """Application entrypoint: bootstrap theme, show first-run help, start scheduler, and REPL loop."""
     _load()
 
     # Honor --no-color if present
@@ -643,7 +641,7 @@ def main() -> None:
     start_report_scheduler_email(lambda: STATE, build_weekly_pdf, send_email_smtp, interval_sec=30)
 
     # 🔽 تفعيل إكمال الأوامر بالـTab داخل REPL
-    _enable_tab_completion()  # يربط completer بالـreadline (يدعم Git Bash/Unix؛ على ويندوز عبر pyreadline3)
+    _enable_tab_completion()
 
     try:
         while True:
@@ -660,3 +658,4 @@ def main() -> None:
     finally:
         _save()
     print("Goodbye!")
+ 
