@@ -14,8 +14,7 @@ def quick_translator (phrase:str, target_language:str) ->str:
     translator = Translator()
     #Call Translate method
     translated_phrase = translator.translate(phrase, dest = target_language)
-    return translated_phrase
+    return translated_phrase.text
 
 
-#Function test
-print(quick_translator("مرحبا بالعالم","ko"))
+

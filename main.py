@@ -26,19 +26,36 @@ Menu:
 
 """
 
+#email check function
 def check_email(email:str)-> bool:
     try:
         isValid = validate_email(email)
         email_address = isValid.email
         return True
-        print(f'{email_address} The email is correct')
         
     except EmailNotValidError as e:
         return False
-        print(f"{str(e)} The email unvalid")
-        
+
+'''
+#check input in file function
+def check_input_in_file(user_input, file_path='language_short.txt'):
+    
+    check_input = user_input.strip()
+    try:
+        with open( file_path, 'r', encoding = 'UTF-8') as file:
+            file_content = file.readlines()
+            if check_input in file_content:
+                return True
+            else:
+                return False
+    except FileNotFoundError:
+        print(f"There is wrong in the file path: {file_path} ")
+    except Exception as e:
+        print(f"There is error when read the file {e}")
+'''
 
 
+#users list
 translator_list = []
 company_list = []
 
@@ -64,12 +81,14 @@ def load_to_company_list():
 
 #create json write function for translator
 def save_to_translator_list():
-    with open('translator_list.json','w', encoding = "UTF-8") as file:
-        json_content = json.dump(translator_list, indent = 2)
+    with open('to_dos.json', "w", encoding="UTF-8") as file:
+        json_content = json.dumps(translator_list , indent=2)
         file.write(json_content)
+        
 
 #create json write function for company
 def save_to_company_list():
+    global company_list
     with open('company_list.json','w', encoding = "UTF-8") as file:
         json_content = json.dump(company_list, indent = 2)
         file.write(json_content)
@@ -109,13 +128,17 @@ while True:
                 "3.Searching by location.\n") 
 
                 if search_type == "1":
-                    search_phrase = input("Enter searching type: ")
-                    search_result = list(filter(lambda translator: translator.translation_type == search_phrase, translator_list = [] )) 
+                                        
+                    search_phrase =  input ("\nEnter your translation type: ( 'Written Translator' or 'Interprter' )")
+                    
+                    search_result = list(filter(lambda translator: search_phrase in translator.translation_type , translator_list )) 
+                    
+                    #To print the search result
                     for index, trans_list in enumerate (search_result):
-                        print("")#هنا أكمل
-                        pass
+                        print(f"{index+1}- {trans_list.translation_type} ")
+                    print("-*20")   
                 elif search_type == "2":
-                    pass
+                    search_phrase = input ("\n Enter your translation major: ( 'Medical Translation' or 'Legal Translation' or 'Technical / Engineering Translation' or 'Creative Translation' or 'Diplomatic and Political Translation' )")
                 elif search_type == "3":
                     pass
                 else: print("Wrong input, please enter a valid choice.")
@@ -126,8 +149,20 @@ while True:
         if len(company_list) == 0:
             print("The list is empty, there is not translator available ..\n" \
             "Try later.") 
-               
-        pass
+        else: 
+            #Print company pre info  
+            for user_list in company_list:
+                print(user_list.user_information())
+                       
+            # for more specific kind of search choose one of the list below (Y/N)
+
+            specific_search = input("Do you want more specific search? 'y' for yes, 'n' for no ")
+            if specific_search == 'y':  
+                pass   
+            elif specific_search == 'n':   
+                pass
+            else: print("Wrong input, please enter a valid choice.")
+            pass
     elif user_input == "3":
         #To determine the user type if the user translator 
         # will create a new translator object and if the user is a company 
@@ -135,7 +170,7 @@ while True:
         user_type = input("Who are you?\n" \
         "1- Translator.\n" \
         "2- Company.\n")
-        if user_input == "1":
+        if user_type == "1":
             #Add user information
 
             #Print a menu to tell the user what will be enter in the next
@@ -144,6 +179,8 @@ while True:
             "2- Translator location.\n" \
             "3- Translator email.\n" \
             "4- Translator gender.\n" \
+            "5- Translator mother tongue.\n"\
+            "6- Translator other language.\n"\
             "5- Translator major.\n" \
             "6- Translator mother tongue.\n" \
             "7- Is Translator have an offical certificate? ('True' or 'False')\n" \
@@ -157,22 +194,64 @@ while True:
             
             #if statement to check if the user entered a right email or not
             #email check function
-            if check_email(translator_email):
-                continue
-            else: 
+            if not check_email(translator_email):
                 translator_email = input("Enter your email again: ")
+                check_email(translator_email)
             
-            translator_gender = input("Enter your gender: ")
-            translator_major = input("Enter your major: ")
+            translator_gender = input("Enter your gender: ( 'F' or 'Female' , 'M' or 'Male')")
+
+            if translator_gender.lower() == 'f' or translator_gender.lower() == 'female':
+                translator_gender = "Female"
+            elif translator_gender.lower() == 'm' or translator_gender.lower() == 'male':
+                translator_gender = "Male" 
+            else: translator_gender = input("Wrong input! .. try again \n Enter your gender: ( 'F' or 'Female' , 'M' or 'Male')") 
+
             translator_mother_tongue = input ("Enter your mother tongue: ")
-            translator_certificate = input ("Enter 'True' or 'False' if you have official certificate: ")
+            other_language = input("Enter the other language you know: ")
+
+
+            translator_major = input("Enter your translation major: ( 'MT' 'Medical Translation' or 'LT' 'Legal Translation' or 'IT' 'Technical / 'ENG' Engineering Translation' or 'CT' 'Creative Translation' or 'DPT' 'Diplomatic and Political Translation' ) ")
+            
+            if translator_major.lower() == 'medical translation' or translator_major.lower() == 'mt':
+                translator_major = 'Medical Translation'
+            elif translator_major.lower() == 'legal translation' or translator_major.lower() == 'lt':
+                translator_major = 'Legal Translation'
+            elif translator_major.lower() == 'technical translation' or translator_major.lower() == 'it':
+                translator_major = 'Technical Translation'
+            elif translator_major.lower() == 'engineering translation' or translator_major.lower() == 'eng':
+                translator_major = 'Engineering Translation'
+            elif translator_major.lower() == 'creative translation' or translator_major.lower() ==  'ct':
+                translator_major = 'Creative Translation'
+            elif translator_major.lower() == 'diplomatic and political translation' or translator_major.lower() == 'dpt':
+                translator_major ='Diplomatic and Political Translation'
+            else: input("Wrong input! .. try again \n ")
+
+            translation_type = input("Enter your translation type: ( 'W' or 'Written Translator' , I or 'Interprter' )")
+            
+            if translation_type.lower() == 'w' or translation_type.lower() == 'written translator':
+                translation_type = 'Written Translator'
+            elif translation_type.lower() == 'i' or translation_type.lower() == 'interprter':
+                translation_type = 'Interprter'
+            else: input("Wrong input! .. try again \n Enter your translation type: ( 'W' or 'Written Translator' , I or 'Interprter' )")
+            
+            translator_certificate = input ("Enter 'T' or 'True' , 'F' or 'False' if you have official certificate: ")
+            if translator_certificate.lower() == 'false' or translator_certificate.lower() == 'f':
+                translator_certificate = False
+            elif translator_certificate.lower() == 'true' or translator_certificate.lower() == 't':
+                translator_certificate = True
             translator_experience_years = int( input("Enter a number of years of experience do you have: "))
             
 
     
-            #name, location, email, gender, major, language,  official_certificate, years_of_experience 
-            translator_user = TranslatorUser(translator_name, translator_location, translator_email, translator_gender, translator_major, translator_mother_tongue, translator_certificate, translator_experience_years)
+            #name ,location ,email ,translation_major ,translation_type , gender:str, language:str,  official_certificate:bool,  years_of_experience:int=0 ,rate:int = 0, 
+            translator_user = TranslatorUser(translator_name, translator_location, translator_email, translator_major,translation_type, translator_gender,  translator_mother_tongue, translator_certificate, translator_experience_years)
+            translator_user.add_language(other_language)
+            
+            #append information to the list
             translator_list.append(translator_user)
+
+
+            #print Successful add
             print("New Translator added Successfully ...")
             
         elif user_type == "2":
@@ -192,10 +271,9 @@ while True:
             
             #if statement to check if the user entered a right email or not
             #email check function
-            if check_email(company_email):
-                continue
-            else: 
+            if not check_email(company_email):
                 company_email = input("Enter your email again: ")
+                check_email(company_email)
             
             company_translator_language = input("Enter the company translator language: (the language want translate it to)")
             company_translator_type = input("Enter the company translator type: ")
@@ -205,8 +283,8 @@ while True:
             #name, location, email, translate_to:str, translator_type:str, translator_major:str, price_offer:float
             company_user = Company( company_name, company_location, company_email, company_translator_language, company_translator_type, company_translator_major,company_price_offer)
             company_list.append(company_user)
-            
-          
+            save_to_company_list()
+            print("New Company added Successfully ...")
         else: print("Wrong input, please enter a valid choice.")
 
     elif user_input == "4":
@@ -223,12 +301,19 @@ while True:
         "-'ru' for Russian.\n" \
         "-'tr' for Turkish.\n" \
         "-'it' for Italian.\n" )
+        
+        '''
+        #check input characters 
+        if(check_input_in_file(select_language)):
+            print("Your translation text is: ", quick_translator(text_to_translate, select_language))
+        else: select_language = input("Wrong input! .. try again \n Enter the character: ")
+        '''
         print("Your translation text is: ", quick_translator(text_to_translate, select_language))
-    
     elif user_input == "5":
-        #save the content to the file
+
+        #save information to the file
         save_to_translator_list()
-        save_to_company_list()
+
         #print a good bye sentence
         print("Thank you to visit our program, see you again.")
         break

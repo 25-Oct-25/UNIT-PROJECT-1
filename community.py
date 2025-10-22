@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 
 #Create community class
 class CommunityUser:
@@ -32,7 +33,7 @@ class CommunityUser:
     def update_information(self,email:str):
         self.email = email
 
-        print("Your Email and Password updated")
+        print("Your Email updated")
         
     #Show user information
     def user_information(self):
