@@ -1,4 +1,3 @@
-# core/dns_intel/passive_dns.py
 from typing import Dict, Any, Optional, List
 from pathlib import Path
 import json
@@ -14,12 +13,7 @@ def _load_hist(path: Path) -> Dict[str, Any]:
     return {}
 
 def passive_dns_lookup(domain: str) -> Dict[str, Any]:
-    """
-    يحسب عدد الدومينات الأخرى في التاريخ تشترك مع هذا الدومين في أي IP.
-    يعتمد على آخر snapshot حفظته أدواتك.
-    """
     hist = _load_hist(HISTORY_FILE)
-    # نحتاج IPs الحالية من آخر نتيجة محفوظة في results/level4 أو level1؟ نستخدم history آخر مرة
     cur = hist.get(domain, {})
     ips = cur.get("last_ips") or []
     if not ips:

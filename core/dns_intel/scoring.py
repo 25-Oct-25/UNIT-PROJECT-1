@@ -1,7 +1,5 @@
-# core/dns_intel/scoring.py
 from typing import Dict, Any, Tuple, Optional
 
-# Trusted/cloud hints -- لا نعتبر وجودهم دليلاً على خطر
 TRUSTED_HINTS = [
     "akamai", "akamaitechnologies", "cloudflare", "google", "google llc", "1e100",
     "amazon", "aws", "amazon.com", "amazon technologies", "microsoft", "azure",
@@ -16,10 +14,6 @@ def _lower(s: Optional[str]) -> str:
     return (s or "").strip().lower()
 
 def _is_trusted_host(bundle: Dict[str, Any]) -> bool:
-    """
-    يرجع True لو الـ ip_enrichment يشير لمزود موثوق (CDN/Cloud).
-    يتحقق من ipinfo.org أو PTR.
-    """
     b = _as_dict(bundle)
     ipinfo = _as_dict(b.get("ipinfo"))
     org = _lower(ipinfo.get("org")) if isinstance(ipinfo, dict) else ""
@@ -29,10 +23,7 @@ def _is_trusted_host(bundle: Dict[str, Any]) -> bool:
 
 # ---- VirusTotal parsing ----
 def _vt_positives_from_bundle(bundle: Dict[str, Any]) -> int:
-    """
-    استخراج عدد الـ positives الموثوق منه من بنية VT (api v3).
-    ندعم شكل الرّد 'data' -> 'attributes' -> 'last_analysis_stats' أو إن api رجعت خطأ/notice.
-    """
+    
     b = _as_dict(bundle)
     vt = _as_dict(b.get("vt"))
     # if vt contains notice/error, ignore
@@ -57,11 +48,6 @@ def _vt_positives_from_bundle(bundle: Dict[str, Any]) -> int:
 
 # ---- AbuseIPDB parsing ----
 def _abuse_score_from_bundle(bundle: Dict[str, Any]) -> int:
-    """
-    يحسب نقاط Abuse من بنية AbuseIPDB:
-    - إذا isWhitelisted True -> 0
-    - بناء على abuseConfidenceScore و totalReports
-    """
     b = _as_dict(bundle)
     abuse = _as_dict(b.get("abuse"))
     if not abuse:
@@ -99,22 +85,15 @@ def _abuse_score_from_bundle(bundle: Dict[str, Any]) -> int:
 
 # ---- Main scorer ----
 def compute_dns_risk(domain_result: Dict[str, Any]) -> Tuple[int, Dict[str, int], str]:
-    """
-    Compute a robust DNS risk score (0..100) using:
-      - VirusTotal positives (قوي)
-      - AbuseIPDB signals (قوي)
-      - Fast-Flux (سلوكي مهم)
-      - SPF/DMARC/MX misconfig (خفيف)
-      - لا نعاقب CDN/Cloud المعروف
-    Returns: (score, breakdown, label)
-    """
     score = 0
     details: Dict[str, int] = {}
+    src = domain_result.get("dns") or domain_result
 
-    recs = _as_dict(domain_result.get("records"))
-    flags = _as_dict(domain_result.get("security_flags"))
-    ips = domain_result.get("ips", []) or []
-    enrich = _as_dict(domain_result.get("ip_enrichment"))
+    recs   = _as_dict(src.get("records"))
+    flags  = _as_dict(src.get("security_flags"))
+    ips    = src.get("ips", []) or []
+   
+    enrich = _as_dict(domain_result.get("ip_enrichment") or src.get("ip_enrichment"))
     fastflux = bool(domain_result.get("fast_flux"))
 
     # 1) Threat intel from enrichment (VT + Abuse)
@@ -155,9 +134,6 @@ def compute_dns_risk(domain_result: Dict[str, Any]) -> Tuple[int, Dict[str, int]
     if has_mx and (not flags.get("spf") or not flags.get("dmarc")):
         details["mail_misconfig"] = 10
         score += 10
-
-    # 4) Hosting / CDN: إذا كل العناوين داخل مزود موثوق—نعتبر محايد، لا نقاط إضافية
-    # لكن نضيف ملاحظة إذا بعض الـ IPs أظهرت تقارير (فهي محسوبة بالفعل أعلاه)
 
     # 5) cap and label
     score = max(0, min(100, score))

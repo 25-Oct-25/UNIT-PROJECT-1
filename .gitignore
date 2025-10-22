@@ -215,10 +215,14 @@ __marimo__/
 .env.*
 
 # Local data & results
-data/
+/data/
 results/
 reports/
 
 # Optional logs or debug outputs
 *.log
 *.tmp
+/data/*.db
+/simulations/scenarios/*.json
+/.env
+venv/

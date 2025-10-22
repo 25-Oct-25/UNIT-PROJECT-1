@@ -1,4 +1,3 @@
-# core/brands/verifier.py
 from __future__ import annotations
 import os, json, re
 from pathlib import Path
@@ -6,11 +5,10 @@ from dataclasses import dataclass
 from typing import Optional, Dict, Any, List
 import requests
 
-# مفاتيح من البيئة (اختيارية)
 OPENCORP_API_KEY   = os.getenv("OPENCORP_API_KEY")
 BRANDFETCH_API_KEY = os.getenv("BRANDFETCH_API_KEY")
 
-BRANDS_DB = Path("data/brands_db.json")  # نخزن فيه تفاصيل البراندات المتحققة
+BRANDS_DB = Path("data/brands_db.json")  
 
 @dataclass
 class BrandHit:
@@ -22,11 +20,7 @@ class BrandHit:
     meta: Dict[str, Any]
 
 class BrandVerifier:
-    """
-    يحاول التحقق من اسم البراند عبر عدة مزودات:
-    1) Wikidata (مجاني)  2) OpenCorporates (مفتاح اختياري)  3) Brandfetch (مفتاح اختياري)
-    يدمج النتائج ويقرّر.
-    """
+    
     def __init__(self, session: Optional[requests.Session] = None):
         self.s = session or requests.Session()
         self.s.headers.update({"User-Agent": "PhishSentry/verify"})
@@ -34,7 +28,6 @@ class BrandVerifier:
     # ---- مزود 1: Wikidata (مجاني) ----
     def _wd_search(self, query: str) -> Optional[BrandHit]:
         try:
-            # بحث
             r = self.s.get("https://www.wikidata.org/w/api.php", params={
                 "action":"wbsearchentities", "search":query, "language":"en",
                 "format":"json", "type":"item", "limit": 1
@@ -75,93 +68,11 @@ class BrandVerifier:
         except Exception:
             return None
 
-    # ---- مزود 2: OpenCorporates (اختياري) ----
-    def _opencorp(self, query: str) -> Optional[BrandHit]:
-        if not OPENCORP_API_KEY:
-            return None
-        try:
-            r = self.s.get("https://api.opencorporates.com/v0.4/companies/search", params={
-                "q": query,
-                "api_token": OPENCORP_API_KEY,
-                "per_page": 1
-            }, timeout=8)
-            r.raise_for_status()
-            js = r.json()
-            arr = (js.get("results") or {}).get("companies") or []
-            if not arr:
-                return None
-            comp = arr[0].get("company", {})
-            name = comp.get("name") or query
-            # موقع إن توفر
-            website = comp.get("website") or comp.get("registered_address_in_full")
-            conf = 0.75
-            if name.lower() == query.lower(): conf += 0.10
-            return BrandHit(
-                name=query,
-                canonical_name=name,
-                website=website,
-                confidence=min(conf, 0.92),
-                source="opencorporates",
-                meta={"jurisdiction": comp.get("jurisdiction_code"), "company_number": comp.get("company_number")}
-            )
-        except Exception:
-            return None
-
-    # ---- مزود 3: Brandfetch (اختياري) ----
-    def _brandfetch(self, query: str) -> Optional[BrandHit]:
-        if not BRANDFETCH_API_KEY:
-            return None
-        # نحاول استنتاج دومين من الاسم (بسيط). إن كان للمستخدم دومين رسمي من Wikidata نفضّل استخدامه.
-        guess_domain = self._guess_domain(query)
-        try:
-            headers = {"Authorization": f"Bearer {BRANDFETCH_API_KEY}"}
-            # ملاحظة: قد تختلف نقطة النهاية حسب الخطة—عدّلها لوثائقك
-            r = self.s.get(f"https://api.brandfetch.io/v2/brands/{guess_domain}", headers=headers, timeout=8)
-            if r.status_code == 404:
-                return None
-            r.raise_for_status()
-            js = r.json()
-            name = (js.get("name") or query).strip()
-            website = js.get("domain") or js.get("website")
-            conf = 0.80
-            if website and guess_domain in (website or ""):
-                conf += 0.05
-            return BrandHit(
-                name=query,
-                canonical_name=name,
-                website=website,
-                confidence=min(conf, 0.95),
-                source="brandfetch",
-                meta={"raw": js}
-            )
-        except Exception:
-            return None
-
-    @staticmethod
-    def _guess_domain(name: str) -> str:
-        # تخمين دومين بسيط من الاسم (للاستخدام مع براندفيتش)
-        n = re.sub(r"[^A-Za-z0-9]+", "", name).lower()
-        # استثناءات بسيطة
-        if n in ("stc","mystc"): return "stc.com.sa"
-        if n in ("alrajhibank","alrajhi","rajhibank"): return "alrajhibank.com.sa"
-        return f"{n}.com"
-
     def verify(self, brand: str) -> Optional[BrandHit]:
         brand = brand.strip()
-        # Wikidata أولاً (مجاني)
         best = self._wd_search(brand)
-
-        # OpenCorporates إن متاح
-        oc = self._opencorp(brand)
-        if oc and (not best or oc.confidence > best.confidence):
-            best = oc
-
-        # Brandfetch إن متاح
-        bf = self._brandfetch(best.website if (best and best.website) else brand)
-        if bf and (not best or bf.confidence > best.confidence):
-            best = bf
-
         return best
+
 
 def load_brands_db() -> Dict[str, Any]:
     if BRANDS_DB.exists():
