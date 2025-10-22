@@ -4,14 +4,15 @@ from utils.art_assets import TRAVELER_LOGO
 from utils.colors import *
 
 class TimeTraveler :
+    """TimeTraveler game where players explore historical events by 
+    entering dates and earn points and achievements based on their travels."""
+
     def __init__(self, user) -> None:
         self.user = user
-        self.points = 0
+        self.points = user.scores['TimeTraveler']
 
-    def safe_int_input(prompt, min_val=None, max_val=None, allow_blank=False):
-        """
-        Reads an integer input safely with optional bounds and blank allowance.
-        """
+    def safe_int_input(self, prompt, min_val=None, max_val=None, allow_blank=False):
+        """Reads an integer input safely with optional bounds and blank allowance."""
         while True:
             value = input(prompt).strip()
             if allow_blank and value == "":
@@ -29,23 +30,13 @@ class TimeTraveler :
             return value
 
     def play(self):
-        """
-        Play the Time Traveler game.
-
-        Workflow:
-        - Prompts the user to enter a year (required) and optionally month and day.
-        - Validates inputs to ensure valid date.
-        - Retrieves a historical event for that date.
-        - Awards points and handles achievements.
-        - Offers replay option.
-        """
+        """Time Traveler game logic."""
         
         print(TRAVELER_LOGO)
 
-        year = self.safe_int_input("Enter a year to travel to: ", min_val=1000, max_val=2100)
-        month = self.safe_int_input("Enter month (1-12) or leave blank: ", min_val=1, max_val=12, allow_blank=True)
-        day = self.safe_int_input("Enter day (1-31) or leave blank: ", min_val=1, max_val=31, allow_blank=True)
-
+        year = self.safe_int_input("Enter a year to travel to: ", 1000, 2100)
+        month = self.safe_int_input("Enter month (1-12) or leave blank: ", 1, 12, True)
+        day = self.safe_int_input("Enter day (1-31) or leave blank: ", 1, 31, True)
 
         if month and day:
             try:
@@ -53,25 +44,8 @@ class TimeTraveler :
             except ValueError:
                 print(RED + "⚠️ Invalid date! Please enter a valid day/month combination." + RESET)
                 return self.play()
-            
 
         print(YELLOW + "\nTraveling through time..." + RESET)
-
-        """while True:
-            try:
-                year = int(input("Enter a year to travel to: "))
-                break
-            except ValueError:
-                print(RED + "Invalid year. Please enter a valid number." + RESET)
-
-        month = input("Enter month (1-12) or leave blank: ").strip()
-        month = int(month) if month.isdigit() else None
-
-        day = input("Enter day (1-31) or leave blank: ").strip()
-        day = int(day) if day.isdigit() else None"""
-
-        print(YELLOW + "\nTraveling through time..." + RESET)
-
         
         event = get_historical_event(year, month, day)
         print(GREEN + f"\n📜 Event found: {event}\n" + RESET)

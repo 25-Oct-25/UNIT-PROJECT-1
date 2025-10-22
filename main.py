@@ -17,6 +17,7 @@ os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 logging.basicConfig(filename=LOG_FILE, level=logging.ERROR, format="%(asctime)s %(levelname)s: %(message)s")
 
 def safe_input(prompt: str, validator=None, error_msg="Invalid input."):
+    """Safely handle user input with optional validation."""
     while True:
         try:
             val = input(prompt)
@@ -29,15 +30,18 @@ def safe_input(prompt: str, validator=None, error_msg="Invalid input."):
         print(RED + error_msg + RESET)
 
 def safe_password(prompt="Password: "):
+    """Securely get hidden password input from user."""
     try:
         return getpass.getpass(prompt)
     except (KeyboardInterrupt, EOFError):
         print("\n" + YELLOW + "Input cancelled. Returning to menu." + RESET)
         return None
 def is_valid_username(u: str):
+    """Check if username meets minimum requirements."""
     return bool(u) and len(u) >= 3 and " " not in u
 
 def login_or_register():
+    """Handle login or registration flow for users and admins."""
     users = load_data(USERS_FILE) or {}
 
     print("Welcome to Time Arcade!")
@@ -63,7 +67,7 @@ def login_or_register():
         if username is None:
             return None
 
-        # Load users from file (ensure we have latest)
+       
         users = load_data(USERS_FILE) or {}
 
         if username not in users or users[username].get("role") != "admin":
@@ -71,8 +75,6 @@ def login_or_register():
             return None
 
         stored_hash = users[username]["password"]
-
-        # allow repeated tries but not infinite: max_attempts (you asked no auto-exit, so we show incorrect but let them try again)
         max_attempts = 5
         attempts = 0
 
@@ -80,7 +82,6 @@ def login_or_register():
             password = safe_password("Admin password (hidden): ")
             if password is None:
                 return None
-            # verify using User.verify_password (must be the same User class that created the hash)
             try:
                 if User.verify_password(password, stored_hash):
                     print(GREEN + f"👑 Welcome back, Admin {username}!" + RESET)
@@ -106,7 +107,7 @@ def login_or_register():
     # USER LOGIN / REGISTER SECTION
     # ==========================
     else:
-        # ask username with validation (not empty, >=3 chars, no spaces)
+        """Handle user login or account creation."""
         while True:
             username = safe_input(
                 "Enter your username: ",
@@ -116,17 +117,15 @@ def login_or_register():
             if username is None:
                 return None
 
-            # prevent non-admins from using reserved admin name(s)
+            
             reserved_admins = [u for u, v in users.items() if v.get("role") == "admin"]
             if username.lower() == "admin" or username in reserved_admins:
                 print(RED + "⚠️ The username 'admin' is reserved. Please choose another username." + RESET)
                 continue
-
-            # passed validation
             break
 
-        # If user exists -> login flow
         if username in users:
+            """Login existing user if credentials match."""
             attempts = 0
             while attempts < 3:
                 password = safe_password("Enter your password (hidden): ")
@@ -146,8 +145,8 @@ def login_or_register():
             print(RED + "Too many failed attempts. Returning to main menu." + RESET)
             return None
 
-        # register new user (username doesn't exist and not reserved)
         print("Creating new account...")
+        """Register a new user if username not found."""
         while True:
             password = safe_password("Set a password (hidden): ")
             if password is None:
@@ -169,38 +168,16 @@ def login_or_register():
 
 
 class GameMenu:
-    """
-    Represents the main menu for the arcade games.
-
-    Attributes:
-        user (User): The currently logged-in user.
-        games (dict): A dictionary mapping menu options to game instances.
-
-    Methods:
-        show_menu():
-            Displays the list of available games.
-            Allows the user to select and play games.
-            Saves user data (scores and achievements) after each game session or upon exiting.
-    """
+    """Main game menu allowing users to select and play available games."""
     def __init__(self, user) -> None:
+        """Initialize game menu with user and available games."""
         self.user = user
         self.games = {
             "1":TimeTraveler(user),
             "2":EscapeRoom(user)
-            # still working on other games to add it
         }
     def show_menu(self):
-        """
-        Display the interactive game menu.
-
-        - Prints available games and menu options.
-        - Handles user input for selecting a game or exiting.
-        - Plays the selected game if valid.
-        - Saves user data (password, scores, achievements) after playing a game or exiting.
-        - Displays error messages for invalid selections.
-
-        Returns:None
-        """
+        """Display and handle the main game selection menu."""
         while True:
             try:
                 clear_screen()
@@ -210,7 +187,7 @@ class GameMenu:
                 for key, game in self.games.items():
                     print(f"{key}. {game.__class__.__name__}")
                 if getattr(self.user, "role", "user") == "admin":
-                    print("4. 👑 Admin Dashboard")
+                    print("3. 👑 Admin Dashboard")
                 print("0. Exit")
 
                 choice = safe_input("Select an option: ")
@@ -218,13 +195,13 @@ class GameMenu:
                     return
                 choice = choice.strip()
                 if choice == "0":
-                    print("Goodbye!")
-                    # save data user after exiting
+                    print("Goodbye!👋")
                     users = load_data(USERS_FILE) or {}
                     users[self.user.username] = self.user.to_dict()
                     save_data(USERS_FILE, users)
                     return
                 elif choice in self.games:
+                    """Play selected game and save progress."""
                     try:
                         self.games[choice].play()
                     except Exception as e:
@@ -234,7 +211,8 @@ class GameMenu:
                         users = load_data(USERS_FILE) or {}
                         users[self.user.username] = self.user.to_dict()
                         save_data(USERS_FILE, users)
-                elif choice == "4" and getattr(self.user, "role", "user") == "admin":
+                elif choice == "3" and getattr(self.user, "role", "user") == "admin":
+                    """Open admin dashboard if user is an admin."""
                     try:
                         admin_menu()
                     except Exception as e:
@@ -250,8 +228,9 @@ class GameMenu:
                 print(RED + "An unexpected error occurred. Check logs and try again." + RESET)
                 safe_input("Press Enter to continue...")
 
-# run
+
 if __name__ == "__main__":
+    """Run the Time Arcade program."""
     try:
         animated_welcome()
         user = login_or_register()

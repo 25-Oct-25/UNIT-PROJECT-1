@@ -6,8 +6,10 @@ from users.user import User
 
 USERS_FILE = "data/users.json"
 
+games = ['TimeTraveler', 'EscapeRoom']
 
 def verify_admin_login(username: str, password: str, UserClass=None) -> bool:
+    """Verify if the given credentials belong to an admin user."""
     users = load_users()
     if username not in users:
         return False
@@ -18,61 +20,18 @@ def verify_admin_login(username: str, password: str, UserClass=None) -> bool:
         UserClass = User
     return UserClass.verify_password(password, u["password"])
 
-def change_admin_password_interactive():
-    users = load_data(USERS_FILE) or {}
-    admin_username = input("Enter admin username: ").strip()
-    if admin_username not in users or users[admin_username].get("role") != "admin":
-        print(RED+"Admin user not found."+RESET)
-        return
-
-    old = getpass.getpass("Enter current admin password (hidden): ").strip()
-    if not User.verify_password(old, users[admin_username]["password"]):
-        print(RED+"Incorrect current password."+RESET)
-        return
-
-    while True:
-        new1 = getpass.getpass("Enter new password (hidden): ").strip()
-        new2 = getpass.getpass("Confirm new password (hidden): ").strip()
-        if new1 != new2:
-            print(RED+"Passwords do not match. Try again."+RESET)
-            continue
-        if len(new1) < 6:
-            print(YELLOW+"Password should be at least 6 characters."+RESET)
-            continue
-        break
-    
-    new_password = User.hash_password(new1)
-    users[admin_username]["password"] = new_password
-    save_data(USERS_FILE, users)
-    print(GREEN+"Admin password changed successfully."+RESET)
-    return new_password
-
 def load_users():
+    """Load all users' data from the JSON file."""
     return load_data(USERS_FILE) or {}
 
 
 def save_users(users: dict):
+    """Save all users' data to the JSON file."""
     save_data(USERS_FILE, users)
 
 
 def admin_menu():
-    """
-    Display the admin dashboard and allow the admin to manage users.
-
-    Features:
-    - View all registered users.
-    - View scores of a specific user.
-    - Edit a user's game score.
-    - Delete a user after confirmation.
-    - Add achievements to a user.
-    
-    The menu is interactive and runs in a loop until the admin chooses to exit.
-    Requires admin password verification before access.
-
-    Returns:
-        None
-    """
-    
+    """Display the admin dashboard for managing users and their data."""
     print("\n👑 Welcome, Admin!")
     users = load_users()
 
@@ -85,7 +44,6 @@ def admin_menu():
 3. 📝 Edit user score
 4. 🗑️ Delete user
 5. 🎖️ Add achievement to user
-6. 🔑 Change admin password
 0. 🚪 Exit admin
 ''')
 
@@ -109,15 +67,18 @@ def admin_menu():
         elif choice == "3":
             username = input("Enter username: ").strip()
             if username in users:
-                game = input("Enter game name: ").strip()
-                try:
-                    new_score = int(input("Enter new score: "))
-                    users[username].setdefault("scores", {})
-                    users[username]["scores"][game] = new_score
-                    save_users(users)
-                    print(GREEN+f"Updated {username}'s {game} score to {new_score}."+RESET)
-                except ValueError:
-                    print(YELLOW+"⚠️ Invalid score."+RESET)
+                game = input("Enter game name As(TimeTraveler, EscapeRoom): ").strip()
+                if game not in games:
+                    print(RED + 'Game not found.' + RESET)
+                else:
+                    try:
+                        new_score = int(input("Enter new score: "))
+                        users[username].setdefault("scores", {})
+                        users[username]["scores"][game] = new_score
+                        save_users(users)
+                        print(GREEN+f"Updated {username}'s {game} score to {new_score}."+RESET)
+                    except ValueError:
+                        print(YELLOW+"⚠️ Invalid score."+RESET)
             else:
                 print(RED+"User not found."+RESET)
 
@@ -145,9 +106,6 @@ def admin_menu():
                     print(YELLOW + "User already has this achievement." + RESET)
             else:
                 print(RED+"User not found."+RESET)
-        elif choice == "6":
-            return change_admin_password_interactive()
-
         elif choice == "0":
             print("Exiting admin...")
             break

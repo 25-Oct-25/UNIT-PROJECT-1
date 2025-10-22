@@ -5,12 +5,8 @@ from utils.colors import *
 from utils.art_assets import ESCAPEROOM_LOGO
 
 class EscapeRoom:
-    """
-    Escape Room Game.
-    - Each room is randomly generated with a logical puzzle.
-    - Player has limited time and attempts to solve it.
-    - Points and achievements are given based on performance.
-    """
+    """EscapeRoom game where the player solves puzzles under time and attempt limits, 
+    earning points and achievements based on performance."""
 
     def __init__(self, user=None):
         self.user = user
@@ -63,7 +59,7 @@ class EscapeRoom:
     
     def play(self):
         print(ESCAPEROOM_LOGO)
-        """Main game logic"""
+        """Escape room game logic"""
         print("Loading", end="", flush=True)
         for _ in range(3):
             sys.stdout.write(".")
@@ -82,8 +78,8 @@ class EscapeRoom:
         correct = False
 
         while self.attempts_used < self.attempts_allowed:
-            remaining_time = max(0, int(self.time_limit - (time.time() - self.start_time)))
-            print(YELLOW + f"(⏳ {remaining_time} seconds left)" + RESET)
+            self.remaining_time = max(0, int(self.time_limit - (time.time() - self.start_time)))
+            print(YELLOW + f"(⏳ {self.remaining_time} seconds and {(self.attempts_allowed - self.attempts_used)} attempts left)" + RESET)
             ans = input("Your answer (or type 'hint'): ").strip().lower()
 
             if ans == "hint":
@@ -96,11 +92,16 @@ class EscapeRoom:
 
             self.attempts_used += 1
 
-            if ans == self.room["answer"].lower():
-                correct = True
+            self.remaining_time = max(0, int(self.time_limit - (time.time() - self.start_time)))
+            if self.remaining_time == 0:
+                print(RED + "No more time left!" + RESET)
                 break
             else:
-                print(RED + "Wrong answer. Try again!" + RESET)
+                if ans == self.room["answer"].lower():
+                    correct = True
+                    break
+                else:
+                    print(RED + "Wrong answer. Try again!" + RESET)
 
         total_elapsed = time.time() - self.start_time
         points = self.calculate_points(correct, total_elapsed, self.attempts_used, self.hints_used, self.time_limit)
