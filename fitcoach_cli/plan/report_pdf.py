@@ -2,115 +2,138 @@
 from __future__ import annotations
 
 from pathlib import Path
-import datetime, os
+import datetime
 from fpdf import FPDF
 import arabic_reshaper
 from bidi.algorithm import get_display
 
-# مسار مجلد المشروع ثم الخطوط
+# ===== مسارات الخطوط =====
 ROOT_DIR = Path(__file__).resolve().parents[2]
 FONT_DIR = ROOT_DIR / "assets" / "fonts"
-FONT_REG = FONT_DIR / "NotoSansArabic-Regular.ttf"
-FONT_BOLD = FONT_DIR / "NotoSansArabic-Bold.ttf"
 
-def shape_ar(text: str) -> str:
-    """
-    يهيّئ العربية (ligatures) ويعكس الاتجاه (RTL) حتى تظهر صحيحة في PDF.
-    مرّر النص العربي عبرها قبل الكتابة.
-    نصوص إنجليزية/أرقام ما تحتاج هذا عادة.
-    """
+# العربي (موجود عندك)
+FONT_AR_REG  = FONT_DIR / "NotoSansArabic-Regular.ttf"
+FONT_AR_BOLD = FONT_DIR / "NotoSansArabic-Bold.ttf"
+
+# اللاتيني (ويندوز) — لا يحتاج تنزيل
+WIN_FONTS = Path(r"C:\Windows\Fonts")
+FONT_LAT_REG  = WIN_FONTS / "arial.ttf"
+FONT_LAT_BOLD = WIN_FONTS / "arialbd.ttf"
+
+# علامات اتجاه عند خلط RTL/LTR
+LRE, PDF_ = "\u202A", "\u202C"   # فرض LTR داخل سطر عربي
+
+def ar(text: str) -> str:
+    """تهيئة العربية: وصل الحروف + اتجاه RTL."""
     if not text:
         return ""
-    reshaped = arabic_reshaper.reshape(text)
-    return get_display(reshaped)
+    return get_display(arabic_reshaper.reshape(text))
 
-def _ascii_sanitize(s: str) -> str:
-    """استبدال رموز Unicode الشائعة بنسخ ASCII (حل احتياطي للعنوانين فقط)."""
-    if not s: return s
-    repl = {"—": "-", "–": "-", "…": "...", "“": '"', "”": '"', "’": "'", "‘": "'"}
-    for k, v in repl.items():
-        s = s.replace(k, v)
-    return s
+def ltr(s: str) -> str:
+    """يفرض اتجاه LTR لقطعة لاتينية/تواريخ داخل سطر عربي."""
+    return f"{LRE}{s}{PDF_}"
+
+def gray(pdf: FPDF, val: int):
+    pdf.set_text_color(val, val, val)
+
+def black(pdf: FPDF):
+    pdf.set_text_color(0, 0, 0)
 
 class ReportPDF(FPDF):
+    """
+    خطّان:
+      - ArabicWin  -> NotoSansArabic (العربي)
+      - LatinWin   -> Arial (اللاتيني/التواريخ/الرموز)
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # تحميل الخطوط اليونيكود مرة واحدة
-        # uni=True ضروري لدعم Unicode
-        self.add_font("NotoArabic", "", str(FONT_REG), uni=True)
-        self.add_font("NotoArabic", "B", str(FONT_BOLD), uni=True)
-        self.set_auto_page_break(auto=True, margin=12)
 
+        # تسجيل الخطوط
+        self.add_font("ArabicWin", "",  str(FONT_AR_REG),  uni=True)
+        self.add_font("ArabicWin", "B", str(FONT_AR_BOLD), uni=True)
+        self.add_font("LatinWin",  "",  str(FONT_LAT_REG),  uni=True)
+        self.add_font("LatinWin",  "B", str(FONT_LAT_BOLD), uni=True)
+
+        # هوامش وترويس
+        self.set_auto_page_break(auto=True, margin=15)
+        self.set_margins(left=18, top=18, right=18)
+
+    # ——— ترويسة وتذييل ———
     def header(self):
-        self.set_font("NotoArabic", "B", 16)
-        # استخدم عنوان ASCII-safe لتجنّب مشاكل لو نسيت الخط
-        title = _ascii_sanitize("FitCoach — Weekly Report")
-        # لو تبي عربي:
-        # title = shape_ar("تقرير FitCoach الأسبوعي")
-        self.cell(0, 10, title, new_x="LMARGIN", new_y="NEXT", align="C")
-        self.set_font("NotoArabic", "", 11)
-        self.ln(2)
+        # عنوان لاتيني في الوسط
+        self.set_y(16)
+        self.set_draw_color(220, 220, 220)
+        self.set_line_width(0.2)
+
+        self.set_font("LatinWin", "B", 20)
+        black(self)
+        self.cell(0, 10, "FitCoach - Weekly Report", align="C", new_x="LMARGIN", new_y="NEXT")
+
+        # خط فاصل رفيع
+        y = self.get_y() + 2
+        self.line(18, y, self.w - 18, y)
+        self.ln(4)
 
     def footer(self):
-        self.set_y(-12)
-        self.set_font("NotoArabic", "", 9)
-        txt = f"Page {self.page_no()} / {{nb}}"
-        self.cell(0, 10, txt, align="C")
+        self.set_y(-15)
+        self.set_font("LatinWin", "", 9)
+        gray(self, 120)
+        today = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        self.cell(0, 8, f"Generated: {today}   •   Page {self.page_no()} / {{nb}}",
+                  align="C")
+        black(self)
+
+    # ——— أدوات طباعة ———
+    def font_ar(self, size=12, bold=False):
+        self.set_font("ArabicWin", "B" if bold else "", size)
+
+    def font_lat(self, size=12, bold=False):
+        self.set_font("LatinWin", "B" if bold else "", size)
+
+    def kv_row(self, label: str, value: str, w_label=45, h=8):
+        """صف ثنائي الأعمدة (لاتيني)."""
+        self.font_lat(11, False)
+        gray(self, 40)
+        self.cell(w_label, h, label)
+        black(self)
+        self.font_lat(11, False)
+        self.cell(0, h, value, ln=1)
 
 def build_weekly_pdf(state, file_path: str, days: int = 7) -> None:
-    """
-    يبني تقرير أسبوعي إلى PDF.
-    state: كائن الحالة العام (نفس الذي تستخدمه في بقية المشروع).
-    file_path: مسار ملف الإخراج.
-    days: كم يوم يشمل التقرير (افتراضي 7).
-    """
-    # إشارة اختيارية: لو حاب تفرض ASCII فقط من المجدول
-    ascii_only = os.environ.get("FITCOACH_PDF_ASCII_FALLBACK") == "1"
-
     pdf = ReportPDF(orientation="P", unit="mm", format="A4")
     pdf.alias_nb_pages()
     pdf.add_page()
-    pdf.set_font("NotoArabic", "", 12)
 
-    # مثال: عنوان/ملخص عربي
-    summary_title = "ملخص الأسبوع"
-    summary_body  = "هذا تقرير موجز لنشاطك خلال الأيام الماضية."
+    # ——— عنوان قسم عربي يمين ———
+    pdf.font_ar(16, True)
+    pdf.cell(0, 10, ar("ملخص الأسبوع"), ln=1, align="R")
 
-    if ascii_only:
-        # إن احتجت إجبار ASCII لأي سبب
-        summary_title = _ascii_sanitize(summary_title)
-        summary_body  = _ascii_sanitize(summary_body)
-        writer_title  = summary_title
-        writer_body   = summary_body
-    else:
-        writer_title  = shape_ar(summary_title)
-        writer_body   = shape_ar(summary_body)
-
-    # عنوان القسم
-    pdf.set_font("NotoArabic", "B", 14)
-    pdf.cell(0, 8, writer_title, ln=1, align="R")  # R للاتجاه من اليمين
-    pdf.set_font("NotoArabic", "", 12)
-    pdf.multi_cell(0, 7, writer_body, align="R")
+    # وصف عربي
+    pdf.font_ar(12, False)
+    gray(pdf, 60)
+    pdf.multi_cell(0, 7, ar("هذا تقرير موجز لنشاطك خلال الأيام الماضية."), align="R")
+    black(pdf)
     pdf.ln(2)
 
-    # أمثلة بيانات (استبدلها ببياناتك الفعلية من state)
+    # ——— فترة التقرير (لاتيني) ———
     today = datetime.date.today()
-    period = f"{(today - datetime.timedelta(days=days-1)).isoformat()} → {today.isoformat()}"
-    pdf.set_font("NotoArabic", "B", 12)
-    pdf.cell(0, 7, _ascii_sanitize(f"Period: {period}"), ln=1)
+    start = today - datetime.timedelta(days=days - 1)
+    period = f"{start.isoformat()} → {today.isoformat()}"
 
-    # مثال جدول بسيط
-    pdf.set_font("NotoArabic", "", 11)
+    pdf.font_lat(12, True)
+    pdf.cell(0, 8, f"Period: {ltr(period)}", ln=1)
+    pdf.ln(2)
+
+    # ——— جدول بيانات ———
     rows = [
-        ("Weight trend", "−0.4 kg"),   # لاحظ الإشارة السالبة؛ مدعومة في Unicode
+        ("Weight trend", "-0.4 kg"),
         ("Workouts", "4 sessions"),
         ("Best lift", "Bench 80×8 @ RPE 8"),
     ]
     for k, v in rows:
-        pdf.cell(60, 7, _ascii_sanitize(k))
-        pdf.cell(0, 7, _ascii_sanitize(v), ln=1)
+        pdf.kv_row(k, v)
 
-    # في نهاية الوثيقة
-    out_path = Path(file_path).resolve()
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    pdf.output(str(out_path))
+    # ——— حفظ الملف ———
+    out = Path(file_path).resolve()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    pdf.output(str(out))
