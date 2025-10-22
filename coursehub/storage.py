@@ -34,6 +34,17 @@ def init_db():
             FOREIGN KEY(user_id) REFERENCES users(id),
             FOREIGN KEY(course_id) REFERENCES courses(id)
         )""")
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS resources(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            course_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            url TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(course_id) REFERENCES courses(id)
+        )""")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_resources_course ON resources(course_id)")
+
         con.commit()
 
 def query_one(sql, params=()):
