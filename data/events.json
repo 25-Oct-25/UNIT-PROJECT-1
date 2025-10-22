@@ -39,5 +39,41 @@
     "reminders": [],
     "poster": null,
     "attendees": []
+  },
+  {
+    "title": "Eid Adha",
+    "date": "2025-10-22 10:21",
+    "description": "Eid Mubarak",
+    "location": "Dammam",
+    "reminders": [],
+    "poster": null,
+    "attendees": []
+  },
+  {
+    "title": "EID Alftar",
+    "date": "2025-10-22 10:00",
+    "description": "Eid mubarak",
+    "location": "Jubail",
+    "reminders": [],
+    "poster": null,
+    "attendees": []
+  },
+  {
+    "title": "Gaming",
+    "date": "2025-03-11 11:00",
+    "description": "Playing Online Games",
+    "location": "Riyadh",
+    "reminders": [],
+    "poster": null,
+    "attendees": []
+  },
+  {
+    "title": "minstrel",
+    "date": "2025-10-21 10:00",
+    "description": "Plying and dancing",
+    "location": "jubail",
+    "reminders": [],
+    "poster": null,
+    "attendees": []
   }
 ]
