@@ -1,3 +1,4 @@
+# main.py
 from dotenv import load_dotenv
 from colorama import init as colorama_init
 import os
@@ -41,6 +42,33 @@ def _auto_engine():
         return "hf"
     return None
 
+# ---------- small helpers ----------
+def _yn_prompt(label: str, default_yes: bool = True) -> bool:
+    """
+    Strict Y/n prompt. Returns True for yes, False for no.
+    Keeps asking until a valid answer is given.
+    """
+    default = "Y" if default_yes else "n"
+    while True:
+        ans = input(f"{label} (Y/n): ").strip().lower() or default.lower()
+        if ans in ("y", "yes"):
+            return True
+        if ans in ("n", "no"):
+            return False
+        ui.error("❌ Invalid input. Please enter 'Y' or 'n'.")
+
+def _engine_prompt(default_engine: str | None = None) -> str:
+    """
+    Ask user for engine with validation.
+    """
+    default_engine = default_engine or "replicate"
+    allowed = ["auto", "replicate", "hf", "gemini"]
+    while True:
+        choice = input(f"Engine [auto/replicate/hf/gemini] (default: {default_engine}): ").strip().lower() or default_engine
+        if choice in allowed:
+            return choice
+        ui.error("❌ Invalid input. Please enter one of: auto, replicate, hf, gemini")
+
 # -------------------- Menu actions --------------------
 
 def action_generate_poster():
@@ -59,14 +87,9 @@ def action_generate_poster():
         )
 
     detected = _auto_engine()
-    engine = None
     if detected is None:
         ui.warning("No image engine tokens found in .env")
-        engine = ui.prompt("Engine (replicate/hf)").lower()
-    else:
-        default_info = f"[{detected}]"
-        ans = ui.prompt(f"Engine (replicate/hf) {default_info}")
-        engine = (ans.lower() or detected)
+    engine = _engine_prompt(default_engine=(detected or "replicate"))
 
     subtitle = ui.prompt("Subtitle (e.g. '2025-10-20 • Jubail')")
     footer   = ui.prompt("Footer (e.g. 'Eid Mubarak 🌙✨') [optional]")
@@ -156,16 +179,21 @@ def update_hub_cli():
         if choice == "1":
             edit_event_cli()
             input("Press Enter to continue...")
+
         elif choice == "2":
             edit_attendee_cli()
             input("Press Enter to continue...")
+
         elif choice == "3":
             delete_attendee_cli()
             input("Press Enter to continue...")
+
         elif choice == "4":
             add_reminder_cli()
             input("Press Enter to continue...")
+
         elif choice == "5":
+            # Regenerate poster flow with engine choice + validation
             events = load_events()
             if not events:
                 ui.warning("No events found.")
@@ -179,7 +207,7 @@ def update_hub_cli():
             try:
                 idx = int(input("\nNumber: ").strip()) - 1
             except ValueError:
-                ui.warning("Invalid input.")
+                ui.warning("Invalid input. Please enter a number.")
                 input("Press Enter to continue...")
                 continue
 
@@ -190,14 +218,21 @@ def update_hub_cli():
 
             ev = events[idx]
             title = ev["title"]
+
             prompt = input("Poster prompt (leave empty for elegant default): ").strip()
             if not prompt:
-                prompt = ("Elegant wedding/event poster, soft lights, gold accents, "
-                          "clean typography, centered composition, 4k, professional design")
+                prompt = (
+                    "Elegant event poster, soft lights, gold accents, "
+                    "clean typography, centered composition, 4k, professional design"
+                )
 
             subtitle = input("Subtitle (e.g., '2025-11-25 • Dammam'): ").strip()
             footer   = input("Footer (optional): ").strip()
             qr       = input("QR text/url (optional): ").strip() or None
+
+            # engine selection with default detection
+            auto_guess = _auto_engine() or "replicate"
+            engine = _engine_prompt(default_engine=auto_guess)
 
             try:
                 out_path = generate_poster_for_event(
@@ -206,15 +241,18 @@ def update_hub_cli():
                     subtitle=subtitle,
                     footer=footer,
                     qr_text=qr,
-                    engine="auto",
+                    engine=engine,
                 )
                 ui.success(f"Poster saved at: {out_path}")
+                ui.bullet("If the selected engine fails, you'll be prompted to try another before falling back to a local design.")
             except Exception as e:
                 ui.error(f"Poster generation failed: {e}")
+
             input("Press Enter to continue...")
 
         elif choice == "0":
             break
+
         else:
             ui.warning("Invalid choice.")
             input("Press Enter to continue...")
@@ -225,7 +263,7 @@ def print_menu_and_get_choice():
         ("1", f"{ui.CAL}  Create Event"),
         ("2", "List Events"),
         ("3", "Delete Event"),
-        ("4", "UPDAT — Update (event / attendees / reminders / poster)"),  # update hub
+        ("4", "UPDAT — Update (event / attendees / reminders / poster)"),
         ("5", f"{ui.TIME} Start Reminder Service (background)"),
         ("6", f"{ui.PEOPLE} Add Attendee to Event"),
         ("7", "List Attendees for Event"),
@@ -245,64 +283,81 @@ def print_menu_and_get_choice():
 def main():
     while True:
         choice = print_menu_and_get_choice()
+
         if choice == "1":
             create_event_cli()
             ui.success("Event created.")
             input("Press Enter to continue...")
+
         elif choice == "2":
             ui.section("Your Events")
             list_events_cli()
             input("Press Enter to continue...")
+
         elif choice == "3":
             delete_event_cli()
             ui.success("Event deleted (if existed).")
             input("Press Enter to continue...")
+
         elif choice == "4":
             update_hub_cli()
+
         elif choice == "5":
             ui.badge("Reminder loop started", bg=ui.B.GREEN)
             start_reminder_loop()
+
         elif choice == "6":
             add_attendee_cli()
             ui.success("Attendee added.")
             input("Press Enter to continue...")
+
         elif choice == "7":
             ui.section("Attendees")
             list_attendees_cli()
             input("Press Enter to continue...")
+
         elif choice == "8":
             mark_attendance_cli()
             input("Press Enter to continue...")
+
         elif choice == "9":
             add_reminder_cli()
             ui.success("Reminder added.")
             input("Press Enter to continue...")
+
         elif choice == "10":
             action_generate_poster()
             input("Press Enter to continue...")
+
         elif choice == "11":
             send_invites_cli()
             input("Press Enter to continue...")
+
         elif choice == "12":
             action_draft_sample_email()
             input("Press Enter to continue...")
+
         elif choice == "13":
             action_send_test_email()
             input("Press Enter to continue...")
+
         elif choice == "14":
             action_export_report()
+
         elif choice == "15":
             action_export_and_email_report()
+
         elif choice == "16":
             start_inbox_watcher()
             input("Press Enter to continue...")
+
         elif choice == "0":
             ui.success("Goodbye!")
             break
+
         else:
             ui.warning("Invalid choice.")
             input("Press Enter to continue...")
-
 
 if __name__ == "__main__":
     main()

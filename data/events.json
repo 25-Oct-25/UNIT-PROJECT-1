@@ -1,1 +1,43 @@
-[]
+[
+  {
+    "title": "EID",
+    "date": "2025-10-22 9:00",
+    "description": "EID muabrak",
+    "location": "Jubail",
+    "reminders": [
+      {
+        "minutes_before": 20,
+        "fired": false
+      }
+    ],
+    "poster": null,
+    "attendees": []
+  },
+  {
+    "title": "عيد الاضحة",
+    "date": "2025-10-22 10:00",
+    "description": "كل عام وانتم بخير",
+    "location": "الدمام",
+    "reminders": [],
+    "poster": null,
+    "attendees": []
+  },
+  {
+    "title": "Ramadan",
+    "date": "2025-10-22 10:00",
+    "description": "Ramdan Kareem",
+    "location": "Jubail",
+    "reminders": [],
+    "poster": null,
+    "attendees": []
+  },
+  {
+    "title": "Football Training",
+    "date": "2025-10-22 10:00",
+    "description": "Playing Football",
+    "location": "jubail",
+    "reminders": [],
+    "poster": null,
+    "attendees": []
+  }
+]

@@ -29,7 +29,6 @@ def _pick_gemini_model():
     """Pick a model that supports generateContent, prefer flash/flash-lite, avoid pro/exp if possible."""
     if not _GEMINI_READY:
         return None
-#
     try:
         models = [m for m in genai.list_models()
                   if "generateContent" in getattr(m, "supported_generation_methods", [])]
@@ -79,7 +78,6 @@ def _extract_info(bullet_points):
 
 def _apply_tone(base: str, tone: str) -> str:
     tone = (tone or "").lower()
-    # Small, friendly tone tweaks
     if any(k in tone for k in ["playful", "fun", "exciting", "cheerful"]):
         return base.replace("Warm regards,", "Can’t wait to celebrate!").replace("Best regards,", "Cheers,")
     if any(k in tone for k in ["polite", "elegant", "professional"]):
@@ -88,7 +86,7 @@ def _apply_tone(base: str, tone: str) -> str:
         return base.replace("Best regards,", "Warm wishes,")
     return base
 
-# -------- Local templates (fallback) --------
+# -------- Local templates (fallback, English only) --------
 def _birthday_email(info, signature, rich=True):
     title = info["title"] or "Birthday Celebration"
     body = dedent(f"""
@@ -200,20 +198,25 @@ def _local_fallback(kind: str, info: dict, signature: str, tone: str, rich: bool
         body = _generic_email(info, signature, rich=rich)
     return _apply_tone(body, tone)
 
-# -------- Gemini drafting --------
-def _gemini_draft(subject, audience, tone, info, signature, kind) -> str:
-    """Draft with Gemini; pick a sensible model and guard against common errors."""
+# -------- Gemini drafting (AI mode) --------
+def _gemini_draft(subject, audience, tone, info, signature, kind, language="en") -> str:
+    """Draft with Gemini; supports English or Arabic depending on user choice."""
     if not _GEMINI_READY:
         raise RuntimeError("Gemini not configured")
 
     model_name = _pick_gemini_model() or "models/gemini-2.0-flash"
     model = genai.GenerativeModel(model_name=model_name)
 
+    if language.lower().startswith("ar"):
+        lang_instruction = "in Arabic (use natural, formal, and friendly Modern Standard Arabic)."
+    else:
+        lang_instruction = "in English (clear, natural, and polite tone)."
+
     guidance = f"""
-You are a helpful copywriter. Write an engaging invitation email in English.
-Style: {tone}. Keep it warm, natural, and human.
+You are a helpful email assistant. Write an engaging invitation email {lang_instruction}
+Style: {tone}.
 Event kind: {kind}.
-Subject (context): {subject}
+Subject: {subject}
 Audience: {audience}
 Details:
 - Event: {info.get('title') or '-'}
@@ -222,17 +225,16 @@ Details:
 - Notes: {info.get('desc') or ''}
 
 Requirements:
-- Start with a friendly greeting (e.g., "Dear friends," / "Dear guests,").
-- 1–2 short intro sentences that set the mood.
-- Clear bullet/line items for date, time, and location (use simple lines with • or clear separators).
-- One warm closing line encouraging attendance/RSVP.
+- Start with a friendly greeting.
+- Include short introduction sentences.
+- Clearly list event details (date, time, location).
+- Add one warm closing line encouraging attendance/RSVP.
 - End with the signature: {signature}
 - IMPORTANT: Do NOT include the Subject line inside the body.
 """
 
     try:
         resp = model.generate_content(guidance)
-        # Try multiple access paths to stay compatible
         text = (getattr(resp, "text", None) or "").strip()
         if not text:
             try:
@@ -243,10 +245,8 @@ Requirements:
             raise RuntimeError("Empty response from Gemini")
         return text
     except ResourceExhausted as e:
-        # Clear cause so we fall back gracefully
         raise RuntimeError(f"Gemini quota/rate limit on {model_name}: {e.message}")
     except Exception as e:
-        # Any other error → let caller fall back
         raise RuntimeError(f"Gemini draft error: {e}")
 
 # -------- Public API --------
@@ -268,17 +268,12 @@ def draft_email(
     info = _extract_info(bullet_points)
     kind = event_kind or _detect_kind(subject, info.get("title", ""))
 
-    # Force English for this project
-    if language.lower().startswith("ar"):
-        language = "en"
-
-    # Try Gemini first
+    # Try Gemini first with chosen language
     if _GEMINI_READY:
         try:
-            return _gemini_draft(subject, audience, tone, info, signature, kind)
+            return _gemini_draft(subject, audience, tone, info, signature, kind, language=language)
         except Exception as e:
-            # Soft fall back to template
             print(f"⚠️ Gemini draft failed, using local template. Reason: {e}")
 
-    # Local templates
+    # Local templates fallback (English only)
     return _local_fallback(kind, info, signature, tone, rich)
