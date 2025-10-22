@@ -1,44 +1,91 @@
 class Story:
+    """
+    Represents an interactive story created by the user.
+
+    Attributes:
+        title (str): The story title.
+        genre (str): The story genre (e.g., Drama, Adventure, Fantasy, Romance).
+        length (str): The desired story length ('short' or 'long').
+        parts (list): List of text segments representing the story's parts.
+        last_choice (str or None): The user's last selected choice, if applicable.
+    """
+
     def __init__(self, title, genre, length, parts=None, last_choice=None):
         """
-        initialize sotory object :
-        - title: story's title
-        - gener: type of story
-        - length: length story(short or long)
-        - parts: list of story part(chapters)
-        - last_choice: the user last decision of selected option
+        Initialize a Story object.
+
+        Args:
+            title (str): Story title.
+            genre (str): Story genre.
+            length (str): 'short' or 'long'.
+            parts (list, optional): List of story parts.
+            last_choice (str, optional): The user's last selected choice.
         """
         self.title = title
         self.genre = genre
         self.length = length
         self.parts = parts if parts else []
-        self.last_choice = last_choice  # story user's las choice
+        self.last_choice = last_choice  # Tracks user's most recent decision
+
+    # ----------------------------------------------------------
 
     def add_part(self, text):
-        """Add new part"""
-        self.parts.append(text)
+        """
+        Add a new part to the story, avoiding duplicates.
+
+        Args:
+            text (str): The new story text to be added.
+        """
+        if not self.parts or self.parts[-1] != text:
+            self.parts.append(text)
+        else:
+            print("⚠️ Duplicate story part detected, skipping addition.")
+
+    # ----------------------------------------------------------
 
     def get_summary(self):
-        """return short summary of the story"""
+        """
+        Return a short summary of the story.
+
+        Returns:
+            str: A string like 'Title (Genre, X parts)'.
+        """
         return f"{self.title} ({self.genre}, {len(self.parts)} parts)"
 
+    # ----------------------------------------------------------
+
     def to_dict(self):
-        """convert the story object to dict for json save"""
+        """
+        Convert the story object into a dictionary for JSON storage.
+
+        Returns:
+            dict: Serializable story data.
+        """
         return {
             "title": self.title,
             "genre": self.genre,
             "length": self.length,
             "parts": self.parts,
-            "last_choice": self.last_choice
+            "last_choice": self.last_choice,
         }
+
+    # ----------------------------------------------------------
 
     @staticmethod
     def from_dict(data):
-        """load story object from dict json data"""
+        """
+        Create a Story object from a dictionary loaded from JSON.
+
+        Args:
+            data (dict): JSON-like dictionary containing story data.
+
+        Returns:
+            Story: A fully initialized Story object.
+        """
         return Story(
             title=data.get("title", "Untitled"),
             genre=data.get("genre", "Unknown"),
             length=data.get("length", "short"),
             parts=data.get("parts", []),
-            last_choice=data.get("last_choice", None)
+            last_choice=data.get("last_choice", None),
         )

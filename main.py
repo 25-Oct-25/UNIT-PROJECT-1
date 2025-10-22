@@ -1,55 +1,75 @@
 from User import User
 from StoryManager import StoryManager
 
+
 def main():
-    print("\n=== Interactive Story App ===")
-    print("1. Login")
-    print("2. Sign Up")
-    choice = input("Choose (1/2): ").strip()
+    """Main entry point of the Interactive Story App."""
+    print("\n=== 🌙 Welcome to the AI Interactive Story Creator ===")
+    print("------------------------------------------------------")
 
     user = None
-    #handel user choice for login or signup
-    if choice == "1":
-        user = User.login()
-    elif choice == "2":
-        user = User.signup()
-    else:
-        print("Invalid choice.")
-        return
 
-    # if user successfully logged in or sighn up
-    if user:
-        print(f"\nWelcome, {user.username}!")
-        manager = StoryManager(user.username)
+    # Authentication loop
+    while not user:
+        print("\n1. Login")
+        print("2. Sign Up")
+        print("3. Exit")
 
-        # resume last unfinished story
-        print("\nChecking if you have a previous story...")
-        manager.resume_last_story()
+        choice = input("Choose (1/2/3): ").strip()
 
-        while True:
-            print("\n=== Story Menu ===")
-            print("1. Start a new story")
-            print("2. Continue a story")
-            print("3. View old stories")
-            print("4. Export a story")
-            print("5. Exit")
+        if choice == "1":
+            user = User.login()
+            if not user:
+                retry = input("\n❌ Login failed. Try again? (y/n): ").strip().lower()
+                if retry == "n":
+                    print("\nWould you like to sign up for a new account?")
+                    signup_choice = input("Sign up now? (y/n): ").strip().lower()
+                    if signup_choice == "y":
+                        user = User.signup()
+                    else:
+                        print("Goodbye!")
+                        return
+        elif choice == "2":
+            user = User.signup()
+        elif choice == "3":
+            print("Goodbye 👋")
+            return
+        else:
+            print("⚠️ Invalid option. Please choose 1, 2, or 3.")
 
-            option = input("Choose (1-5): ").strip()
-            if option == "1":
-                manager.start_new_story()
-            elif option == "2":
-                manager.load_old_stories()
-            elif option == "3":
-                manager.view_old_story()
-            elif option == "4":
-                manager.export_story()
-            elif option == "5":
-                print(f"Goodbye, {user.username}!")
-                break
-            else:
-                print(" Invalid option. Try again.")
-    else:
-        print(" Login or signup failed. Try again.")
+    # If user logged in or signed up successfully
+    #print(f"\n✅ Welcome, {user.username}!")
+    manager = StoryManager(user.username)
+
+    # Check if there is a previously saved story
+    print("\nChecking if you have a previous story...")
+    manager.resume_last_story()
+
+    # Main story menu loop
+    while True:
+        print("\n=== 📚 Story Menu ===")
+        print("1. Start a new story")
+        print("2. Continue a saved story")
+        print("3. View old stories")
+        print("4. Export a story")
+        print("5. Exit")
+
+        option = input("Choose (1-5): ").strip()
+
+        if option == "1":
+            manager.start_new_story()
+        elif option == "2":
+            manager.load_old_stories()
+        elif option == "3":
+            manager.view_old_story()
+        elif option == "4":
+            manager.export_story()
+        elif option == "5":
+            print(f"\n👋 Goodbye, {user.username}! Thanks for creating stories with us.")
+            break
+        else:
+            print("⚠️ Invalid option. Please choose between 1-5.")
+
 
 if __name__ == "__main__":
     main()

@@ -1,11 +1,10 @@
 from huggingface_hub import InferenceClient
 import os
 
+
 class AIHelper:
     def __init__(self):
-        """
-        initial the connection to the hugging face Ai
-        """
+        """Initialize connection to Hugging Face API."""
         api_key = os.getenv("HUGGINGFACE_API_KEY")
         if not api_key:
             raise ValueError("API key not found. Please check your .env file.")
@@ -13,84 +12,68 @@ class AIHelper:
 
     def generate_part(self, prompt, genre, length="short"):
         """
-        generate new part of the story with 3 user choices
-        allows control over story length (short or long)
+        Generate a story part with smooth continuation and concise storytelling.
+        Always ends with exactly three numbered choices.
         """
-        # system message that instructs the AI model how to write
         system_message = (
-        f"You are a talented creative writer who writes {genre} stories. "
-        f"This story should be {'brief and concise' if length == 'short' else 'detailed and immersive'}. "
-        f"Continue the story in the same tone and style. "
-        f"If the story has reached its natural conclusion, end it gracefully and write 'THE END'. "
-        f"Otherwise, after the story, provide EXACTLY THREE numbered choices (1, 2, and 3) for what happens next."
-    )
+            f"You are a concise, talented {genre} story writer. "
+            f"Continue the story naturally and logically from the previous events. "
+            f"Write in a cinematic and emotional style but keep it concise — "
+            f"no more than 4 to 6 short paragraphs. "
+            f"Avoid repeating any previous information or summarizing earlier parts. "
+            f"Focus only on what happens next. "
+            f"After writing, provide exactly THREE numbered choices (1., 2., 3.) "
+            f"that are short (one line each), clear, and mutually distinct. "
+            f"Never include 'THE END' unless the story truly concludes."
+        )
 
         try:
-            # requst the model to generate the next story part
+            # 🔮 Generate story continuation
             response = self.client.chat_completion(
                 model="mistralai/Mixtral-8x7B-Instruct-v0.1",
                 messages=[
                     {"role": "system", "content": system_message},
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": prompt},
                 ],
-                max_tokens=400 if length == "short" else 800,
-                temperature=0.9
+                max_tokens=750 if length == "short" else 1100,
+                temperature=0.7,  # أقل شوي لتقليل الحشو
+                top_p=0.9,
             )
 
-            story_text = response.choices[0].message["content"]
-            print("\n" + story_text)
+            # 📝 Extract response text
+            story_text = response.choices[0].message["content"].strip()
 
-            # extract choices (1,2,3) from the story 
-            options = []
-            for line in story_text.split("\n"):
-                if line.strip().startswith(("1.", "2.", "3.")):
-                    options.append(line.strip())
+            # ✅ Detect numbered options (1–3)
+            lines = story_text.split("\n")
+            options = [line.strip() for line in lines if line.strip().startswith(("1.", "2.", "3."))]
 
-            # display option to the user
-            if options:
-                print("\n Choose what happens next:")
-                for opt in options:
-                    print(opt)
+            # ⚙️ Add fallback if missing
+            if not options:
+                options = [
+                    "1. The hero takes a bold action to change the situation.",
+                    "2. A mysterious twist forces a new decision.",
+                    "3. The hero pauses to reflect before moving forward."
+                ]
+                story_text += "\n\n" + "\n".join(options)
 
-                choice = input("\nEnter your choice (1-3): ").strip()
-                if choice not in ["1", "2", "3"]:
-                    print("Invalid choice. Continuing with option 1.")
-                    choice = "1"
+            # 🧹 Clean up unwanted endings or empty lines
+            story_text = story_text.replace("THE END", "").strip()
+            story_text = "\n".join([line for line in story_text.split("\n") if line.strip()])
 
-                # generate new part of the story based on the selcted option
-                followup_prompt = (
-                    f"{prompt}\nThe reader chose option {choice}. Continue the story accordingly. "
-                    f"Keep the same tone and detail level ({length})."
-                )
-
-                next_response = self.client.chat_completion(
-                    model="mistralai/Mixtral-8x7B-Instruct-v0.1",
-                    messages=[
-                        {"role": "system", "content": system_message},
-                        {"role": "user", "content": followup_prompt}
-                    ],
-                    max_tokens=400 if length == "short" else 800,
-                    temperature=0.9
-                )
-
-                continuation = next_response.choices[0].message["content"]
-                print("\n" + continuation)
-
-                # merge the orignal story with the continuation
-                return {
-                    "text": prompt + "\n\n" + story_text + "\n\n" + continuation,
-                    "choice": choice
-                }
-
-            else:
-                # in case the model didn't provide any choices
-                return {
-                    "text": story_text,
-                    "choice": None
-                }
+            
+            return {"text": story_text, "options": options}
 
         except Exception as e:
-            return {
-                "text": f"HF API Error: {str(e)}",
-                "choice": None
-            }
+            # 💥 Safe fallback
+            fallback_text = (
+                f"⚠️ HF API Error: {str(e)}\n"
+                "The connection to the AI service was interrupted.\n"
+                "Don't worry — your progress is saved and you can continue!"
+            )
+            fallback_options = [
+                "1. Retry the last part.",
+                "2. Change the story’s direction.",
+                "3. End the story for now."
+            ]
+            print("\n" + fallback_text)
+            return {"text": fallback_text, "options": fallback_options}
