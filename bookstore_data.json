@@ -1,0 +1,87 @@
+{
+    "books": {
+        "The Lord of the Rings": {
+            "author": "J.R.R. Tolkien",
+            "description": "Epic fantasy novel.",
+            "price": 25.0,
+            "quantity": 10,
+            "isbn": "978-0618260274",
+            "genre": "Fantasy",
+            "reviews": []
+        },
+        "Pride and Prejudice": {
+            "author": "Jane Austen",
+            "description": "Romantic novel of manners.",
+            "price": 15.5,
+            "quantity": 15,
+            "isbn": "978-0141439518",
+            "genre": "Romance",
+            "reviews": []
+        },
+        "1984": {
+            "author": "George Orwell",
+            "description": "Dystopian social science fiction novel.",
+            "price": 12.0,
+            "quantity": 8,
+            "isbn": "978-0451524935",
+            "genre": "Dystopian",
+            "reviews": []
+        },
+        "To Kill a Mockingbird": {
+            "author": "Harper Lee",
+            "description": "Classic of modern American literature.",
+            "price": 18.75,
+            "quantity": 12,
+            "isbn": "978-0446310789",
+            "genre": "Classic",
+            "reviews": []
+        },
+        "The Great Gatsby": {
+            "author": "F. Scott Fitzgerald",
+            "description": "Novel illustrating the Jazz Age.",
+            "price": 14.0,
+            "quantity": 7,
+            "isbn": "978-0743273565",
+            "genre": "Classic",
+            "reviews": []
+        },
+        "Python": {
+            "author": "python-handbook",
+            "description": " The Python Handbook follows the 80/20 rule: learn in 20% of the time the",
+            "price": 10.0,
+            "quantity": 5,
+            "isbn": "188-0743273565",
+            "genre": "Educational",
+            "reviews": []
+        }
+    },
+    "users": {
+        "customer1": {
+            "password": "password123",
+            "email": "customer1@example.com",
+            "address": {},
+            "purchase_history": [],
+            "cart": {}
+        },
+        "admin": {
+            "password": "adminpassword",
+            "email": "admin@example.com",
+            "is_admin": true
+        },
+        "mjeed": {
+            "password": "1234",
+            "email": "abdulmajeedalbaqami4@gmail.com",
+            "address": {},
+            "purchase_history": [],
+            "cart": {}
+        },
+        "abdulmajeed": {
+            "password": "123123",
+            "email": "abdulmajeedalbaqami4@gmail",
+            "address": {},
+            "purchase_history": [],
+            "cart": {}
+        }
+    },
+    "orders": {}
+}
