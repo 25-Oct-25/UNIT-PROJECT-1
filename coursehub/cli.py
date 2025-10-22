@@ -1,5 +1,5 @@
 from . import storage, services
-from .utils import cinfo, cgood, cbad, cwarn, ctitle, print_table
+from .utils import cinfo, cgood, cbad, cwarn, ctitle, print_table, show_logo, colored_bar
 from .certificate import generate_certificate
 from .ai_global import ask_global
 from .mailer import send_email
@@ -45,17 +45,23 @@ def require(role):
 
 def screen_auth_first():
     def login_student():
-        email = ask("Email"); name = ask("Name")
+        email = ask("Email").strip().lower()
+        name = ask("Name").strip().lower()
         uid = services.ensure_user(email, name, "student")
         global _current_user; _current_user = (uid, "student", email, name)
         print(cgood(f"Logged in as student: {name}"))
+
     def login_admin():
         pin = ask("PIN (1234)")
-        if pin != "1234": print(cbad("Wrong PIN")); return
-        email = ask("Admin email"); name = ask("Admin name")
+        if pin != "1234":
+            print(cbad("Wrong PIN"))
+            return
+        email = ask("Admin email").strip().lower()
+        name = ask("Admin name").strip().lower()
         uid = services.ensure_user(email, name, "admin")
         global _current_user; _current_user = (uid, "admin", email, name)
         print(cgood(f"Logged in as admin: {name}"))
+
     while True:
         print("\n" + ctitle("Login"))
         print("  1) Login as Student")
@@ -120,9 +126,29 @@ def screen_admin():
 def screen_student():
     def enroll():
         if not require("student"): return
-        cid = ask_int("Course ID", 1)
+
+        rows = services.list_available_courses_for_user(_current_user[0])
+        if not rows:
+            print(cwarn("You are enrolled in all available courses or none are available."))
+            input(cinfo("Enter to continue..."))
+            return
+
+        table = [[cid, title, lvl, price, (summary[:60] + "…") if len(summary) > 60 else summary]
+                for (cid, title, lvl, price, summary) in rows]
+        print_table(table, headers=["ID", "Title", "Level", "Price", "Summary"])
+
+        cid = ask_int("Enter Course ID to enroll", 1)
+
+        valid_ids = {r[0] for r in rows}
+        if cid not in valid_ids:
+            print(cbad("Invalid Course ID (not in the list above)."))
+            input(cinfo("Enter to continue..."))
+            return
+
         services.enroll(_current_user[0], cid)
-        print(cgood("Enrolled (or already).")); input(cinfo("Enter to continue..."))
+        print(cgood("Enrolled successfully."))
+        input(cinfo("Enter to continue..."))
+
 
     def my_courses():
         if not require("student"): return
@@ -130,7 +156,7 @@ def screen_student():
         if not rows: print(cwarn("No enrolled courses.")); input(cinfo("Enter to continue...")); return
         table = []
         for (_e, cid, title, lvl, prog, price) in rows:
-            bar = "[" + ("#"*(prog//10)).ljust(10, ".") + "]"
+            bar = colored_bar(prog)
             table.append([cid, title, lvl, f"{prog}%", bar, price])
         print_table(table, headers=["ID","Title","Level","Progress","Bar","Price"])
         input(cinfo("Enter to continue..."))
@@ -215,6 +241,7 @@ def screen_student():
 def run_cli():
     global _current_user
     storage.init_db()
+    show_logo()
 
     if not screen_auth_first():
         return

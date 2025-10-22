@@ -62,7 +62,6 @@ def recommend(user_id: int, limit: int = 3):
         """, (level, user_id, limit))
     return storage.query_all("SELECT id,title,level,price,summary FROM courses ORDER BY price ASC LIMIT ?",(limit,))
 
-# --- Certificate helpers ---
 def get_enrollment(user_id: int, course_id: int):
     return storage.query_one(
         "SELECT id, user_id, course_id, progress FROM enrollments WHERE user_id=? AND course_id=?",
@@ -77,7 +76,6 @@ def can_issue_certificate(user_id: int, course_id: int):
         return False, f"Current progress is {row[3]}% — need 100%."
     return True, None
 
-# --- Course resources (links) ---
 def add_resource_link(course_id: int, title: str, url: str) -> int:
     cr = storage.query_one("SELECT id FROM courses WHERE id=?", (course_id,))
     if not cr:
@@ -90,3 +88,10 @@ def list_resource_links(course_id: int):
         "SELECT id, title, url, created_at FROM resources WHERE course_id=? ORDER BY created_at DESC", (course_id,)
     )
 
+def list_available_courses_for_user(user_id: int):
+    return storage.query_all("""
+        SELECT c.id, c.title, c.level, c.price, c.summary
+        FROM courses c
+        WHERE c.id NOT IN (SELECT course_id FROM enrollments WHERE user_id=?)
+        ORDER BY c.title
+    """, (user_id,))
