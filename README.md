@@ -78,8 +78,8 @@ UNIT-PROJECT-1/
 │  ├─ rsvp_mailto.py               # Builds the 'Accept / Decline' mailto buttons/links.
 │  ├─ rsvp.py                      # Manages attendee read/write/mark attendance functionality.
 │  ├─ ui.py                        # CLI widgets, Rich/Colorama styling, headers, and menus.
-│  ├─ update_hub.py                # Unified hub for event, attendee, reminder, and poster updates.
-│  └─ actions.py                   # Quick helper actions (generate poster, test email, etc.).
+│  
+│  
 ├─ outputs/
 │  └─ reports/                     # Generated PDF reports are stored here.
 ├─ .env                            # Environment file (SMTP, IMAP, API keys, etc.).

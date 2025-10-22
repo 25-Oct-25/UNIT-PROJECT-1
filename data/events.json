@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "title": "IT Innovation Workshop",
+    "date": "2025-10-22 23:00",
+    "description": "IT Innovation Workshop",
+    "location": "dammam",
+    "reminders": [],
+    "poster": null,
+    "attendees": []
+  },
+  {
+    "title": "EID aladha",
+    "date": "2025-10-22 10:21",
+    "description": "Eid Mubarak",
+    "location": "Dammam",
+    "reminders": [],
+    "poster": null,
+    "attendees": []
+  }
+]

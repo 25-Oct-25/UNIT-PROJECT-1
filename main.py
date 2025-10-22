@@ -366,7 +366,7 @@ def print_main_menu_and_get_choice():
         ("3", f"{ui.MAIL} Communication & Invites (Send, Draft, Test)"),
         ("4", f"{ui.POSTER} Generate Poster for Event"),
         ("5", f"{ui.REPORT} Reports & Reminders (Export, Schedule)"),
-        ("6", "UPDAT — Update Center (Edit details, Regenerate Poster)"), # ✅ تم تغيير 9 إلى 6
+        ("6", "UPDATE — Update Center (Edit details, Regenerate Poster)"), # ✅ تم تغيير 9 إلى 6
         ("0", "Exit"),
     ]
     return ui.menu("Creative Smart Event Manager", items)
