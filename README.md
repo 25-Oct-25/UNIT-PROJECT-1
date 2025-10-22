@@ -1,44 +1,51 @@
 # UNIT-PROJECT-1
 
+# CourseHub – Interactive Learning CLI
 
-## Based on what you’ve learned until now , create a project of your choosing (impress us with your imagination) . This project must at least satisfy the following minimum requirements :
+CourseHub is an interactive command-line (CLI) learning platform built in Python.  
+It allows students to enroll in courses, track their progress, ask AI questions about the course content,  
+and receive a PDF certificate via email upon completion.  
+Admins can manage courses and upload resource links for each course.
 
-- Must be interactive on CLI.
-- Use your coding skills in Python accurately.
-- Organize Your Code into modules & (or packages)
-- Use git & Github to track changes in your code.
+---
 
-## Example Project :  An online Grocery Store :
+# Features
 
-#### Overview : An online store that sells fruits to customers. This online store has 2 main users. The customer and the manager of the store . Each one of them should be able to do the following tasks for the store to function properly . 
+# Authentication
 
-### Features & User Stories
-#### As a customer I should be able to do the following :
-- Browse  Products . 
-- View the product info (summary, specs, price, quantity , etc.)
-- Search for Products.
-- Get recommendations for my next purchase based on my purchase history.
-- Add Products to the shopping cart .
-- Remove a product from the shopping cart.
-- List the products in my shopping cart. 
-- Continue to checkout . 
-- Fill in my address for delivery.
-- Get receipt of my purchases.
-- Check delivery status . 
+- Login as Student or Admin (role-based access).
+- Case-insensitive email and name (e.g., John@Gmail.com = john@gmail.com).
+- Admin PIN: 1234.
 
+# Admin Features
 
+- Add new courses with title, level, price, and summary.
+- Add and list resource links for each course (e.g., YouTube videos).
+- View all available courses.
 
-#### Usage :
- Explain to the user how to use your project . 
- for example:
- - type in search product_name to search for a product.
- - type in list_products to show all the products in the grocery.
- - type in show product_name to get information about this product.
- - type in buy product_name to buy the product . 
- - and so on...
+# Student Features
 
+- View and enroll in available courses.
+- View enrolled courses with progress bars and levels.
+- Update progress percentage.
+- View course resource links.
+- Ask questions to the built-in AI Assistant (Gemini) within the course.
+- Generate a PDF certificate and automatically receive it via email with a congratulatory message.
+- Get personalized course recommendations.
 
-### For your project. Edit this README.md file to include your own project name,  overview, user stories, and usage. 
+# AI Integration
 
-### NOTE: before submitting the final project, please do the following command:
-`pip freeze > requirements.txt` to enable use to know & use the packages used in your project.
+The system uses Google Gemini API (google-generativeai) to provide intelligent responses to students' questions inside each course.  
+If the quota is exceeded, it automatically falls back to lighter models such as gemini-2.5-flash-lite.
+
+# Email Integration
+
+When a student completes a course, student can request to a PDF certificate is generated and sent via email.
+
+# Developer
+
+Developed by: Abdulrahman Al-Qahtani  
+Project: UNIT PROJECT 1 – Tuwaiq Academy  
+College: Jubail Industrial College  
+Language: Python  
+Year: 2025
