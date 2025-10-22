@@ -32,8 +32,17 @@ The Admin manages the inventory, while the Guest can browse available cars, get 
 
 
 ## Usage
+First you need to export your GOOGLE_API_KEY like this :
+* on macOS:
+```bash
+export GOOGLE_API_KEY="YOUR_API_KEY_HERE"
+```
+* on Windows:
+```bash
+set GOOGLE_API_KEY="YOUR_API_KEY_HERE"
+```
 
-First, start the application by running `main.py` from your terminal:
+Then, start the application by running `main.py` from your terminal:
 
 ```bash
 python main.py
