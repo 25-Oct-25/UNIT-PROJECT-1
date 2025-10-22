@@ -1,5 +1,5 @@
 #import translator package
-from googletrans import Translator
+from google_trans_new import google_translator
 
 #Create object
 
@@ -11,10 +11,10 @@ def quick_translator (phrase:str, target_language:str) ->str:
     and the second one for a target language
     The function return the text after translate
     '''
-    translator = Translator()
+    translator = google_translator()
     #Call Translate method
     translated_phrase = translator.translate(phrase, dest = target_language)
-    return translated_phrase.text
+    return translated_phrase
 
 
 #Function test
