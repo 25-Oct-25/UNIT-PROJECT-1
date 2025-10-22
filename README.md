@@ -15,7 +15,8 @@
 - ⭐ Product Ratings and Reviews system
 - 📊 Product Sorting by rating or best-selling
 - 💰 Discount Coupons for special savings
-- 👨‍💼 For Administrators:
+
+## 👨‍💼 For Administrators:
 - 🔐 Secure Login with encrypted passwords
 - ➕ Add New Products to inventory
 - ✏️ Edit Existing Products information
