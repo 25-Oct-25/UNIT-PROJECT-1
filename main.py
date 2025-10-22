@@ -110,9 +110,9 @@ while True:
 
                 if search_type == "1":
                     search_phrase = input("Enter searching type: ")
-                    search_result = list(filter(lambda translator: translator. s == search_phrase pass)) #هنا توقفت _راح اضيف نوع الترجمة و مجالها في الكلاس الأم ، بعدها أرجع هنا أكمل
-                    for index, trans_list in enumerate (translator_list):
-
+                    search_result = list(filter(lambda translator: translator.translation_type == search_phrase, translator_list = [] )) 
+                    for index, trans_list in enumerate (search_result):
+                        print("")#هنا أكمل
                         pass
                 elif search_type == "2":
                     pass
@@ -123,6 +123,10 @@ while True:
                 continue
             else: print("Wrong input, please enter a valid choice.")
     elif user_input == "2":
+        if len(company_list) == 0:
+            print("The list is empty, there is not translator available ..\n" \
+            "Try later.") 
+               
         pass
     elif user_input == "3":
         #To determine the user type if the user translator 
