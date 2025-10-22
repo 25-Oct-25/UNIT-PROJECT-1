@@ -1,0 +1,488 @@
+[
+  {
+    "timestamp": "2025-10-20 20:20:30",
+    "players": [
+      "Maha Saud",
+      "Raghad Saud"
+    ],
+    "mode": "single-level",
+    "source": "Local question bank",
+    "results_sorted": [
+      {
+        "name": "Raghad Saud",
+        "score": 80.0,
+        "avg_time": 17.757,
+        "label": "Fast Thinker",
+        "message": "Rating: fast thinker. | Solid confidence and steady pace. | Smart and swift analysis. | Tip: use 'with' for safe file handling. | avg time 17.76s",
+        "dev_plan": "Development plan:\n- lists/enumerate: Practice enumerate and list comprehensions; predict outputs first.\n- Speed note: your average is 17.76s — answer first, then quickly verify to reduce time.\n- Action: focus on one weak topic per day and summarize afterward."
+      },
+      {
+        "name": "Maha Saud",
+        "score": 40.0,
+        "avg_time": 50.622,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice. | Solid confidence and steady pace. | Smart and swift analysis. | Tip: use 'with' for safe file handling. | avg time 50.62s",
+        "dev_plan": "Development plan:\n- generators/yield: Write a tiny generator with yield and step through with next().\n- dicts: Practice dict.get(key, default) vs direct indexing.\n- basics: Reinforce: def/print/len/==/is and common data types.\n- Speed note: your average is 50.62s — answer first, then quickly verify to reduce time.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-20 21:39:27",
+    "players": [
+      "maha"
+    ],
+    "mode": "single-level",
+    "source": "Local question bank",
+    "results_sorted": [
+      {
+        "name": "maha",
+        "score": 0.0,
+        "avg_time": 1.513,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice. | Solid confidence and steady pace. | Your code smiles when answers are precise. | Tip: sets help remove duplicates and test membership. | avg time 1.51s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- slicing/strings: Review slicing: s[start:end:step]; remember end is exclusive.\n- lists/enumerate: Practice enumerate and list comprehensions; predict outputs first.\n- Speed note: your average is 1.51s — good rhythm; keep precision high.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-20 21:48:28",
+    "players": [
+      "a"
+    ],
+    "mode": "single-level",
+    "source": "Local question bank",
+    "results_sorted": [
+      {
+        "name": "a",
+        "score": 0.0,
+        "avg_time": 1.171,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nClear and organized thinking.\nSmart and swift analysis.\nTip: use 'with' for safe file handling.\nAverage time: 1.17s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- sets: Remember sets remove duplicates; membership is usually O(1).\n- generators/yield: Write a tiny generator with yield and step through with next().\n- Speed note: your average is 1.17s — good rhythm; keep precision high.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-20 21:50:58",
+    "players": [
+      "s"
+    ],
+    "mode": "single-level",
+    "source": "Local question bank",
+    "results_sorted": [
+      {
+        "name": "s",
+        "score": 0.0,
+        "avg_time": 1.039,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nStrong performance.\nSmart and swift analysis.\nTip: list comprehensions simplify transformations.\nAverage time: 1.04s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- sets: Remember sets remove duplicates; membership is usually O(1).\n- generators/yield: Write a tiny generator with yield and step through with next().\n- Speed note: your average is 1.04s — good rhythm; keep precision high.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-20 22:04:26",
+    "players": [
+      "اا"
+    ],
+    "mode": "single-level",
+    "source": "Local question bank",
+    "results_sorted": [
+      {
+        "name": "اا",
+        "score": 0.0,
+        "avg_time": 0.893,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nResults to be proud of.\nPython seems like your daily companion.\nTip: list comprehensions simplify transformations.\nAverage time: 0.89s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- dicts: Practice dict.get(key, default) vs direct indexing.\n- lists/enumerate: Practice enumerate and list comprehensions; predict outputs first.\n- Speed note: your average is 0.89s — good rhythm; keep precision high.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-20 22:06:01",
+    "players": [
+      "d",
+      "f"
+    ],
+    "mode": "single-level",
+    "source": "Local question bank",
+    "results_sorted": [
+      {
+        "name": "f",
+        "score": 0.0,
+        "avg_time": 0.68,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nSolid confidence and steady pace.\nSmart and swift analysis.\nTip: enumerate gives (index, value) pairs.\nAverage time: 0.68s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- slicing/strings: Review slicing: s[start:end:step]; remember end is exclusive.\n- sets: Remember sets remove duplicates; membership is usually O(1).\n- Speed note: your average is 0.68s — good rhythm; keep precision high.\n- Action: solve 10 short questions today in each weak topic."
+      },
+      {
+        "name": "d",
+        "score": 0.0,
+        "avg_time": 0.773,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nStrong performance.\nYour logic reads like clean code.\nTip: list comprehensions simplify transformations.\nAverage time: 0.77s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- lists/enumerate: Practice enumerate and list comprehensions; predict outputs first.\n- slicing/strings: Review slicing: s[start:end:step]; remember end is exclusive.\n- Speed note: your average is 0.77s — good rhythm; keep precision high.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-20 23:55:51",
+    "players": [
+      "mmm"
+    ],
+    "mode": "single-level",
+    "source": "Local question bank",
+    "results_sorted": [
+      {
+        "name": "mmm",
+        "score": 0.0,
+        "avg_time": 4.286,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nClear and organized thinking.\nYour logic reads like clean code.\nTip: enumerate gives (index, value) pairs.\nAverage time: 4.29s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- dicts: Practice dict.get(key, default) vs direct indexing.\n- sets: Remember sets remove duplicates; membership is usually O(1).\n- Speed note: your average is 4.29s — answer first, then quickly verify to reduce time.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-20 23:59:44",
+    "players": [
+      "sara"
+    ],
+    "mode": "single-level",
+    "source": "Local question bank",
+    "results_sorted": [
+      {
+        "name": "sara",
+        "score": 40.0,
+        "avg_time": 5.209,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nClear and organized thinking.\nYour code smiles when answers are precise.\nTip: sets help remove duplicates and test membership.\nAverage time: 5.21s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- dicts: Practice dict.get(key, default) vs direct indexing.\n- Speed note: your average is 5.21s — answer first, then quickly verify to reduce time.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-21 00:01:02",
+    "players": [
+      "hhhhh"
+    ],
+    "mode": "single-level",
+    "source": "Local question bank",
+    "results_sorted": [
+      {
+        "name": "hhhhh",
+        "score": 0.0,
+        "avg_time": 0.834,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nStrong performance.\nSmart and swift analysis.\nTip: enumerate gives (index, value) pairs.\nAverage time: 0.83s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- sets: Remember sets remove duplicates; membership is usually O(1).\n- lists/enumerate: Practice enumerate and list comprehensions; predict outputs first.\n- Speed note: your average is 0.83s — good rhythm; keep precision high.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-21 00:42:49",
+    "players": [
+      "lolo"
+    ],
+    "mode": "single-level",
+    "source": "Local question bank",
+    "results_sorted": [
+      {
+        "name": "lolo",
+        "score": 0.0,
+        "avg_time": 1.04,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nConsistency leads to improvement.\nYour code smiles when answers are precise.\nTip: enumerate gives (index, value) pairs.\nAverage time: 1.04s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- lists/enumerate: Practice enumerate and list comprehensions; predict outputs first.\n- dicts: Practice dict.get(key, default) vs direct indexing.\n- Speed note: your average is 1.04s — good rhythm; keep precision high.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-21 08:22:16",
+    "players": [
+      "mimi"
+    ],
+    "mode": "single-level",
+    "source": "AI-generated (OpenAI)",
+    "results_sorted": [
+      {
+        "name": "mimi",
+        "score": 20.0,
+        "avg_time": 19.63,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nStrong performance.\nSmart and swift analysis.\nTip: sets help remove duplicates and test membership.\nAverage time: 19.63s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- lists/enumerate: Practice enumerate and list comprehensions; predict outputs first.\n- dicts: Practice dict.get(key, default) vs direct indexing.\n- Speed note: your average is 19.63s — answer first, then quickly verify to reduce time.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-21 08:50:45",
+    "players": [
+      "nora"
+    ],
+    "mode": "single-level",
+    "source": "Local question bank",
+    "results_sorted": [
+      {
+        "name": "nora",
+        "score": 0.0,
+        "avg_time": 0.748,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nResults to be proud of.\nYour logic reads like clean code.\nTip: f-strings are fast and readable.\nAverage time: 0.75s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- slicing/strings: Review slicing: s[start:end:step]; remember end is exclusive.\n- sets: Remember sets remove duplicates; membership is usually O(1).\n- Speed note: your average is 0.75s — good rhythm; keep precision high.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-21 09:09:24",
+    "players": [
+      "Amwaj"
+    ],
+    "mode": "single-level",
+    "source": "Local question bank",
+    "results_sorted": [
+      {
+        "name": "Amwaj",
+        "score": 80.0,
+        "avg_time": 22.353,
+        "label": "Fast Thinker",
+        "message": "Rating: fast thinker.\nClear and organized thinking.\nYour logic reads like clean code.\nTip: enumerate gives (index, value) pairs.\nAverage time: 22.35s",
+        "dev_plan": "Development plan:\n- sets: Remember sets remove duplicates; membership is usually O(1).\n- Speed note: your average is 22.35s — answer first, then quickly verify to reduce time.\n- Action: focus on one weak topic per day and summarize afterward."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-21 09:34:02",
+    "players": [
+      "Amwaj"
+    ],
+    "mode": "single-level",
+    "source": "AI-generated (OpenAI)",
+    "results_sorted": [
+      {
+        "name": "Amwaj",
+        "score": 0.0,
+        "avg_time": 19.942,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nConsistency leads to improvement.\nYour logic reads like clean code.\nTip: f-strings are fast and readable.\nAverage time: 19.94s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- lists/enumerate: Practice enumerate and list comprehensions; predict outputs first.\n- dicts: Practice dict.get(key, default) vs direct indexing.\n- Speed note: your average is 19.94s — answer first, then quickly verify to reduce time.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-21 09:41:43",
+    "players": [
+      "kk"
+    ],
+    "mode": "single-level",
+    "source": "Local question bank",
+    "results_sorted": [
+      {
+        "name": "kk",
+        "score": 0.0,
+        "avg_time": 0.946,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nSolid confidence and steady pace.\nYour logic reads like clean code.\nTip: sets help remove duplicates and test membership.\nAverage time: 0.95s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- lists/enumerate: Practice enumerate and list comprehensions; predict outputs first.\n- dicts: Practice dict.get(key, default) vs direct indexing.\n- Speed note: your average is 0.95s — good rhythm; keep precision high.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-21 16:12:34",
+    "players": [
+      "rafah",
+      "jod"
+    ],
+    "mode": "single-level",
+    "source": "Local MCQ Bank",
+    "results_sorted": [
+      {
+        "name": "jod",
+        "score": 60.0,
+        "avg_time": 2.23,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nResults to be proud of.\nSmart and swift analysis.\nTip: sets help remove duplicates and test membership.\nAverage time: 2.23s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- Speed note: your average is 2.23s — good rhythm; keep precision high.\n- Action: solve 10 short questions today in each weak topic."
+      },
+      {
+        "name": "rafah",
+        "score": 20.0,
+        "avg_time": 17.407,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nSolid confidence and steady pace.\nPython seems like your daily companion.\nTip: use 'with' for safe file handling.\nAverage time: 17.41s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- generators/yield: Write a tiny generator with yield and step through with next().\n- Speed note: your average is 17.41s — answer first, then quickly verify to reduce time.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-21 16:15:38",
+    "players": [
+      "didi"
+    ],
+    "mode": "single-level",
+    "source": "Local MCQ Bank",
+    "results_sorted": [
+      {
+        "name": "didi",
+        "score": 40.0,
+        "avg_time": 0.742,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nResults to be proud of.\nSmart and swift analysis.\nTip: enumerate gives (index, value) pairs.\nAverage time: 0.74s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- Speed note: your average is 0.74s — good rhythm; keep precision high.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-21 16:30:21",
+    "players": [
+      "aaaaaa"
+    ],
+    "mode": "single-level",
+    "source": "Local MCQ Bank",
+    "results_sorted": [
+      {
+        "name": "aaaaaa",
+        "score": 40.0,
+        "avg_time": 0.995,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nClear and organized thinking.\nYour logic reads like clean code.\nTip: enumerate gives (index, value) pairs.\nAverage time: 0.99s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- Speed note: your average is 0.99s — good rhythm; keep precision high.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-21 17:54:54",
+    "players": [
+      "ghadah"
+    ],
+    "mode": "single-level",
+    "source": "Local MCQ Bank",
+    "results_sorted": [
+      {
+        "name": "ghadah",
+        "score": 20.0,
+        "avg_time": 77.244,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nStrong performance.\nSmart and swift analysis.\nTip: f-strings are fast and readable.\nAverage time: 77.24s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- Speed note: your average is 77.24s — answer first, then quickly verify to reduce time.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-21 18:03:48",
+    "players": [
+      "wwww"
+    ],
+    "mode": "single-level",
+    "source": "Local MCQ Bank",
+    "results_sorted": [
+      {
+        "name": "wwww",
+        "score": 40.0,
+        "avg_time": 2.004,
+        "label": "Needs Practice",
+        "message": "Rating: needs more practice.\nClear and organized thinking.\nYour code smiles when answers are precise.\nTip: enumerate gives (index, value) pairs.\nAverage time: 2.00s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- Speed note: your average is 2.00s — good rhythm; keep precision high.\n- Action: solve 10 short questions today in each weak topic."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-21 19:53:22",
+    "players": [
+      "foz"
+    ],
+    "mode": "single-level",
+    "source": "Local MCQ Bank",
+    "results_sorted": [
+      {
+        "name": "foz",
+        "score": 80.0,
+        "avg_time": 22.286,
+        "label": "Fast Thinker",
+        "message": "Rating: fast thinker.\nStrong performance.\nPython seems like your daily companion.\nTip: list comprehensions simplify transformations.\nAverage time: 22.29s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- Speed note: your average is 22.29s — answer first, then quickly verify to reduce time.\n- Action: focus on one weak topic per day and summarize afterward."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-23 00:11:02",
+    "players": [
+      "maha",
+      "memo"
+    ],
+    "mode": "single-level",
+    "source": "Local MCQ Bank",
+    "results_sorted": [
+      {
+        "name": "memo",
+        "score": 100.0,
+        "avg_time": 3.628,
+        "label": "Excellent",
+        "message": "Rating: excellent.\nClear and organized thinking.\nYour logic reads like clean code.\nTip: f-strings are fast and readable.\nAverage time: 3.63s",
+        "dev_plan": "Development plan: no notable mistakes. Maintain your pace and focus on precision."
+      },
+      {
+        "name": "maha",
+        "score": 80.0,
+        "avg_time": 4.354,
+        "label": "Fast Thinker",
+        "message": "Rating: fast thinker.\nConsistency leads to improvement.\nYour logic reads like clean code.\nTip: enumerate gives (index, value) pairs.\nAverage time: 4.35s",
+        "dev_plan": "Development plan:\n- basics: Reinforce: def/print/len/==/is and common data types.\n- Speed note: your average is 4.35s — answer first, then quickly verify to reduce time.\n- Action: focus on one weak topic per day and summarize afterward."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-23 00:15:07",
+    "players": [
+      "saud",
+      "fahad"
+    ],
+    "mode": "single-level",
+    "source": "Local MCQ Bank",
+    "results_sorted": [
+      {
+        "name": "fahad",
+        "score": 100.0,
+        "avg_time": 2.283,
+        "label": "Excellent",
+        "message": "Rating: excellent.\nStrong performance.\nYour code smiles when answers are precise.\nTip: sets help remove duplicates and test membership.\nAverage time: 2.28s",
+        "dev_plan": "Development plan: no notable mistakes. Pace is excellent."
+      },
+      {
+        "name": "saud",
+        "score": 100.0,
+        "avg_time": 3.211,
+        "label": "Excellent",
+        "message": "Rating: excellent.\nClear and organized thinking.\nYour logic reads like clean code.\nTip: list comprehensions simplify transformations.\nAverage time: 3.21s",
+        "dev_plan": "Development plan: no notable mistakes. Maintain your pace and focus on precision."
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-23 00:16:38",
+    "players": [
+      "lili",
+      "gogo"
+    ],
+    "mode": "single-level",
+    "source": "Local MCQ Bank",
+    "results_sorted": [
+      {
+        "name": "gogo",
+        "score": 100.0,
+        "avg_time": 2.45,
+        "label": "Excellent",
+        "message": "Rating: excellent.\nResults to be proud of.\nSmart and swift analysis.\nTip: use 'with' for safe file handling.\nAverage time: 2.45s",
+        "dev_plan": "Development plan: no notable mistakes. Pace is excellent."
+      },
+      {
+        "name": "lili",
+        "score": 100.0,
+        "avg_time": 2.453,
+        "label": "Excellent",
+        "message": "Rating: excellent.\nStrong performance.\nYour logic reads like clean code.\nTip: enumerate gives (index, value) pairs.\nAverage time: 2.45s",
+        "dev_plan": "Development plan: no notable mistakes. Pace is excellent."
+      }
+    ]
+  }
+]

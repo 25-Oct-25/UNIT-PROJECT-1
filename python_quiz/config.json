@@ -1,0 +1,15 @@
+{
+  "num_easy": 2,
+  "num_medium": 2,
+  "num_hard": 1,
+  "save_pdf": false,
+  "save_csv": true,
+  "colors": {
+    "easy": "green",
+    "medium": "yellow",
+    "hard": "red",
+    "title": "cyan",
+    "ok": "green",
+    "warn": "magenta"
+  }
+}
