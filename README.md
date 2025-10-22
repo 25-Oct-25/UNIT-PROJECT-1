@@ -1,44 +1,28 @@
-# UNIT-PROJECT-1
+🏀 Fantasy Basketball Trade Analyzer
 
+A Python-based command-line application designed to provide objective, category-based analysis for fantasy basketball trades. It uses the Z-Score methodology to calculate the normalized fantasy value of players across nine standard categories (9-CAT), helping users determine which side wins a proposed trade.
 
-## Based on what you’ve learned until now , create a project of your choosing (impress us with your imagination) . This project must at least satisfy the following minimum requirements :
+The application features an interactive menu, season selection, robust typo correction (fuzzy matching), and a styled console output using rich library.
 
-- Must be interactive on CLI.
-- Use your coding skills in Python accurately.
-- Organize Your Code into modules & (or packages)
-- Use git & Github to track changes in your code.
+Features:
 
-## Example Project :  An online Grocery Store :
+- Objective Analysis (9-CAT): Analyzes players based on the nine standard fantasy categories (PTS, REB, AST, STL, BLK, FG%, FT%, 3PM, TOV).
 
-#### Overview : An online store that sells fruits to customers. This online store has 2 main users. The customer and the manager of the store . Each one of them should be able to do the following tasks for the store to function properly . 
+- Z-Score Methodology: Calculates each player's value based on Standard Deviations from the league mean, providing a clear, normalized Total Z-Score.
 
-### Features & User Stories
-#### As a customer I should be able to do the following :
-- Browse  Products . 
-- View the product info (summary, specs, price, quantity , etc.)
-- Search for Products.
-- Get recommendations for my next purchase based on my purchase history.
-- Add Products to the shopping cart .
-- Remove a product from the shopping cart.
-- List the products in my shopping cart. 
-- Continue to checkout . 
-- Fill in my address for delivery.
-- Get receipt of my purchases.
-- Check delivery status . 
+- Interactive Menu: Seamlessly switch between viewing individual player stats and analyzing complex trades.
 
+- Season Selector: Fetches official NBA data for the specific season you choose (e.g., 2024-25, 2023-24,...).
 
+- Fuzzy Matching & Correction: Handles common player name typos (e.g., typing "Lebrone" will suggest "LeBron James").
 
-#### Usage :
- Explain to the user how to use your project . 
- for example:
- - type in search product_name to search for a product.
- - type in list_products to show all the products in the grocery.
- - type in show product_name to get information about this product.
- - type in buy product_name to buy the product . 
- - and so on...
+- Styled Output: Uses the rich library for highly readable, colored, and professional-looking tables and reports.
 
+ Install Dependencies:
 
-### For your project. Edit this README.md file to include your own project name,  overview, user stories, and usage. 
+ The application relies on several powerful Python packages:
 
-### NOTE: before submitting the final project, please do the following command:
-`pip freeze > requirements.txt` to enable use to know & use the packages used in your project.
+ - nba_api
+ - pandas
+ - fuzzywuzzy
+ - rich

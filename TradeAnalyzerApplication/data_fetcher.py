@@ -1,23 +1,23 @@
-import pandas as pd
+from rich.console import Console
 from nba_api.stats.endpoints import leaguedashplayerstats
 
 class DataFetcher:
-    '''Handles fetching row NBA player stats and initial data preparation.'''
+    '''Handles fetching NBA player stats and initial data preparation.'''
 
     def __init__(self, season= '2024-25', min_gp=20, categories= []):
 
         self.season= season
         self.min_gp= min_gp
         self.categories= categories
+        self.console= Console()
 
     def fetch_and_prepare(self):
         '''Fetches player stats from the NBA API and filters the DataFrame.'''
-        print(f"fetching stats for season {self.season}...")
 
         try:
             data = leaguedashplayerstats.LeagueDashPlayerStats(
                 season=self.season,
-                per_mode_simple = 'PerGame'
+                per_mode_detailed= 'PerGame'
             )
 
             df= data.get_data_frames()[0]
@@ -38,5 +38,6 @@ class DataFetcher:
         df_stats['FTA'] = df_filtered['FTA']
 
 
-        print(f"Data fetched and filtered successfuly. Found {len(df_stats)} qualified players.")
+        self.console.print(f"[bold blue]Data fetched and filtered successfuly. Found [cyan]{len(df_stats)}[/cyan] qualified players.")
         return df_stats
+    
