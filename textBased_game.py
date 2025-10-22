@@ -4,8 +4,8 @@ LAST_BOSS_UNLOCK_LEVEL = 3
 class Player:
 
     ROLES_INITIAL_STATS = {
-        "Paladin": {"HP": 120, "ATK": 15, "DEFENSE": 30, 'COINS': 20, 'WEAPON': 'Wooden Sword'},
-        "Knight":  {"HP": 140, "ATK": 18, "DEFENSE": 25, 'COINS': 20, 'WEAPON': 'Simple Axe'}
+        "Paladin": {"HP": 120, "ATK": 15, "DEFENSE": 2, 'COINS': 20, 'WEAPON': 'Wooden Sword'},
+        "Knight":  {"HP": 140, "ATK": 18, "DEFENSE": 1, 'COINS': 20, 'WEAPON': 'Simple Axe'}
     }
 
     SHOP_ITEMS = {
@@ -14,7 +14,7 @@ class Player:
         'Heal Potion': {'Price': 20, 'Effect': 10, 'Type': 'Consumable'}
     }
 
-    def __init__(self, name: str, role: str, loaded_data = None):
+    def __init__(self, name: str = "", role: str = "", loaded_data = None):
         
         if loaded_data:
             self.__dict__.update(loaded_data)
@@ -42,7 +42,7 @@ class Player:
     def display_stats(self):
         print("\nYour current stats:")
         print(f"Role: {self.role}, HP: {self.current_hp} / {self.max_hp}, Level: {self.level}")
-        print(f"Attack: {self.atk}, Defense: {self.defense}")
+        print(f"ATK: {self.atk}, DEF: {self.defense}")
         print(f"Coins: {self.coins}, XP: {self.xp}")
         print(f"Weapon: {self.weapon}")
 
