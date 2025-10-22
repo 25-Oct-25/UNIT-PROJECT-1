@@ -1,0 +1,15 @@
+{
+    "name": "norah",
+    "role": "Knight",
+    "level": 1,
+    "xp": 0,
+    "inventory": {
+        "Heal Potion": 1
+    },
+    "max_hp": 140,
+    "current_hp": 140,
+    "atk": 18,
+    "defense": 25,
+    "coins": 0,
+    "weapon": "Simple Axe"
+}
