@@ -1,0 +1,10 @@
+python-dotenv
+colorama
+art
+rich
+schedule
+requests
+qrcode
+fpdf2
+google-generativeai
+openai
