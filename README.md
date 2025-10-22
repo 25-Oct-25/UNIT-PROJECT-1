@@ -38,10 +38,10 @@ Create a .env file in the project root directory.
 
 Add your credentials:
 
-HUGGINGFACE_API_KEY=your_huggingface_api_key
-EMAIL_SENDER=your_email@gmail.com
-EMAIL_PASSWORD=your_email_password
-ENCRYPTION_KEY=your_secret_key
+1. HUGGINGFACE_API_KEY=your_huggingface_api_key
+2. EMAIL_SENDER=your_email@gmail.com
+3. EMAIL_PASSWORD=your_email_password
+4. ENCRYPTION_KEY=your_secret_key
 
 
 Then run the program in your terminal.
