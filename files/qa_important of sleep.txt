@@ -1,5 +1,3 @@
-Generated Q&A Pairs:
-
 Q1: Why is sleep considered essential?
 A1: You can't function or survive without it.
 

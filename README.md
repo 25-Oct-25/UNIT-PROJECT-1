@@ -1,44 +1,78 @@
 # UNIT-PROJECT-1
 
+Smart Video Assistant system
 
-## Based on what you’ve learned until now , create a project of your choosing (impress us with your imagination) . This project must at least satisfy the following minimum requirements :
+Overview:
 
-- Must be interactive on CLI.
-- Use your coding skills in Python accurately.
-- Organize Your Code into modules & (or packages)
-- Use git & Github to track changes in your code.
+In today’s fast-paced world, people no longer have enough time to watch long videos or follow full visual content, which makes it difficult to extract important information efficiently.
+To address this need, the Smart Video Assistant project was designed as an intelligent tool that helps users analyze videos and extract the most important information from them.
 
-## Example Project :  An online Grocery Store :
+The system converts video content into readable text, making it especially useful for individuals with hearing impairments.
+It then generates a concise summary and a set of questions and answers that help users quickly understand and review the content later.
 
-#### Overview : An online store that sells fruits to customers. This online store has 2 main users. The customer and the manager of the store . Each one of them should be able to do the following tasks for the store to function properly . 
+Features:
+As a user, you should be able to:
 
-### Features & User Stories
-#### As a customer I should be able to do the following :
-- Browse  Products . 
-- View the product info (summary, specs, price, quantity , etc.)
-- Search for Products.
-- Get recommendations for my next purchase based on my purchase history.
-- Add Products to the shopping cart .
-- Remove a product from the shopping cart.
-- List the products in my shopping cart. 
-- Continue to checkout . 
-- Fill in my address for delivery.
-- Get receipt of my purchases.
-- Check delivery status . 
+Create a new account (Sign Up).
+Log in (Login).
+Process a new video:
+Generate a Transcript of the video content.
+Create an intelligent Summary of the video.
+Generate Questions and Answers (Q&A) from the extracted text.
+Save the results as PDF files within the system.
+Automatically receive the files via email.
+View the History of all previously processed videos:
+Reopen any saved file for review or resend it via email.
+Log out securely.
 
+Usage:
+To use the Smart Video Assistant system, follow these steps:
 
+Run the system
+The start screen displays two options:
+Login – to log into an existing account.
+Sign Up – to create a new account.
 
-#### Usage :
- Explain to the user how to use your project . 
- for example:
- - type in search product_name to search for a product.
- - type in list_products to show all the products in the grocery.
- - type in show product_name to get information about this product.
- - type in buy product_name to buy the product . 
- - and so on...
+Choose your operation after logging in:
+Process a new video – to analyze a new video.
+View History – to view previously processed videos.
 
+When selecting “Process a new video”:
+Enter the path of the video from your device.
+The system supports only MP4 (for video) and WAV (for audio) formats.
 
-### For your project. Edit this README.md file to include your own project name,  overview, user stories, and usage. 
+After processing, you will see the following options:
+Convert to Text – to extract the transcript.
+Summarize – to generate a smart summary.
+Generate Q&A – to create interactive questions and answers.
 
-### NOTE: before submitting the final project, please do the following command:
-`pip freeze > requirements.txt` to enable use to know & use the packages used in your project.
+After choosing an operation:
+You can save the result as a PDF file.
+You can also send it directly to your registered email.
+
+View History:
+Allows you to review all previously processed files, reopen them, or resend them to your email.
+
+Technical Steps:
+
+Extract Audio from Video
+(using FFmpeg)
+⬇️
+Convert Audio to Text (Transcription)
+(using Whisper – OpenAI)
+⬇️
+Summarize the Text (Summarization)
+(using BART Large CNN – Facebook AI)
+⬇️
+Generate Questions and Answers (Q&A Generation)
+(using Gemini 2.5 – Google DeepMind)
+⬇️
+Create a PDF Report
+(using FPDF)
+⬇️
+Send the Results to the User via Email
+(using smtplib)
+⬇️
+Save User Files and History
+(using JSON Files)
+

@@ -28,5 +28,4 @@ class GeneratePDF:
             pdf.multi_cell(0, 10, line)
 
         pdf.output(filename)
-        print(f"PDF saved successfully as '{filename}'")
         return filename

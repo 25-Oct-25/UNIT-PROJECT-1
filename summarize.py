@@ -33,39 +33,3 @@ class Summarizer:
 
         final_summary = " ".join(summaries)
         return final_summary
-
-
-
-'''def summarize_pdf():
-    """
-    Reads PDF content and uses summarize_text() to summarize it.
-    """
-    file_path = input("\nEnter the name of your PDF file (e.g., report.pdf): ")
-
-    if not file_path.endswith(".pdf"):
-        file_path += ".pdf"
-
-    print("\nReading PDF file...")
-    try:
-        reader = PdfReader(file_path)
-    except Exception as e:
-        print(f"Could not open file: {e}")
-        return
-
-    pdf_text = ""
-    for i, page in enumerate(reader.pages, 1):
-        text = page.extract_text()
-        if text:
-            pdf_text += text + "\n"
-        print(f"Extracted text from page {i}/{len(reader.pages)}")
-
-    if not pdf_text.strip():
-        print("Could not extract text. The PDF might be image-based.")
-        return
-
-    summary = summarize_text(pdf_text)
-
-    with open("pdf_summary.txt", "w", encoding="utf-8") as f:
-        f.write(summary)
-    print("\nSummary saved in pdf_summary.txt")
-'''

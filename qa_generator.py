@@ -6,7 +6,7 @@ import logging
 
 class QAGenerator:
     def __init__(self):
-         # 🔹 Hide unwanted logs and warnings
+         #  Hide unwanted logs and warnings
         os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
         warnings.filterwarnings("ignore")
         logging.getLogger("absl").setLevel(logging.ERROR)
@@ -17,14 +17,15 @@ class QAGenerator:
 
     def generate_qa(self, text):
         """Generate 5 question-answer pairs using Gemini API."""
-        print(f"📝 Text received for Q&A generation (length: {len(text)})")
+        print(f"Text received for Q&A generation (length: {len(text)})")
 
         if not text or len(text.strip()) < 100:
             return "The text is too short to generate meaningful Q&A. Please ensure the transcription is correct."
 
         prompt = f"""
-        You are an intelligent Q&A generator.
-        Read the following transcript carefully and generate 5 meaningful question-answer pairs in this format:
+        You are a smart Q&A generator.
+        Generate a suitable number (between 5 and 15) of question-answer pairs 
+        based on the information density of the text.:
 
         Q1: [question]
         A1: [answer]
