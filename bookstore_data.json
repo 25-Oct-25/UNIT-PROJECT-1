@@ -4,7 +4,7 @@
             "author": "J.R.R. Tolkien",
             "description": "Epic fantasy novel.",
             "price": 25.0,
-            "quantity": 10,
+            "quantity": 9,
             "isbn": "978-0618260274",
             "genre": "Fantasy",
             "reviews": []
@@ -71,8 +71,15 @@
         "mjeed": {
             "password": "1234",
             "email": "abdulmajeedalbaqami4@gmail.com",
-            "address": {},
-            "purchase_history": [],
+            "address": {
+                "street": "939",
+                "city": "Ryiadh",
+                "state": "Ryiadh",
+                "zip_code": "12311"
+            },
+            "purchase_history": [
+                "33a7ecce-c4f9-4704-8160-2e61d99fa7b1"
+            ],
             "cart": {}
         },
         "abdulmajeed": {
@@ -83,5 +90,21 @@
             "cart": {}
         }
     },
-    "orders": {}
+    "orders": {
+        "33a7ecce-c4f9-4704-8160-2e61d99fa7b1": {
+            "username": "mjeed",
+            "items": {
+                "The Lord of the Rings": 1
+            },
+            "total_amount": 25.0,
+            "shipping_address": {
+                "street": "939",
+                "city": "Ryiadh",
+                "state": "Ryiadh",
+                "zip_code": "12311"
+            },
+            "order_date": "2025-10-23 00:46:58",
+            "status": "Processing"
+        }
+    }
 }

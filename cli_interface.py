@@ -1,6 +1,7 @@
 # cli_interface.py
 
 import sys
+from colorama import Fore, Back, Style
 from user_manager import register_user, login_user, set_shipping_address, is_admin
 from book_manager import list_all_books, get_book_details, search_books, add_book_review, filter_books_by_genre, get_available_genres
 from cart_manager import add_to_cart, remove_from_cart, view_cart
@@ -10,37 +11,40 @@ from bookstore_data import save_data # Ensure data is saved on exit
 
 current_user = None
 
+
+
+
 def display_customer_menu():
-    print("\n--- Customer Menu ---")
-    print("1. Browse All Books (list_books)")
-    print("2. View Book Details (show <book_name>)")
-    print("3. Search for Books (search <query>)")
-    print("4. Filter Books by Genre (filter_by_genre <genre_name>)")
-    print("5. Add Book to Cart (add_to_cart <book_name> [quantity])")
-    print("6. Remove Book from Cart (remove_from_cart <book_name> [quantity])")
-    print("7. View Shopping Cart (view_cart)")
-    print("8. Set Shipping Address (set_address)")
-    print("9. Checkout (checkout)")
-    print("10. Check Delivery Status (check_status <order_id>)")
-    print("11. Get Recommendations (recommendations)")
-    print("12. Add Book Review (review_book <book_name>)")
-    print("13. Logout (logout)")
-    print("14. Exit Application (exit)")
-    print("---------------------")
+    print(Style.BRIGHT + Fore.LIGHTCYAN_EX + "\n--- Customer Menu ---" + Style.RESET_ALL)
+    print(Fore.LIGHTBLUE_EX + "1. Browse All Books (list_books)" + Style.RESET_ALL)
+    print(Fore.LIGHTBLUE_EX + "2. View Book Details (show <book_name>)" + Style.RESET_ALL)
+    print(Fore.LIGHTBLUE_EX + "3. Search for Books (search <query>)" + Style.RESET_ALL)
+    print(Fore.LIGHTBLUE_EX + "4. Filter Books by Genre (filter_by_genre <genre_name>)" + Style.RESET_ALL)
+    print(Fore.LIGHTBLUE_EX + "5. Add Book to Cart (add_to_cart <book_name> [quantity])" + Style.RESET_ALL)
+    print(Fore.LIGHTBLUE_EX + "6. Remove Book from Cart (remove_from_cart <book_name> [quantity])" + Style.RESET_ALL)
+    print(Fore.LIGHTBLUE_EX + "7. View Shopping Cart (view_cart)" + Style.RESET_ALL)
+    print(Fore.LIGHTBLUE_EX + "8. Set Shipping Address (set_address)" + Style.RESET_ALL)
+    print(Fore.LIGHTBLUE_EX + "9. Checkout (checkout)" + Style.RESET_ALL)
+    print(Fore.LIGHTBLUE_EX + "10. Check Delivery Status (check_status <order_id>)" + Style.RESET_ALL)
+    print(Fore.LIGHTBLUE_EX + "11. Get Recommendations (recommendations)" + Style.RESET_ALL)
+    print(Fore.LIGHTBLUE_EX + "12. Add Book Review (review_book <book_name>)" + Style.RESET_ALL)
+    print(Fore.LIGHTBLUE_EX + "13. Logout (logout)" + Style.RESET_ALL)
+    print(Fore.LIGHTBLUE_EX + "14. Exit Application (exit)" + Style.RESET_ALL)
+    print(Style.BRIGHT + Fore.LIGHTCYAN_EX + "---------------------" + Style.RESET_ALL)
 
 def display_admin_menu():
-    print("\n--- Admin Menu ---")
-    print("1. Browse All Books (list_books)")
-    print("2. View Book Details (show <book_name>)")
-    print("3. Add New Book (admin_add_book)")
-    print("4. Remove Book (admin_remove_book)")
-    print("5. View All Orders (admin_view_orders)")
-    print("6. Update Order Status (admin_update_order_status)")
-    print("7. View All Users (admin_view_users)")
-    print("8. Check Low Stock Alerts (check_low_stock)")
-    print("9. Logout (logout)")
-    print("10. Exit Application (exit)")
-    print("------------------")
+    print(Style.BRIGHT + Fore.LIGHTMAGENTA_EX + "\n--- Admin Menu ---" + Style.RESET_ALL)
+    print(Fore.LIGHTGREEN_EX + "1. Browse All Books (list_books)" + Style.RESET_ALL)
+    print(Fore.LIGHTGREEN_EX + "2. View Book Details (show <book_name>)" + Style.RESET_ALL)
+    print(Fore.LIGHTGREEN_EX + "3. Add New Book (admin_add_book)" + Style.RESET_ALL)
+    print(Fore.LIGHTGREEN_EX + "4. Remove Book (admin_remove_book)" + Style.RESET_ALL)
+    print(Fore.LIGHTGREEN_EX + "5. View All Orders (admin_view_orders)" + Style.RESET_ALL)
+    print(Fore.LIGHTGREEN_EX + "6. Update Order Status (admin_update_order_status)" + Style.RESET_ALL)
+    print(Fore.LIGHTGREEN_EX + "7. View All Users (admin_view_users)" + Style.RESET_ALL)
+    print(Fore.LIGHTGREEN_EX + "8. Check Low Stock Alerts (check_low_stock)" + Style.RESET_ALL)
+    print(Fore.LIGHTGREEN_EX + "9. Logout (logout)" + Style.RESET_ALL)
+    print(Fore.LIGHTGREEN_EX + "10. Exit Application (exit)" + Style.RESET_ALL)
+    print(Style.BRIGHT + Fore.LIGHTMAGENTA_EX + "------------------" + Style.RESET_ALL)
 
 def handle_customer_commands(command_parts):
     global current_user
