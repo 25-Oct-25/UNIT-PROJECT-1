@@ -1,0 +1,22 @@
+[
+    {
+        "product_name": "MacBook Pro 16",
+        "number_of_solds": 1
+    },
+    {
+        "product_name": "Samsung Galaxy S24",
+        "number_of_solds": 1
+    },
+    {
+        "product_name": "Google Pixel 8",
+        "number_of_solds": 2
+    },
+    {
+        "product_name": "Sony A7 IV",
+        "number_of_solds": 2
+    },
+    {
+        "product_name": "Samsung Galaxy Watch 6",
+        "number_of_solds": 2
+    }
+]
