@@ -16,7 +16,7 @@ TIME_ARCADE_LOGO = """
 
 
 
-traveler_text = pyfiglet.figlet_format("Time\nTraveler", font="mono12")
+traveler_text = pyfiglet.figlet_format("Time\nTravel", font="mono12")
 TRAVELER_LOGO = colored(traveler_text, color="dark_grey")
 
 escaperoom_text = pyfiglet.figlet_format("Escape\nRoom", font="mono12")

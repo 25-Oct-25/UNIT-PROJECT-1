@@ -1,20 +1,35 @@
 {
-    "ghala": {
-        "password": "1234",
-        "scores": {
-            "TimeTraveler": 30,
-            "EscapeRoom": 102
-        },
-        "achievements": [
-            "Time Explorer 2000s",
-            "Time Explorer 1980s",
-            "Escape Beginner",
-            "No Help Needed"
-        ]
+  "Ali": {
+    "username": "Ali",
+    "password": "$2b$12$AlBtx4Nzi0TXePGrnGIFT.88ZYZdV1U68tiOXpqj23stNmlXznKfi",
+    "role": "admin",
+    "scores": {},
+    "achievements": []
+  },
+  "sara": {
+    "username": "sara",
+    "password": "$2b$12$qcOhhBKtjEGKpFL5U5LwgO248sX8HagYzJ06HFGn5T3pl/Ir8odDS",
+    "role": "user",
+    "scores": {
+      "TimeTraveler": 40
     },
-    "Wafi": {
-        "password": "0000",
-        "scores": {},
-        "achievements": []
-    }
+    "achievements": [
+      "Time Explorer 2000s",
+      "2000s"
+    ]
+  },
+  "nora": {
+    "username": "nora",
+    "password": "$2b$12$uLJY/SG2TpiGHHw4g5Ss4unFSf.SHY9Ib96Q.dDpkr1pBFqvxg/3W",
+    "role": "user",
+    "scores": {},
+    "achievements": []
+  },
+  "dana": {
+    "username": "dana",
+    "password": "$2b$12$blg954t07UqoH9PWa1.duO8DjAovdxg78PQh0y9hyu3fYKhdcNSn6",
+    "role": "user",
+    "scores": {},
+    "achievements": []
+  }
 }

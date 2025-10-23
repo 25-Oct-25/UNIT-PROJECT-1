@@ -97,6 +97,7 @@ def login_or_register():
                 # if something unexpected happens during verification, log and stop
                 logging.error("Admin password verify error: %s\n%s", e, traceback.format_exc())
                 print(RED + "⚠️ An error occurred verifying password. See logs." + RESET)
+                print(e)
                 return None
 
         # if reached here: too many attempts
@@ -211,10 +212,14 @@ class GameMenu:
                         users = load_data(USERS_FILE) or {}
                         users[self.user.username] = self.user.to_dict()
                         save_data(USERS_FILE, users)
-                elif choice == "3" and getattr(self.user, "role", "user") == "admin":
+                elif choice == "3" and getattr(self.user, "role", "") == "admin":
                     """Open admin dashboard if user is an admin."""
                     try:
                         admin_menu()
+                        users = load_data(USERS_FILE) or {}
+                        users[self.user.username] = self.user.to_dict()
+                        save_data(USERS_FILE, users)
+                        input(GREEN + "\nReturning to main menu... Press Enter to continue." + RESET)
                     except Exception as e:
                         logging.error("Admin menu error: %s\n%s", e, traceback.format_exc())
                         print(RED + "⚠️ Admin error. See logs." + RESET)

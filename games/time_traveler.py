@@ -9,7 +9,7 @@ class TimeTraveler :
 
     def __init__(self, user) -> None:
         self.user = user
-        self.points = user.scores['TimeTraveler']
+        self.points = self.user.scores.get("TimeTraveler", 0) if self.user.scores else 0
 
     def safe_int_input(self, prompt, min_val=None, max_val=None, allow_blank=False):
         """Reads an integer input safely with optional bounds and blank allowance."""

@@ -6,8 +6,8 @@ class User:
         self.username = username
         self.password = password if hashed else self.hash_password(password)
         self.role = role
-        self.scores = scores
-        self.achievements = achievements
+        self.scores = scores or {}
+        self.achievements = achievements or []
 
     @staticmethod
     def hash_password (password: str) -> str:

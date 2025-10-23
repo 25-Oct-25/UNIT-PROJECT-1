@@ -7,7 +7,7 @@ USERS_FILE = "data/users.json"
 
 def setup_admin():
     users = {}
-    username = "admin"
+    username = "Ali"
     password = "1234" 
     admin = User(username, password, role="admin")
     users[username] = admin.to_dict()
