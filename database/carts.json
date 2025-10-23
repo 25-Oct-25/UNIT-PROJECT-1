@@ -1,0 +1,47 @@
+[
+    {
+        "user_id": 2,
+        "cart": [
+            {
+                "product_category": "Laptops",
+                "product_name": "MacBook Pro 16",
+                "product_price": 2500,
+                "product_quantity": 3,
+                "total_price": 7500
+            },
+            {
+                "product_category": "Phones",
+                "product_name": "Samsung Galaxy S24",
+                "product_price": 900,
+                "product_quantity": 10,
+                "total_price": 9000
+            }
+        ]
+    },
+    {
+        "user_id": 3,
+        "cart": [
+            {
+                "product_category": "Phones",
+                "product_name": "Google Pixel 8",
+                "product_price": 700,
+                "product_quantity": 2,
+                "total_price": 1400
+            },
+            {
+                "product_category": "Cameras",
+                "product_name": "Sony A7 IV",
+                "product_price": 2500,
+                "product_quantity": 1,
+                "total_price": 2500
+            },
+            {
+                "product_category": "Watches",
+                "product_name": "Samsung Galaxy Watch 6",
+                "product_price": 300,
+                "product_quantity": 3,
+                "total_price": 900
+            }
+        ]
+    }
+]

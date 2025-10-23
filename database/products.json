@@ -1,0 +1,107 @@
+[
+    {
+        "category": "Phones",
+        "product_name": "Iphone 15",
+        "product_price": 100
+    },
+    {
+      "category": "Phones",
+      "product_name": "iPhone 15",
+      "product_price": 1000
+    },
+    {
+      "category": "Phones",
+      "product_name": "Samsung Galaxy S24",
+      "product_price": 900
+    },
+    {
+      "category": "Phones",
+      "product_name": "Google Pixel 8",
+      "product_price": 700
+    },
+    {
+      "category": "Phones",
+      "product_name": "OnePlus 12",
+      "product_price": 800
+    },
+    {
+      "category": "Phones", 
+      "product_name": "Xiaomi 14",
+      "product_price": 600
+    },
+    {
+      "category": "Laptops",
+      "product_name": "MacBook Pro 16",
+      "product_price": 2500
+    },
+    {
+      "category": "Laptops",
+      "product_name": "Dell XPS 15",
+      "product_price": 1800
+    },
+    {
+      "category": "Laptops",
+      "product_name": "HP Spectre x360",
+      "product_price": 1500
+    },
+    {
+      "category": "Tablets",
+      "product_name": "iPad Pro 12.9",
+      "product_price": 1100
+    },
+    {
+      "category": "Tablets",
+      "product_name": "Samsung Tab S9",
+      "product_price": 850
+    },
+    {
+      "category": "Headphones",
+      "product_name": "Sony WH-1000XM5",
+      "product_price": 400
+    },
+    {
+      "category": "Headphones", 
+      "product_name": "AirPods Pro",
+      "product_price": 250
+    },
+    {
+      "category": "Watches",
+      "product_name": "Apple Watch Series 9",
+      "product_price": 400
+    },
+    {
+      "category": "Watches",
+      "product_name": "Samsung Galaxy Watch 6",
+      "product_price": 300
+    },
+    {
+      "category": "Cameras",
+      "product_name": "Canon EOS R5",
+      "product_price": 3800
+    },
+    {
+      "category": "Cameras",
+      "product_name": "Sony A7 IV",
+      "product_price": 2500
+    },
+    {
+      "category": "Gaming",
+      "product_name": "PlayStation 5",
+      "product_price": 500
+    },
+    {
+      "category": "Gaming",
+      "product_name": "Xbox Series X",
+      "product_price": 500
+    },
+    {
+      "category": "Accessories",
+      "product_name": "Apple MagSafe Charger",
+      "product_price": 40
+    },
+    {
+      "category": "Accessories", 
+      "product_name": "Samsung Wireless Charger",
+      "product_price": 30
+    }
+]

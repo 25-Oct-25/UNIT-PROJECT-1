@@ -1,0 +1,18 @@
+[
+    {
+        "user_id": 2,
+        "product_name": "Samsung Galaxy S24",
+        "review": {
+            "comment": "Is To Good And Cheap !",
+            "rating": 4.0
+        }
+    },
+    {
+        "user_id": 3,
+        "product_name": "Sony A7 IV",
+        "review": {
+            "comment": "Best Camera !",
+            "rating": 5.0
+        }
+    }
+]
