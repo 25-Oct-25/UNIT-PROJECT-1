@@ -1,0 +1,510 @@
+{
+  "medicines": {
+    "paracetamol": {
+      "price": 2.5,
+      "quantity": 20,
+      "expiry": "2025-12-01"
+    },
+    "ibuprofen": {
+      "price": 3.0,
+      "quantity": 13,
+      "expiry": "2026-05-20"
+    },
+    "amoxicillin": {
+      "price": 4.5,
+      "quantity": 25,
+      "expiry": "2026-09-15"
+    },
+    "cetirizine": {
+      "price": 2.0,
+      "quantity": 40,
+      "expiry": "2027-03-22"
+    },
+    "omeprazole": {
+      "price": 5.0,
+      "quantity": 18,
+      "expiry": "2026-12-05"
+    },
+    "azithromycin": {
+      "price": 6.0,
+      "quantity": 20,
+      "expiry": "2026-04-10"
+    },
+    "cough_syrup": {
+      "price": 4.0,
+      "quantity": 25,
+      "expiry": "2025-08-15"
+    }
+  },
+  "creams": {
+    "nivea_cream": {
+      "price": 8.0,
+      "quantity": 25,
+      "expiry": "2027-05-12"
+    },
+    "vaseline_lotion": {
+      "price": 7.5,
+      "quantity": 30,
+      "expiry": "2027-08-20"
+    },
+    "cerave_moisturizer": {
+      "price": 15.0,
+      "quantity": 14,
+      "expiry": "2027-10-10"
+    },
+    "eucerin_cream": {
+      "price": 14.0,
+      "quantity": 20,
+      "expiry": "2026-12-30"
+    },
+    "cetaphil_cream": {
+      "price": 13.0,
+      "quantity": 25,
+      "expiry": "2027-03-05"
+    },
+    "ponds_bright_beauty": {
+      "price": 6.0,
+      "quantity": 35,
+      "expiry": "2026-11-11"
+    },
+    "bio_oil": {
+      "price": 18.0,
+      "quantity": 11,
+      "expiry": "2027-07-07"
+    },
+    "olay_night_cream": {
+      "price": 16.0,
+      "quantity": 18,
+      "expiry": "2027-04-20"
+    },
+    "loreal_face_cream": {
+      "price": 17.5,
+      "quantity": 22,
+      "expiry": "2027-06-30"
+    }
+  },
+  "shampoos": {
+    "head_shoulders": {
+      "price": 10.0,
+      "quantity": 15,
+      "expiry": "2026-09-01"
+    },
+    "pantene_shampoo": {
+      "price": 9.0,
+      "quantity": 25,
+      "expiry": "2026-06-30"
+    },
+    "dove_shampoo": {
+      "price": 8.5,
+      "quantity": 30,
+      "expiry": "2026-11-10"
+    },
+    "herbal_essences": {
+      "price": 11.0,
+      "quantity": 18,
+      "expiry": "2027-03-22"
+    },
+    "tresemme_keratin": {
+      "price": 12.0,
+      "quantity": 15,
+      "expiry": "2026-12-15"
+    },
+    "clear_shampoo": {
+      "price": 8.0,
+      "quantity": 28,
+      "expiry": "2026-08-08"
+    }
+  },
+  "vitamins": {
+    "vitamin_c": {
+      "price": 1.5,
+      "quantity": 18,
+      "expiry": "2027-01-10"
+    },
+    "vitamin_d": {
+      "price": 2.0,
+      "quantity": 16,
+      "expiry": "2026-09-30"
+    },
+    "vitamin_b12": {
+      "price": 3.5,
+      "quantity": 19,
+      "expiry": "2027-04-15"
+    },
+    "vitamin_e": {
+      "price": 2.8,
+      "quantity": 18,
+      "expiry": "2026-11-05"
+    },
+    "biotin": {
+      "price": 6.0,
+      "quantity": 22,
+      "expiry": "2027-08-20"
+    },
+    "collagen": {
+      "price": 10.0,
+      "quantity": 15,
+      "expiry": "2026-12-12"
+    },
+    "magnesium": {
+      "price": 4.0,
+      "quantity": 25,
+      "expiry": "2027-03-01"
+    },
+    "zinc": {
+      "price": 3.2,
+      "quantity": 28,
+      "expiry": "2026-10-10"
+    },
+    "iron": {
+      "price": 4.5,
+      "quantity": 20,
+      "expiry": "2026-05-25"
+    },
+    "multivitamin": {
+      "price": 7.5,
+      "quantity": 30,
+      "expiry": "2027-07-18"
+    }
+  },
+  "medical_devices": {
+    "omron_blood_pressure_monitor": {
+      "price": 180.0,
+      "quantity": 10,
+      "expiry": "2030-01-01"
+    },
+    "accu_chek_glucometer": {
+      "price": 150.0,
+      "quantity": 15,
+      "expiry": "2029-11-10"
+    },
+    "omron_digital_thermometer": {
+      "price": 50.0,
+      "quantity": 25,
+      "expiry": "2030-03-20"
+    },
+    "pulse_oximeter": {
+      "price": 90.0,
+      "quantity": 20,
+      "expiry": "2029-09-01"
+    },
+    "digital_weighing_scale": {
+      "price": 120.0,
+      "quantity": 10,
+      "expiry": "2030-06-30"
+    }
+  },
+  "smart_devices": {
+    "smart_watch_heart_monitor": {
+      "price": 350.0,
+      "quantity": 10,
+      "expiry": "2030-05-05"
+    },
+    "smart_scale_bluetooth": {
+      "price": 250.0,
+      "quantity": 12,
+      "expiry": "2030-06-30"
+    },
+    "smart_thermometer_wifi": {
+      "price": 180.0,
+      "quantity": 8,
+      "expiry": "2030-04-20"
+    },
+    "fitness_tracker_sleep_monitor": {
+      "price": 200.0,
+      "quantity": 15,
+      "expiry": "2030-03-15"
+    }
+  },
+  "healthy_products": {
+    "organic_honey": {
+      "price": 25.0,
+      "quantity": 20,
+      "expiry": "2027-05-12"
+    },
+    "chia_seeds": {
+      "price": 18.0,
+      "quantity": 25,
+      "expiry": "2027-03-01"
+    },
+    "oatmeal_cereal": {
+      "price": 15.0,
+      "quantity": 30,
+      "expiry": "2026-11-10"
+    },
+    "protein_powder_vanilla": {
+      "price": 120.0,
+      "quantity": 10,
+      "expiry": "2027-08-22"
+    },
+    "almond_butter": {
+      "price": 35.0,
+      "quantity": 15,
+      "expiry": "2026-12-15"
+    },
+    "peanut_butter_natural": {
+      "price": 30.0,
+      "quantity": 18,
+      "expiry": "2027-01-30"
+    },
+    "green_tea": {
+      "price": 22.0,
+      "quantity": 36,
+      "expiry": "2027-07-01"
+    },
+    "herbal_detox_tea": {
+      "price": 28.0,
+      "quantity": 25,
+      "expiry": "2027-09-20"
+    },
+    "granola_bar_mix": {
+      "price": 12.0,
+      "quantity": 35,
+      "expiry": "2026-10-10"
+    },
+    "vitamin_water": {
+      "price": 10.0,
+      "quantity": 50,
+      "expiry": "2026-06-30"
+    }
+  },
+  "dental_care": {
+    "colgate_toothpaste": {
+      "price": 4.5,
+      "quantity": 40,
+      "expiry": "2027-01-15"
+    },
+    "sensodyne_toothpaste": {
+      "price": 6.5,
+      "quantity": 35,
+      "expiry": "2026-11-25"
+    },
+    "closeup_toothpaste": {
+      "price": 5.0,
+      "quantity": 30,
+      "expiry": "2027-03-10"
+    },
+    "oralb_toothbrush": {
+      "price": 3.0,
+      "quantity": 50,
+      "expiry": "2028-01-01"
+    },
+    "colgate_toothbrush": {
+      "price": 2.8,
+      "quantity": 60,
+      "expiry": "2028-02-10"
+    },
+    "signal_toothbrush": {
+      "price": 2.5,
+      "quantity": 55,
+      "expiry": "2027-12-12"
+    }
+  },
+  "lip_balms": {
+    "nivea_lip_balm": {
+      "price": 5.0,
+      "quantity": 40,
+      "expiry": "2027-06-15"
+    },
+    "vaseline_lip_care": {
+      "price": 4.5,
+      "quantity": 45,
+      "expiry": "2027-08-22"
+    },
+    "maybelline_babylips": {
+      "price": 7.0,
+      "quantity": 25,
+      "expiry": "2026-12-05"
+    },
+    "carmex_lip_balm": {
+      "price": 6.5,
+      "quantity": 30,
+      "expiry": "2026-10-10"
+    },
+    "burtbees_lip_balm": {
+      "price": 8.0,
+      "quantity": 20,
+      "expiry": "2027-04-30"
+    },
+    "labello_cherry_shine": {
+      "price": 5.5,
+      "quantity": 28,
+      "expiry": "2027-03-01"
+    },
+    "eos_lip_balm": {
+      "price": 9.0,
+      "quantity": 15,
+      "expiry": "2026-11-18"
+    }
+  },
+  "body_care": {
+    "dove_body_lotion": {
+      "price": 12.0,
+      "quantity": 25,
+      "expiry": "2027-05-30"
+    },
+    "vaseline_body_lotion": {
+      "price": 11.0,
+      "quantity": 30,
+      "expiry": "2027-07-22"
+    },
+    "nivea_body_cream": {
+      "price": 10.0,
+      "quantity": 20,
+      "expiry": "2027-09-12"
+    },
+    "bath_and_body_works_spray": {
+      "price": 18.0,
+      "quantity": 15,
+      "expiry": "2026-12-10"
+    },
+    "victorias_secret_mist": {
+      "price": 22.0,
+      "quantity": 10,
+      "expiry": "2026-11-25"
+    },
+    "johnsons_baby_oil": {
+      "price": 9.0,
+      "quantity": 22,
+      "expiry": "2028-01-15"
+    },
+    "body_shop_scrub": {
+      "price": 17.0,
+      "quantity": 12,
+      "expiry": "2027-10-30"
+    }
+  },
+  "perfumes": {
+    "chanel_coco_mademoiselle": {
+      "price": 480.0,
+      "quantity": 5,
+      "expiry": "2030-01-01"
+    },
+    "dior_sauvage": {
+      "price": 420.0,
+      "quantity": 6,
+      "expiry": "2030-02-15"
+    },
+    "versace_bright_crystal": {
+      "price": 390.0,
+      "quantity": 8,
+      "expiry": "2029-11-11"
+    },
+    "gucci_bloom": {
+      "price": 410.0,
+      "quantity": 7,
+      "expiry": "2029-09-09"
+    },
+    "ariana_grande_cloud": {
+      "price": 280.0,
+      "quantity": 10,
+      "expiry": "2029-05-05"
+    },
+    "lattafa_khamrah": {
+      "price": 160.0,
+      "quantity": 12,
+      "expiry": "2029-07-07"
+    }
+  },
+  "hair_dyes": {
+    "loreal_casting_creme": {
+      "price": 22.0,
+      "quantity": 15,
+      "expiry": "2027-04-10"
+    },
+    "garnier_nutrisse": {
+      "price": 18.0,
+      "quantity": 20,
+      "expiry": "2027-06-25"
+    },
+    "schwarzkopf_palette": {
+      "price": 20.0,
+      "quantity": 18,
+      "expiry": "2027-09-01"
+    },
+    "revlon_colorsilk": {
+      "price": 16.0,
+      "quantity": 22,
+      "expiry": "2027-07-30"
+    },
+    "clairol_nice_n_easy": {
+      "price": 19.0,
+      "quantity": 17,
+      "expiry": "2027-08-15"
+    }
+  },
+  "face_masks": {
+    "neutrogena_hydroboost_mask": {
+      "price": 10.0,
+      "quantity": 30,
+      "expiry": "2027-04-01"
+    },
+    "loreal_pure_clay_mask": {
+      "price": 18.0,
+      "quantity": 20,
+      "expiry": "2027-08-15"
+    },
+    "the_body_shop_charcoal_mask": {
+      "price": 25.0,
+      "quantity": 15,
+      "expiry": "2027-06-20"
+    },
+    "garnier_sheet_mask": {
+      "price": 8.0,
+      "quantity": 40,
+      "expiry": "2026-12-05"
+    },
+    "freeman_av_cado_mask": {
+      "price": 11.0,
+      "quantity": 28,
+      "expiry": "2027-01-30"
+    },
+    "innisfree_green_tea_mask": {
+      "price": 14.0,
+      "quantity": 20,
+      "expiry": "2027-05-22"
+    }
+  },
+  "first_aid": {
+    "band_aid_plasters": {
+      "price": 5.0,
+      "quantity": 60,
+      "expiry": "2028-02-01"
+    },
+    "medical_gauze_roll": {
+      "price": 8.0,
+      "quantity": 40,
+      "expiry": "2028-05-10"
+    },
+    "cotton_roll": {
+      "price": 6.0,
+      "quantity": 45,
+      "expiry": "2028-07-20"
+    },
+    "dettol_antiseptic_liquid": {
+      "price": 12.0,
+      "quantity": 30,
+      "expiry": "2027-12-15"
+    },
+    "savlon_antiseptic_cream": {
+      "price": 10.0,
+      "quantity": 25,
+      "expiry": "2027-10-01"
+    },
+    "burnol_burn_cream": {
+      "price": 9.0,
+      "quantity": 20,
+      "expiry": "2027-09-09"
+    },
+    "neosporin_ointment": {
+      "price": 14.0,
+      "quantity": 18,
+      "expiry": "2027-11-30"
+    },
+    "hand_sanitizer": {
+      "price": 5.5,
+      "quantity": 50,
+      "expiry": "2027-08-08"
+    }
+  }
+}
