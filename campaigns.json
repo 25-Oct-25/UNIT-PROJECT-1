@@ -1,0 +1,40 @@
+[
+    {
+        "id": 1,
+        "leader": "sara00@gmail.com",
+        "from": "Italy",
+        "to": "Saudi Arabia",
+        "airline": "Flynas",
+        "flight_number": "XY 781",
+        "departure_time": "2025-12-12 00:00",
+        "max_members": 50,
+        "members": []
+    },
+    {
+        "id": 2,
+        "leader": "sara00@gmail.com",
+        "from": "Kuwait",
+        "to": "Saudi Arabia",
+        "airline": "Jazeera Air",
+        "flight_number": "J9 242",
+        "departure_time": "2026-01-12 14:00",
+        "max_members": 70,
+        "members": []
+    },
+    {
+        "id": 3,
+        "leader": "lana78@gmail.com",
+        "from": "Singapore",
+        "to": "Saudi Arabia",
+        "airline": "Flynas",
+        "flight_number": "XY 704",
+        "departure_time": "2025-11-10 13:14",
+        "max_members": 20,
+        "members": [
+            {
+                "name": "Ragad Alboshi",
+                "email": "ragad00@gmail.com"
+            }
+        ]
+    }
+]
