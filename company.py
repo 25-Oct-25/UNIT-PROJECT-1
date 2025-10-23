@@ -13,8 +13,14 @@ class Company(CommunityUser):
     
     #Convert the characterstic of the user to dictionary to help us in json
     def to_dict(self):
-        super().to_dict()
         return {
+            "name": self.name,
+            "location": self.location,
+            "email":self.email,
+            "translation_major": self.translation_major,
+            "translation_type": self.translation_type,
+            "registration_date": self.registration_date.isoformat(),
+            "user_type": "User",           
             "translate_to": self.translate_to,
             "price_offer" : self.price_offer
         }

@@ -99,7 +99,7 @@ load_to_translator_list()
 
 #Display th program
 while True:
-    user_input = input("What are you looking for ? \n" \
+    user_input = input("\nWhat are you looking for ? \n" \
     "1- Freelance translator.\n" \
     "2- Corporate offers for translators.\n" \
     "3- Join the community.\n"\
@@ -115,8 +115,8 @@ while True:
         
         else: 
             #Print translators pre info  
-            for user_list in translator_list:
-                print(user_list.user_information())
+            for index,user_list in  enumerate(translator_list,start=1):
+                print(f"{index}-The translator name: {user_list['name']}, The translator location: {user_list['location']}, The translator email: {user_list['email']}, The translator translation major: {user_list['translation_major']}, The translator translation type: {user_list['translation_type']} , The translator registration date: {user_list['registration_date']}.")
             
             # for more specific kind of search choose one of the list below (Y/N)
             while True:
@@ -132,35 +132,39 @@ while True:
                         search_phrase =  input ("\nEnter your translation type: ( 'Written Translator' or 'Interprter' )")
                     
                         #To search about the type and store it in list
-                        search_result = list(filter(lambda translator: search_phrase in translator.translation_type , translator_list )) 
+                        search_result = list(filter(lambda translator: search_phrase in translator['translation_type'] , translator_list )) 
                         
                         #To print the search result
                         for index, trans_list in enumerate (search_result):
-                            print(f"{index+1}- {trans_list.user_information()} ")
-                        print("-*20")   
+                            print(f"{index}-The translator name: {trans_list['name']}, The translator location: {trans_list['location']}, The translator email: {trans_list['email']}, The translator translation major: {trans_list['translation_major']}, The translator translation type: {trans_list['translation_type']} , The translator registration date: {trans_list['registration_date']}.\n")
+ 
+                        print("---------------")   
                     elif search_type == "2":
 
                         search_phrase = input ("\n Enter your translation major: ( 'Medical Translation' or 'Legal Translation' or 'Technical / Engineering Translation' or 'Creative Translation' or 'Diplomatic and Political Translation' )")
                         
                         #To search about the major and store it in list
-                        search_result = list(filter(lambda translator: search_phrase in translator.translation_major , translator_list )) 
+                        search_result = list(filter(lambda translator: search_phrase in translator['translation_major'] , translator_list )) 
     
                         #To print the search result
                         for index, trans_list in enumerate (search_result):
-                            print(f"{index+1}- {trans_list.user_information()} ")
-                        print("-*20")     
+                            print(f"{index}-The translator name: {trans_list['name']}, The translator location: {trans_list['location']}, The translator email: {trans_list['email']}, The translator translation major: {trans_list['translation_major']}, The translator translation type: {trans_list['translation_type']} , The translator registration date: {trans_list['registration_date']}.\n")
+
+                        print("---------------")     
 
                     elif search_type == "3":
                         
                         search_phrase = input ("\n Enter your location: ")
                         
                         #To search about the major and store it in list
-                        search_result = list(filter(lambda translator: search_phrase in translator.location , translator_list )) 
+                        search_result = list(filter(lambda translator: search_phrase in translator['location'] , translator_list )) 
     
                         #To print the search result
                         for index, trans_list in enumerate (search_result):
-                            print(f"{index+1}- {trans_list.user_information()} ")
-                        print("-*20")  
+                            print(f"{index}-The translator name: {trans_list['name']}, The translator location: {trans_list['location']}, The translator email: {trans_list['email']}, The translator translation major: {trans_list['translation_major']}, The translator translation type: {trans_list['translation_type']} , The translator registration date: {trans_list['registration_date']}.\n")
+ 
+
+                        print("---------------")  
 
                     else: search_type = input("Wrong input, please enter a valid choice.")
 
@@ -175,9 +179,9 @@ while True:
             "Try later.") 
         else: 
             #Print company pre info  
-            for user_list in company_list:
-                print(user_list.user_information())
-                       
+            for index, user_list in enumerate(company_list, start=1):
+                print(f"{index}- The translator name: {user_list['name']}, The translator location: {user_list['location']}, The translator email: {user_list['email']}, The translator translation major: {user_list['translation_major']}, The translator translation type: {user_list['translation_type']} , The translator registration date: {user_list['registration_date']}.\n")
+                         
             # for more specific kind of search choose one of the list below (Y/N)
             while True:
                 specific_search = input("Do you want more specific search? 'y' for yes, 'n' for no ")
@@ -192,36 +196,39 @@ while True:
                         search_phrase =  input ("\nEnter company translation type: ( 'Written Translator' or 'Interprter' )")
                     
                         #To search about the type and store it in list
-                        search_result = list(filter(lambda company: search_phrase in company.translation_type , company_list )) 
+                        search_result = list(filter(lambda company: search_phrase in company['translation_type'] , company_list )) 
                         
                         #To print the search result
-                        for index, company_ls in enumerate (search_result):
-                            print(f"{index+1}- {company_ls.user_information()} ")
-                        print("-*20") 
+                        for index, company_ls in enumerate (search_result,start=1):
+                            print(f"{index}-The translator name: {company_ls['name']}, The translator location: {company_ls['location']}, The translator email: {company_ls['email']}, The translator translation major: {company_ls['translation_major']}, The translator translation type: {company_ls['translation_type']} , The translator registration date: {company_ls['registration_date']}.\n")
+
+                        print("---------------") 
 
                     elif search_type == "2":
 
                         search_phrase = input ("\n Enter company translation major: ( 'Medical Translation' or 'Legal Translation' or 'Technical / Engineering Translation' or 'Creative Translation' or 'Diplomatic and Political Translation' )")
                         
                         #To search about the major and store it in list
-                        search_result = list(filter(lambda company: search_phrase in company.translation_major , company_list )) 
+                        search_result = list(filter(lambda company: search_phrase in company['translation_major'] , company_list )) 
     
                         #To print the search result
-                        for index, company_ls in enumerate (search_result):
-                            print(f"{index+1}- {company_ls.user_information()} ")
-                        print("-*20")     
+                        for index, company_ls in enumerate (search_result,start=1):
+                            print(f"{index}-The translator name: {company_ls['name']}, The translator location: {company_ls['location']}, The translator email: {company_ls['email']}, The translator translation major: {company_ls['translation_major']}, The translator translation type: {company_ls['translation_type']} , The translator registration date: {company_ls['registration_date']}.\n")
+ 
+                        print("---------------")     
 
                     elif search_type == "3":
                         
                         search_phrase = input ("\n Enter company location: ")
                         
                         #To search about the major and store it in list
-                        search_result = list(filter(lambda company: search_phrase in company.location , company_list )) 
+                        search_result = list(filter(lambda company: search_phrase in company['location'] , company_list )) 
     
                         #To print the search result
-                        for index, company_ls in enumerate (search_result):
-                            print(f"{index+1}- {company_ls.user_information()} ")
-                        print("-*20")  
+                        for index, company_ls in enumerate (search_result,start=1):
+                            print(f"{index}-The translator name: {company_ls['name']}, The translator location: {company_ls['location']}, The translator email: {company_ls['email']}, The translator translation major: {company_ls['translation_major']}, The translator translation type: {company_ls['translation_type']} , The translator registration date: {company_ls['registration_date']}.\n")
+ 
+                        print("---------------")  
 
                     else: search_type = input("Wrong input, please enter a valid choice.")
 
@@ -372,8 +379,8 @@ while True:
 
             company_price_offer = input("Enter the company price offer: ")
 
-            #name, location, email, translate_to:str, translator_type:str, translator_major:str, price_offer:float
-            company_user = Company( company_name, company_location, company_email, company_translator_language, company_translator_type, company_translator_major,company_price_offer)
+            #name ,location ,email ,translation_major ,translation_type ,registration_date , translate_to:str,  price_offer:float):
+            company_user = Company(company_name,company_location,company_email,company_translator_major,company_translator_type, None,company_translator_language,company_price_offer)
             company_list.append(company_user.to_dict())
             print("New Company added Successfully ...")
         else: user_type = input("Wrong input, please enter a valid choice.")
@@ -404,7 +411,7 @@ while True:
 
         #save information to the file
         save_to_translator_list()
-
+        save_to_company_list()
         #print a good bye sentence
         print("Thank you to visit our program, see you again.")
         break
