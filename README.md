@@ -8,34 +8,41 @@
 - Organize Your Code into modules & (or packages)
 - Use git & Github to track changes in your code.
 
-## Example Project :  An online Grocery Store :
+# UNIT-PROJECT-1
 
-#### Overview : An online store that sells fruits to customers. This online store has 2 main users. The customer and the manager of the store . Each one of them should be able to do the following tasks for the store to function properly . 
+## Project: Flight Campaign Manager ✈️
 
-### Features & User Stories
-#### As a customer I should be able to do the following :
-- Browse  Products . 
-- View the product info (summary, specs, price, quantity , etc.)
-- Search for Products.
-- Get recommendations for my next purchase based on my purchase history.
-- Add Products to the shopping cart .
-- Remove a product from the shopping cart.
-- List the products in my shopping cart. 
-- Continue to checkout . 
-- Fill in my address for delivery.
-- Get receipt of my purchases.
-- Check delivery status . 
+## Overview
+A CLI-based flight campaign management system. This project allows users to manage flight campaigns, join campaigns, and track participants. There are 2 main types of users: Leaders and Members. Each user has different functionalities based on their role.
 
+## Features & User Stories
 
+### As a Leader, I should be able to:
+- Register and login to the system.
+- Add new flight campaigns with details (airline, flight number, departure, destination, max members).
+- View all campaigns I have created.
+- See the list of members registered for my campaigns.
+- Send notifications or emails to campaign members (optional feature).
 
-#### Usage :
- Explain to the user how to use your project . 
- for example:
- - type in search product_name to search for a product.
- - type in list_products to show all the products in the grocery.
- - type in show product_name to get information about this product.
- - type in buy product_name to buy the product . 
- - and so on...
+### As a Member, I should be able to:
+- Register and login to the system.
+- Browse all available campaigns.
+- Join a campaign if slots are available.
+- Receive email confirmations for joining a campaign.
+- View my participation history.
+
+## Usage
+This project is CLI-based. Users interact with it using commands and menu options.
+
+Examples:
+- Select `1` for Leader or `2` for Member at the main menu.
+- Leaders can register, login, add campaigns, and view members.
+- Members can register, login, browse campaigns, and join campaigns.
+- Passwords are validated for security (8+ chars, uppercase, lowercase, number).
+- Emails are validated for correct format and confirmation notifications are sent automatically.
+
+### Notes
+Before submitting or sharing the project, make sure to run:
 
 
 ### For your project. Edit this README.md file to include your own project name,  overview, user stories, and usage. 

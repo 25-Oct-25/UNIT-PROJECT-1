@@ -1,0 +1,20 @@
+[
+    {
+        "name": "Sara Ahmed",
+        "email": "sara00@gmail.com",
+        "password": "3d404e188e86d2652c3d7b44eb016f292aeefb083897056816cc19f0873dabaa",
+        "role": "Leader"
+    },
+    {
+        "name": "Lana Alharbi",
+        "email": "lana78@gmail.com",
+        "password": "bcf81d9c21f6c5183fb2eb57530bd0e40872610fbd25234a6811af265078e619",
+        "role": "Leader"
+    },
+    {
+        "name": "Ragad Alboshi",
+        "email": "ragad00@gmail.com",
+        "password": "a28fe4534ef5881f09745c84bce185b641fa1dfc8c2829ca6f14fad5f7bd7e3c",
+        "role": "Member"
+    }
+]
