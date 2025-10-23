@@ -1,44 +1,74 @@
-# UNIT-PROJECT-1
+# 🎮 Time Arcade
 
+**Time Arcade** is a command-line game hub where players can log in, play mini games, earn points, and unlock achievements.  
+It includes both **user** and **admin** modes.
 
-## Based on what you’ve learned until now , create a project of your choosing (impress us with your imagination) . This project must at least satisfy the following minimum requirements :
+---
 
-- Must be interactive on CLI.
-- Use your coding skills in Python accurately.
-- Organize Your Code into modules & (or packages)
-- Use git & Github to track changes in your code.
+## 🧩 Features
+- 👤 **User system** with login and registration  
+- 🔐 **Admin dashboard** to view, edit, and manage users  
+- 🕹️ **Mini games included:**
+  - **Time Traveler** – explore historical events by entering a date  
+  - **Escape Room** – solve puzzles before time runs out  
+- 🏆 **Achievements** and score tracking  
+- 💾 Data saved automatically in `data/users.json`  
+- ⚠️ Error logging for debugging in `logs/error.log`
 
-## Example Project :  An online Grocery Store :
+---
 
-#### Overview : An online store that sells fruits to customers. This online store has 2 main users. The customer and the manager of the store . Each one of them should be able to do the following tasks for the store to function properly . 
+## 🚀 How to Run
 
-### Features & User Stories
-#### As a customer I should be able to do the following :
-- Browse  Products . 
-- View the product info (summary, specs, price, quantity , etc.)
-- Search for Products.
-- Get recommendations for my next purchase based on my purchase history.
-- Add Products to the shopping cart .
-- Remove a product from the shopping cart.
-- List the products in my shopping cart. 
-- Continue to checkout . 
-- Fill in my address for delivery.
-- Get receipt of my purchases.
-- Check delivery status . 
+1. Make sure you have **Python 3.8+** installed.  
+2. Install required dependencies:
+   ```bash
+   pip install bcrypt
+3. Run the admin setup once to create the first admin:
+   ```bash
+   python admin_setup.py
+4. Start the game:
+   ```bash
+   python main.py
 
+## 🧠 Game Modes
 
+**👑 Admin**
+- View users
+- Edit or delete users
+- Add achievements manually
+- Play games and earn points
+- Unlock achievements automatically
+  
+**👥 User**
+- Register or log in
+- Play games and earn points
+- Unlock achievements automatically
 
-#### Usage :
- Explain to the user how to use your project . 
- for example:
- - type in search product_name to search for a product.
- - type in list_products to show all the products in the grocery.
- - type in show product_name to get information about this product.
- - type in buy product_name to buy the product . 
- - and so on...
+## 📁 Project Structure
+    ```bash
+      TimeArcade/
+      │
+      ├── main.py                # Main program entry point
+      ├── admin_setup.py         # Creates the first admin account
+      │
+      ├── data/
+      │   └── users.json         # Stores user and admin data
+      │
+      ├── games/
+      │   ├── time_traveler.py   # Historical time-travel game
+      │   └── escape_room.py     # Puzzle-solving game
+      │
+      ├── users/
+      │   ├── user.py            # User model and password handling
+      │   └── admin.py           # Admin dashboard and tools
+      │
+      └── utils/
+          ├── helpers.py         # Common helper functions
+          ├── colors.py          # Color codes for CLI
+          ├── art_assets.py      # ASCII art and logos
 
+## 🧾 Notes
 
-### For your project. Edit this README.md file to include your own project name,  overview, user stories, and usage. 
-
-### NOTE: before submitting the final project, please do the following command:
-`pip freeze > requirements.txt` to enable use to know & use the packages used in your project.
+- Passwords are stored securely using bcrypt hashing.
+- Admin username is reserved ("admin").
+- All data is saved locally — no external servers required.
