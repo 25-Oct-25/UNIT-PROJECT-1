@@ -103,10 +103,10 @@ class TradeAnalyzerApp:
         value_difference = abs(total_z_a - total_z_b)
 
         if total_z_a > total_z_b:
-            result= f"[bold dodger_blue1]Team'A' wins the trade by {value_difference:.2f} Z-Score Unit![/bold dodger_blue1]"
+            result= f"[bold dodger_blue1]Team'B' wins the trade by {value_difference:.2f} Z-Score Unit![/bold dodger_blue1]"
             result_style= "on blue"
         elif total_z_b > total_z_a:
-            result= f"[bold dodger_blue1]Team'B' wins the trade by {value_difference:.2f} Z-Score Unit![/bold dodger_blue1]"
+            result= f"[bold dodger_blue1]Team'A' wins the trade by {value_difference:.2f} Z-Score Unit![/bold dodger_blue1]"
             result_style= "on blue"
         else:
             result= f"[bold yellow]Trade is even.[/bold yellow]"
