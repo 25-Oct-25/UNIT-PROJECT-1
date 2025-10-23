@@ -1,44 +1,83 @@
-# UNIT-PROJECT-1
+# 🎬 **YouTube Comment Analyzer & AI Report Generator**
+
+## **Overview**
+
+An interactive **Python CLI project** that analyzes YouTube video comments using **Google Gemini AI** and the **YouTube Data API**.
+It detects viewer **sentiment**, identifies **common words**, and generates **AI-powered summaries with actionable advice** for improving future videos.
+You can also **export a professional PDF report** with charts and insights.
+
+---
+
+## **Features**
+
+* Interactive CLI with colorful text and ASCII art
+* English support *(Arabic support coming soon)*
+* Sentiment & keyword analysis
+* AI-powered summaries and recommendations using Gemini
+* Optional PDF report generation
+* Secure API keys through environment variables
+
+---
+
+## **Usage**
+
+```bash
+python main.py
+```
+
+### **Menu Options**
+
+1️⃣ Enter the YouTube Video ID
+2️⃣ Show short summary of comments
+3️⃣ Check overall feeling (sentiment)
+4️⃣ See most repeated words or ideas
+5️⃣ Get tips to improve next video
+6️⃣ Generate PDF Report
+7️⃣ Exit
+ 
+---
+
+## **Setup**
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Set up your API keys:
+
+```bash
+set YOUTUBE_API_KEY=your_youtube_api_key
+set GEMINI_API_KEY=your_gemini_api_key
+```
+
+*(Use `export` instead of `set` on macOS/Linux.)*
+
+---
+
+## 📁 **Output Files**
+
+*  `analysis_<video>.json` → AI summary & metrics
+*  `analysis_report_<video>.pdf` → Full AI report with insights
+
+---
+
+## 🔗 **API References**
+
+* **YouTube Data API** – [https://developers.google.com/youtube/v3](https://developers.google.com/youtube/v3)
+* **Google Gemini API** – [https://ai.google.dev](https://ai.google.dev)
+
+---
+
+## **Author**
+
+**Amwaj Al-Zahrani**
 
 
-## Based on what you’ve learned until now , create a project of your choosing (impress us with your imagination) . This project must at least satisfy the following minimum requirements :
-
-- Must be interactive on CLI.
-- Use your coding skills in Python accurately.
-- Organize Your Code into modules & (or packages)
-- Use git & Github to track changes in your code.
-
-## Example Project :  An online Grocery Store :
-
-#### Overview : An online store that sells fruits to customers. This online store has 2 main users. The customer and the manager of the store . Each one of them should be able to do the following tasks for the store to function properly . 
-
-### Features & User Stories
-#### As a customer I should be able to do the following :
-- Browse  Products . 
-- View the product info (summary, specs, price, quantity , etc.)
-- Search for Products.
-- Get recommendations for my next purchase based on my purchase history.
-- Add Products to the shopping cart .
-- Remove a product from the shopping cart.
-- List the products in my shopping cart. 
-- Continue to checkout . 
-- Fill in my address for delivery.
-- Get receipt of my purchases.
-- Check delivery status . 
 
 
 
-#### Usage :
- Explain to the user how to use your project . 
- for example:
- - type in search product_name to search for a product.
- - type in list_products to show all the products in the grocery.
- - type in show product_name to get information about this product.
- - type in buy product_name to buy the product . 
- - and so on...
 
 
-### For your project. Edit this README.md file to include your own project name,  overview, user stories, and usage. 
 
-### NOTE: before submitting the final project, please do the following command:
-`pip freeze > requirements.txt` to enable use to know & use the packages used in your project.
