@@ -1,0 +1,26 @@
+[
+    {
+        "username": "rakan",
+        "email": "srakan595@gmail.com",
+        "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+        "role": "admin"
+    },
+    {
+        "username": "ibrahim",
+        "email": "ib.alsedran@hotmail.com",
+        "password": "bcb15f821479b4d5772bd0ca866c00ad5f926e3580720659cc80d39c9d09802a",
+        "role": "user"
+    },
+    {
+        "username": "rakan1",
+        "email": "srakan9111@gmail.com",
+        "password": "bcb15f821479b4d5772bd0ca866c00ad5f926e3580720659cc80d39c9d09802a",
+        "role": "user"
+    },
+    {
+        "username": "fahad",
+        "email": "fahadadel274@gmsil.com",
+        "password": "fc60cca460a17a9218662defb6c6de339fc79cbd49bf68be3e42da9517481ba3",
+        "role": "user"
+    }
+]
