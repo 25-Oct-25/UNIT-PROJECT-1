@@ -1,0 +1,201 @@
+{
+    "Rawan": {
+        "password": "1234",
+        "home_location": "",
+        "preferences": "Fastest",
+        "streak": 2,
+        "streak_count": 2,
+        "last_used": "2025-10-21T05:46:37.898610+00:00",
+        "total_points": 127,
+        "travel_history": [
+            {
+                "time_of_day": "morning",
+                "weather": "Sunny",
+                "suggested": "metro",
+                "chosen": "metro",
+                "candidates": [
+                    {
+                        "mode": "car",
+                        "time_min": 75.0,
+                        "cost": 10,
+                        "comfort": "High",
+                        "final_score": 25.0
+                    },
+                    {
+                        "mode": "metro",
+                        "time_min": 40.0,
+                        "cost": 2,
+                        "comfort": "High",
+                        "final_score": 63.0
+                    },
+                    {
+                        "mode": "bus",
+                        "time_min": 67.5,
+                        "cost": 3,
+                        "comfort": "Medium",
+                        "final_score": 34.5
+                    },
+                    {
+                        "mode": "walking",
+                        "time_min": 60.0,
+                        "cost": 0,
+                        "comfort": "Low",
+                        "final_score": 45.0
+                    },
+                    {
+                        "mode": "uber",
+                        "time_min": 50.0,
+                        "cost": 18,
+                        "comfort": "High",
+                        "final_score": 51.0
+                    }
+                ],
+                "points_awarded": 63
+            },
+            {
+                "time_of_day": "morning",
+                "weather": "Rainy",
+                "suggested": "metro",
+                "chosen": "car",
+                "candidates": [
+                    {
+                        "mode": "car",
+                        "time_min": 150.0,
+                        "cost": 10,
+                        "comfort": "High",
+                        "final_score": 0
+                    },
+                    {
+                        "mode": "metro",
+                        "time_min": 40.0,
+                        "cost": 2,
+                        "comfort": "High",
+                        "final_score": 63.0
+                    },
+                    {
+                        "mode": "bus",
+                        "time_min": 81.0,
+                        "cost": 3,
+                        "comfort": "Medium",
+                        "final_score": 21.0
+                    },
+                    {
+                        "mode": "walking",
+                        "time_min": 90.0,
+                        "cost": 0,
+                        "comfort": "Low",
+                        "final_score": 15.0
+                    },
+                    {
+                        "mode": "uber",
+                        "time_min": 100.0,
+                        "cost": 18,
+                        "comfort": "High",
+                        "final_score": 1
+                    }
+                ],
+                "points_awarded": 0
+            },
+            {
+                "time_of_day": "night",
+                "weather": "Rainy",
+                "suggested": "metro",
+                "chosen": "metro",
+                "candidates": [
+                    {
+                        "mode": "car",
+                        "time_min": 72.0,
+                        "cost": 10,
+                        "comfort": "High",
+                        "final_score": 28.0
+                    },
+                    {
+                        "mode": "metro",
+                        "time_min": 40.0,
+                        "cost": 2,
+                        "comfort": "High",
+                        "final_score": 63.0
+                    },
+                    {
+                        "mode": "bus",
+                        "time_min": 59.4,
+                        "cost": 3,
+                        "comfort": "Medium",
+                        "final_score": 42.6
+                    },
+                    {
+                        "mode": "walking",
+                        "time_min": 90.0,
+                        "cost": 0,
+                        "comfort": "Low",
+                        "final_score": 15.0
+                    },
+                    {
+                        "mode": "uber",
+                        "time_min": 50.0,
+                        "cost": 18,
+                        "comfort": "High",
+                        "final_score": 51.0
+                    }
+                ],
+                "points_awarded": 63
+            },
+            {
+                "time_of_day": "afternoon",
+                "weather": "Sunny",
+                "suggested": "uber",
+                "chosen": "uber",
+                "candidates": [
+                    {
+                        "mode": "car",
+                        "time_min": 54.0,
+                        "cost": 10,
+                        "comfort": "High",
+                        "final_score": 46.0
+                    },
+                    {
+                        "mode": "metro",
+                        "time_min": 40.0,
+                        "cost": 2,
+                        "comfort": "High",
+                        "final_score": 63.0
+                    },
+                    {
+                        "mode": "bus",
+                        "time_min": 58.5,
+                        "cost": 3,
+                        "comfort": "Medium",
+                        "final_score": 43.5
+                    },
+                    {
+                        "mode": "walking",
+                        "time_min": 60.0,
+                        "cost": 0,
+                        "comfort": "Low",
+                        "final_score": 45.0
+                    },
+                    {
+                        "mode": "uber",
+                        "time_min": 37.5,
+                        "cost": 18,
+                        "comfort": "High",
+                        "final_score": 63.5
+                    }
+                ],
+                "points_awarded": 64
+            }
+        ],
+        "favorites": []
+    },
+    "rawan": {
+        "password": "",
+        "home_location": "",
+        "preferences": "Fastest",
+        "streak": 1,
+        "streak_count": 1,
+        "last_used": "2025-10-21T08:00:29.175183+00:00",
+        "total_points": 3,
+        "travel_history": [],
+        "favorites": []
+    }
+}
