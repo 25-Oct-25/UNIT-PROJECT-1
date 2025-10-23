@@ -1,0 +1,49 @@
+{
+    "rawan": {
+        "password": "1234",
+        "history": [
+            {
+                "destination": "Tuwaiq acadmy",
+                "departure": "07:00 am",
+                "mode": "Bus",
+                "time_min": 58,
+                "cost_sar": 5,
+                "comfort": "Low",
+                "points": 10,
+                "weather": "Clear",
+                "traffic": "Moderate"
+            },
+            {
+                "destination": "mall",
+                "departure": "9:oo pm",
+                "mode": "Car",
+                "time_min": 20,
+                "cost_sar": 12,
+                "comfort": "High",
+                "points": 30,
+                "weather": "clear",
+                "traffic": "Low"
+            }
+        ],
+        "score": 40,
+        "streak": 2
+    },
+    "fahad": {
+        "password": "1234",
+        "history": [
+            {
+                "destination": "Tuwaiq Acadmy",
+                "departure": "07:00 am",
+                "mode": "Car",
+                "time_min": 40,
+                "cost_sar": 12,
+                "comfort": "High",
+                "points": 2,
+                "weather": "Hot",
+                "traffic": "Heavy"
+            }
+        ],
+        "score": 2,
+        "streak": 1
+    }
+}
