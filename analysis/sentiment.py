@@ -1,3 +1,8 @@
+"""
+Contains natural language analysis tools for comment sentiment
+and keyword extraction.
+Uses VADER sentiment analysis from NLTK.
+"""
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 from collections import Counter
@@ -9,6 +14,7 @@ except LookupError:
     nltk.download('vader_lexicon')
 
 def analyze_sentiment(comments):
+    '''Analyze the sentiment of a list of comments using VADER'''
     sia = SentimentIntensityAnalyzer()
     sentiments = [sia.polarity_scores(c) for c in comments]
 
@@ -28,8 +34,9 @@ def analyze_sentiment(comments):
 
 
 def top_words(comments, n=20):
+    '''Identify the most frequently used words in the comments'''
     text = " ".join(comments).lower()
     words = re.findall(r'\b[a-z]+\b', text)
-    stopwords = set("the and to a of in it for is on this that".split())
+    stopwords = set("the and to a of in it for is on this that you your are is".split())
     filtered = [w for w in words if w not in stopwords and len(w) > 2]
     return Counter(filtered).most_common(n)

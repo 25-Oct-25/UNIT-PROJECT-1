@@ -1,3 +1,9 @@
+"""
+config/settings.py
+-------------------
+Handles environment configuration and Gemini API setup.
+Loads API keys securely from environment variables.
+"""
 import os
 import google.generativeai as genai
 

@@ -1,6 +1,10 @@
+"""
+Provides functions to interact with the YouTube Data API.
+"""
 from googleapiclient.discovery import build
 
 def fetch_comments(video_id, api_key, max_pages=10):
+    '''Retrieve all comments and replies for a given video'''
     youtube = build("youtube", "v3", developerKey=api_key)
     comments, next_page_token = [], None
 
@@ -28,6 +32,7 @@ def fetch_comments(video_id, api_key, max_pages=10):
 
 
 def get_video_title(video_id, api_key):
+    '''Retrieve the video title from its ID'''
     youtube = build("youtube", "v3", developerKey=api_key)
     response = youtube.videos().list(part="snippet", id=video_id).execute()
     items = response.get("items", [])
