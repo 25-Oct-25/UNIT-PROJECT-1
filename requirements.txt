@@ -1,0 +1,5 @@
+colorama==0.4.6
+DateTime==5.5
+pytz==2025.2
+sed==0.3.1
+zope.interface==8.0.1
