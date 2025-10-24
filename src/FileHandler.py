@@ -32,8 +32,16 @@ class FileHandler:
         Creates directories automatically if missing.
         """
         os.makedirs(os.path.dirname(FileHandler.STORIES_FILE), exist_ok=True)
-        with open(FileHandler.STORIES_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+        temp_file = FileHandler.STORIES_FILE + ".tmp"
+
+        try:
+            with open(temp_file, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            os.replace(temp_file, FileHandler.STORIES_FILE)  # atomic replace
+        except Exception as e:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+            raise RuntimeError(f"Failed to write stories file safely: {e}")
 
     # Public Methods 
 
@@ -44,8 +52,11 @@ class FileHandler:
         Returns a list of story dictionaries.
         """
         data = FileHandler._read_data()
-        return data.get(username, {}).get("stories", [])
-
+        user_data = data.get(username, {})
+        if not isinstance(user_data, dict):
+            return []
+        return user_data.get("stories", [])
+    
     @staticmethod
     def save_stories(username, stories):
         """
