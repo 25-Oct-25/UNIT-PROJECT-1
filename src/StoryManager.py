@@ -27,7 +27,8 @@ class StoryManager:
         """Initialize StoryManager with the current username and helper classes."""
         self.username = username
         self.file_handler = FileHandler()
-        self.ai_helper = AIHelper()
+        self.ai_helper = AIHelper(model_name="mistralai/Mixtral-8x7B-Instruct-v0.1")
+        self.creativity = "balanced"
 
     # MAIN MENU 
     def resume_last_story(self):
@@ -79,6 +80,33 @@ class StoryManager:
         time.sleep(0.8)
         print(Fore.LIGHTBLUE_EX + "✨ Summoning imagination from the AI realms...\n")
 
+        print(Fore.CYAN + "\nAvailable AI models:")
+        print("1. Mixtral-8x7B (Balanced & Smart)")
+        print("2. Zephyr-7B (Faster, lighter)")
+        print("3. Llama-3 (Creative writing)")
+
+        model_choice = input(Fore.LIGHTGREEN_EX + "Choose model (1-3): ").strip()
+        model_map = {
+            "1": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+            "2": "HuggingFaceH4/zephyr-7b-beta",
+            "3": "meta-llama/Meta-Llama-3-8B"
+        }
+        selected_model = model_map.get(model_choice, "mistralai/Mixtral-8x7B-Instruct-v0.1")
+
+        self.ai_helper = AIHelper(model_name=selected_model)
+        #  Ask user to choose creativity level
+        print(Fore.CYAN + "\nChoose creativity level:")
+        print("1. Balanced ✨ (Default storytelling)")
+        print("2. Imaginative 🌈 (More fantasy, emotion)")
+        print("3. Serious 🎭 (Logical, minimal fantasy)")
+
+        creativity_choice = input(Fore.LIGHTGREEN_EX + "Choose (1-3): ").strip()
+        creativity_map = {"1": "balanced", "2": "imaginative", "3": "serious"}
+        selected_creativity = creativity_map.get(creativity_choice, "balanced")
+
+        # Store in StoryManager to pass to AIHelper
+        self.creativity = selected_creativity
+        self.ai_helper.creativity = self.creativity
 
         result = self.ai_helper.generate_part(prompt, genre, length)
         if not result or not result.get("text"):
@@ -158,7 +186,7 @@ class StoryManager:
         """Generate and display the next part of the story, continuing based on user choices."""
 
         print(Fore.LIGHTBLUE_EX + "\n✨ Generating the next part...\n")
-
+        self.ai_helper.creativity = getattr(self, "creativity", "balanced")
         prompt = (
             f"Summary of previous parts:\n{self._summarize_story(selected.parts[:-1])}\n\n"
             f"Here's the last scene of the story:\n{selected.parts[-1][-500:]}" )
