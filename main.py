@@ -14,7 +14,7 @@ def main():
 
     #  Authentication loop
     while not user:
-        print(Fore.CYAN + "\n1. Login")
+        print("\n1. Login")
         print("2. Sign Up")
         print("3. Exit" + Style.RESET_ALL)
 

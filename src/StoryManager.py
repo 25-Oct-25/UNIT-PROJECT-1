@@ -1,12 +1,25 @@
+#Project imports 
 from src.FileHandler import FileHandler
 from src.AiHelper import AIHelper
 from src.Story import Story
 from src.EmailHelper import EmailHelper
+
+#Built-in modules
 import os
+import re
 from datetime import datetime
+
+#ReportLab (PDF generation)
 from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, PageBreak
+)
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.units import inch
 from reportlab.lib import colors
+
+#CLI colors 
 from colorama import Fore, Style, init
 
 init(autoreset=True, convert=True)
@@ -248,136 +261,44 @@ class StoryManager:
         export_dir = "Exports"
         os.makedirs(export_dir, exist_ok=True)
 
-        print(Fore.CYAN + "\n📦 Choose export type:")
-        print(Fore.LIGHTBLUE_EX + "1. 📄 Export as TXT file")
-        print("2. 🧾 Export as PDF file")
-        print("3. ✉️ Send via Email")
+        print(Fore.CYAN + "\n Choose export type:")
+        print("1. 🧾 Export as PDF file")
+        print("2. ✉️ Send via Email")
 
-        export_choice = input(Fore.CYAN + "Enter 1, 2, or 3: ").strip()
+        export_choice = input(Fore.CYAN + "Enter 1 or 2: ").strip()
         creation_date = datetime.now().strftime("%d %b %Y")
 
-        #  1. TXT Export 
+
+        # 1. PDF Export 
         if export_choice == "1":
-            txt_path = os.path.join(export_dir, f"{title}.txt")
-            with open(txt_path, "w", encoding="utf-8") as f:
-                f.write(f"Title: {selected['title']}\n")
-                f.write(f"Genre: {selected['genre']}\n")
-                f.write(f"Created on: {creation_date}\n")
-                f.write(f"Author: {self.username}\n\n")
-                for i, part in enumerate(selected["parts"], start=1):
-                    f.write(f"--- Part {i} ---\n{part}\n\n")
-                f.write("\nGenerated using AI Interactive Story Creator 🌙")
-
-            print(Fore.GREEN + f"\n✅ Story exported successfully as '{txt_path}'")
-
-        # 2. PDF Export 
-        elif export_choice == "2":
+                    
             pdf_path = os.path.join(export_dir, f"{title}.pdf")
-            c = canvas.Canvas(pdf_path, pagesize=A4)
-            width, height = A4
-            page_number = 1
+            self._export_as_novel_pdf(selected, pdf_path, creation_date)
 
-            def draw_footer():
-                c.setFont("Helvetica-Oblique", 9)
-                c.setFillColor(colors.grey)
-                c.drawCentredString(width / 2, 40, f"Page {page_number}")
-
-            y = height - 100
-            c.setFont("Helvetica-Bold", 22)
-            c.setFillColor(colors.darkblue)
-            c.drawCentredString(width / 2, y, selected['title'])
-            y -= 30
-            c.setFont("Helvetica-Oblique", 13)
-            c.setFillColor(colors.black)
-            c.drawCentredString(width / 2, y, f"{selected['genre'].capitalize()} Story")
-            y -= 20
-            c.setFont("Helvetica", 11)
-            c.setFillColor(colors.grey)
-            c.drawCentredString(width / 2, y, f"Created on: {creation_date}")
-            y -= 40
-
-            for i, part in enumerate(selected["parts"], start=1):
-                if y <= 100:
-                    draw_footer()
-                    c.showPage()
-                    page_number += 1
-                    y = height - 100
-                c.setFont("Helvetica-Bold", 14)
-                c.setFillColor(colors.darkred)
-                c.drawString(80, y, f"Part {i}")
-                y -= 20
-                c.setFont("Helvetica", 12)
-                c.setFillColor(colors.black)
-                for line in part.split("\n"):
-                    if y <= 80:
-                        draw_footer()
-                        c.showPage()
-                        page_number += 1
-                        y = height - 100
-                        c.setFont("Helvetica", 12)
-                    c.drawString(80, y, line[:100])
-                    y -= 16
-                y -= 25
-
-            draw_footer()
-            c.setFont("Helvetica-Oblique", 10)
-            c.setFillColor(colors.grey)
-            c.drawCentredString(width / 2, 60, "Generated using AI Interactive Story Creator 🌙")
-            c.save()
-
-            print(Fore.GREEN + f"\n✅ Story exported successfully as '{pdf_path}'")
-
-        # 3. EMAIL EXPORT 
-        elif export_choice == "3":
+        # 2. EMAIL EXPORT 
+        elif export_choice == "2":
             email_helper = EmailHelper()
             receiver_email = input(Fore.CYAN + "Enter recipient email: ").strip()
 
-            print(Fore.CYAN + "\n📧 Choose email attachment format:")
-            print(Fore.LIGHTBLUE_EX + "1. Send as PDF")
-            print("2. Send as TXT")
-            attach_choice = input(Fore.CYAN + "Enter 1 or 2: ").strip()
+            print(Fore.CYAN + "\n📧 Sending story as PDF attachment...")
             attachments = []
 
-            if attach_choice == "1":
-                pdf_path = os.path.join(export_dir, f"{title}.pdf")
-                c = canvas.Canvas(pdf_path, pagesize=A4)
-                width, height = A4
-                y = height - 100
-                c.setFont("Helvetica-Bold", 22)
-                c.setFillColor(colors.darkblue)
-                c.drawCentredString(width / 2, y, selected['title'])
-                y -= 40
-                for part in selected["parts"]:
-                    c.setFont("Helvetica", 12)
-                    c.setFillColor(colors.black)
-                    for line in part.split("\n"):
-                        if y <= 100:
-                            c.showPage()
-                            y = height - 100
-                        c.drawString(80, y, line[:100])
-                        y -= 16
-                    y -= 25
-                c.save()
-                attachments.append(pdf_path)
-                print(Fore.GREEN + f"📎 PDF ready: {pdf_path}")
-
-            elif attach_choice == "2":
-                txt_path = os.path.join(export_dir, f"{title}.txt")
-                with open(txt_path, "w", encoding="utf-8") as f:
-                    f.write(f"Title: {selected['title']}\nGenre: {selected['genre']}\n")
-                    f.write(f"Created on: {creation_date}\nAuthor: {self.username}\n\n")
-                    for i, part in enumerate(selected["parts"], start=1):
-                        f.write(f"--- Part {i} ---\n{part}\n\n")
-                    f.write("\nGenerated using AI Interactive Story Creator 🌙")
-                attachments.append(txt_path)
-                print(Fore.GREEN + f"📎 TXT ready: {txt_path}")
-            else:
-                print(Fore.RED + "❌ Invalid choice. Cancelled.")
-                return
+            pdf_path = os.path.join(export_dir, f"{title}.pdf")
+            self._export_as_novel_pdf(selected, pdf_path, creation_date)
+            attachments.append(pdf_path)
+            print(Fore.GREEN + f"📎 PDF ready: {pdf_path}")
 
             subject = f"Your Story: {selected['title']}"
-            body = f"Hey 🌙,\nHere’s your story '{selected['title']}' attached for you!"
+            body = (
+                f"Hello 🌙,\n\n"
+                f"Attached below is your beautifully formatted story titled '{selected['title']}'.\n"
+                "Enjoy reading your adventure, and thank you for using AI Interactive Story Creator! 📖\n\n"
+                "— The Story Creator Team 🌙"
+            )
+
             email_helper.send_email(receiver_email, subject, body, attachments=attachments)
+
+
 
         else:
             print(Fore.RED + "⚠️ Invalid option. Returning to main menu.")
@@ -405,4 +326,111 @@ class StoryManager:
         """Save the updated list of stories for the current user."""
         story_dicts = [s.to_dict() if isinstance(s, Story) else s for s in stories]
         self.file_handler.save_stories(self.username, story_dicts)
+    
+    def _export_as_novel_pdf(self, selected, output_path, creation_date):
+        """
+        export story as novel style pdf (with cover page, light background, and footer logo)
+        """
+
+        # pdf setup
+        doc = SimpleDocTemplate(
+            output_path,
+            pagesize=A4,
+            rightMargin=60,
+            leftMargin=60,
+            topMargin=60,
+            bottomMargin=60 )
+
+        story_flow = []
+        styles = getSampleStyleSheet()
+
+        #text styles 
+        cover_title = ParagraphStyle(
+            'CoverTitle',
+            parent=styles['Heading1'],
+            fontName='Times-Bold',
+            fontSize=26,
+            textColor=colors.darkblue,  
+            alignment=TA_CENTER,
+            spaceAfter=20 )
+
+        cover_sub = ParagraphStyle(
+            'CoverSub',
+            parent=styles['Normal'],
+            fontName='Times-Italic',
+            fontSize=14,
+            textColor='gray',
+            alignment=TA_CENTER,
+            spaceAfter=10 )
+
+        cover_info = ParagraphStyle(
+            'CoverInfo',
+            parent=styles['Normal'],
+            fontName='Times-Roman',
+            fontSize=12,
+            textColor='darkgray',
+            alignment=TA_CENTER,
+            spaceAfter=20 )
+
+        body_style = ParagraphStyle(
+            'Body',
+            parent=styles['Normal'],
+            fontName='Times-Roman',
+            fontSize=16,
+            leading=18,
+            alignment=4,  
+            firstLineIndent=20  )
+
+        # cover page 
+        story_flow.append(Spacer(1, 2.5 * inch))
+        story_flow.append(Paragraph(selected['title'], cover_title))
+        story_flow.append(Spacer(1, 0.1 * inch))
+        story_flow.append(Paragraph("<font color='grey'>───────────────</font>", cover_sub))
+        story_flow.append(Spacer(1, 0.15 * inch))
+        cover_author = ParagraphStyle(
+            'CoverAuthor',
+            parent=styles['Normal'],
+            fontName='Times-BoldItalic',
+            fontSize=15,
+            textColor=colors.slategrey,
+            alignment=TA_CENTER,
+            spaceAfter=12 )
+        story_flow.append(Paragraph(f"By {self.username}", cover_author))
+        story_flow.append(Paragraph(f"{selected['genre'].capitalize()} Story", cover_sub))
+        story_flow.append(Paragraph(f"Created on: {creation_date}", cover_info))
+        story_flow.append(PageBreak())
+
+        # main story page 
+        combined_story = ""
+        for part in selected["parts"]:
+            clean_text = re.sub(r'\b\d+\.\s.*', '', part)  # remove choices option
+            clean_text = re.sub(r'(possible actions|choices|options).*', '', clean_text, flags=re.IGNORECASE)
+            combined_story += " " + clean_text.strip()
+
+        # remove extra spaces
+        combined_story = re.sub(r'\s+', ' ', combined_story).strip()
+
+        # add full story paragraph
+        story_flow.append(Paragraph(combined_story, body_style))
+
+        # export final pdf
+        doc.build(story_flow, onFirstPage=self._draw_cover_background)
+        print(Fore.GREEN + f"\n✅ Story exported successfully : '{output_path}'" + Fore.RESET)
+
+
+    def _draw_cover_background(self,canvas_obj, doc):
+        """draw light gray background and footer logo"""
+        canvas_obj.saveState()
+        width, height = A4
+
+        # light gray background
+        canvas_obj.setFillColorRGB(0.95, 0.95, 0.95)
+        canvas_obj.rect(0, 0, width, height, fill=1)
+
+        # footer logo
+        canvas_obj.setFont("Helvetica-Oblique", 10)
+        canvas_obj.setFillColor(colors.grey)
+        canvas_obj.drawCentredString(width / 2, 40, "Generated using AI Interactive Story Creator 🌙")
+
+        canvas_obj.restoreState()
 
