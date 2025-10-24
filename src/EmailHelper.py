@@ -1,10 +1,12 @@
+#Built-in modules
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
-from dotenv import load_dotenv
 import os
+#External libraries
+from dotenv import load_dotenv
 from colorama import Fore, Style, init
 
 

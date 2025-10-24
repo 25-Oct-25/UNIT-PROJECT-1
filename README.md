@@ -21,7 +21,7 @@ As a User, I can:
 
 5. View, delete, or export my old stories.
 
-6. Export a story as a TXT or PDF file.
+6. Export a story as a PDF file.
 
 7. Send my story via email with attachments.
 

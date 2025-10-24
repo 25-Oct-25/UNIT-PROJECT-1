@@ -1,26 +1,23 @@
-#Project imports 
-from src.FileHandler import FileHandler
-from src.AiHelper import AIHelper
-from src.Story import Story
-from src.EmailHelper import EmailHelper
 
 #Built-in modules
 import os
 import re
 from datetime import datetime
-
-#ReportLab (PDF generation)
+import time
+#External libraries
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, PageBreak
-)
+    SimpleDocTemplate, Paragraph, Spacer, PageBreak )
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.units import inch
 from reportlab.lib import colors
-
-#CLI colors 
 from colorama import Fore, Style, init
+#Project imports 
+from src.FileHandler import FileHandler
+from src.AiHelper import AIHelper
+from src.Story import Story
+from src.EmailHelper import EmailHelper
 
 init(autoreset=True, convert=True)
 
@@ -33,86 +30,121 @@ class StoryManager:
         self.ai_helper = AIHelper()
 
     # MAIN MENU 
-
     def resume_last_story(self):
         """Load and continue the user's most recent story if available."""
-        last_story_title = self.file_handler.get_last_story(self.username)
-        if not last_story_title:
-            print(Fore.YELLOW + "⚠️ No recent story found.")
-            return
+        try:
+            last_story_title = self.file_handler.get_last_story(self.username)
+            if not last_story_title:
+                print(Fore.YELLOW + "⚠️ No recent story found.")
+                return
 
-        stories_data = self.file_handler.load_stories(self.username)
-        stories = [Story.from_dict(s) for s in stories_data]
-        selected = next((s for s in stories if s.title == last_story_title), None)
+            stories_data = self.file_handler.load_stories(self.username)
+            if not stories_data:
+                print(Fore.YELLOW + "📭 No saved stories found.")
+                return
 
-        if not selected:
-            print(Fore.RED + "❌ Last story not found.")
-            return
+            stories = [Story.from_dict(s) for s in stories_data]
+            selected = next((s for s in stories if s.title == last_story_title), None)
+            if not selected:
+                print(Fore.RED + "❌ Last story not found.")
+                return
 
-        print(Fore.CYAN + f"\n📖 Your last story was: {selected.title}")
-        choice = input("Do you want to continue it? (y/n): ").strip().lower()
-        if choice == "y":
-            self._story_loop(selected, stories, auto_continue=True)
-        else:
-            print(Fore.LIGHTBLUE_EX + "↩️ Returning to main menu...")
+            print(Fore.CYAN + f"\n📖 Your last story was: {selected.title}")
+            choice = input("Do you want to continue it? (y/n): ").strip().lower()
+            if choice == "y":
+                self._story_loop(selected, stories, auto_continue=True)
+            else:
+                print(Fore.LIGHTBLUE_EX + "↩️ Returning to main menu...")
+
+        except Exception as e:
+            print(Fore.RED + f"\n⚠️ Could not load your last story: {e}")
+            print(Fore.LIGHTBLUE_EX + "Returning safely to the main menu.\n")
+
+
+
 
     def start_new_story(self):
         """Start a new story by getting user input, generating the first part, and saving it."""
-        print(Fore.CYAN + "\n🪄 Let's create your new story!" + Style.RESET_ALL)
+        print(Fore.MAGENTA + "\n" + "💫" + "═" * 46 + "💫")
+        print(Fore.CYAN + "📖  NEW STORY CREATION  📖".center(60))
+        print(Fore.MAGENTA + "═" * 50 + "💫")
+        print(Fore.LIGHTWHITE_EX + "Let's begin your storytelling journey...".center(60))
+        print(Fore.MAGENTA + "💫" + "═" * 46 + "💫" + Style.RESET_ALL)
         title = input("Enter a title for your story: ").strip()
         genre = input("Choose a genre (Drama, Adventure, Fantasy, Romance): ").strip()
         length = input("Do you want it short or long? ").strip().lower()
         prompt = input("Write the opening for your story: ").strip()
 
-        print(Fore.LIGHTBLUE_EX + "\n✨ Generating the first part of your story...\n")
+        print(Fore.CYAN + "\n🪄 Crafting your story's opening scene...")
+        time.sleep(0.8)
+        print(Fore.LIGHTBLUE_EX + "✨ Summoning imagination from the AI realms...\n")
+
+
         result = self.ai_helper.generate_part(prompt, genre, length)
+        if not result or not result.get("text"):
+            raise RuntimeError("AI failed to generate the first part of the story.")
+
 
         story = Story(title, genre, length)
         story.add_part(result["text"])
 
         stories = self.file_handler.load_stories(self.username)
+        if not stories:
+            stories = []
+
         stories.append(story.to_dict())
         self.file_handler.save_stories(self.username, stories)
         self.file_handler.set_last_story(self.username, story.title)
 
-        print(Fore.CYAN + f"\n📚 You’re now reading: '{story.title}' 🌙")
-        print(Fore.CYAN + "=" * 50)
-        print(f"Genre: {story.genre.capitalize()} | Length: {story.length.capitalize()}")
-        print("=" * 50 + "\n" + Style.RESET_ALL)
+        print(Fore.MAGENTA + "\n💫" + "═" * 46 + "💫")
+        print(Fore.CYAN + f"📖  You're now reading:  『{story.title}』  🌙".center(60))
+        print(Fore.LIGHTWHITE_EX + f"Genre: {story.genre.capitalize()} | Length: {story.length.capitalize()}".center(60))
+        print(Fore.MAGENTA + "💫" + "═" * 46 + "💫" + Style.RESET_ALL + "\n")
 
         self._print_story_text(result["text"])
         self._ask_user_choice(result, story, stories)
 
     # ASK USER CHOICE 
-
     def _ask_user_choice(self, result, story, stories):
         """Display the generated choices and handle user's selection for the next part."""
 
+        # Ensure AI options exist
         if not result["options"] or len(result["options"]) < 3:
             print(Fore.YELLOW + "⚠️ AI did not generate full options, adding defaults..." + Fore.RESET)
             result["options"] = [
-                "1. Continue the journey.",
-                "2. Change direction of the story.",
-                "3. End the story gracefully."
-            ]
+                "1. Continue the journey into the unknown.",
+                "2. Seek a new path through the shadows.",
+                "3. End this chapter with quiet reflection."]
 
+        # Decorative header
+        print(Fore.MAGENTA + "\n💫" + "═" * 46 + "💫")
+        print(Fore.CYAN + "🧭  CHAPTER DECISION  🧭".center(60))
+        print(Fore.MAGENTA + "═" * 50)
+        print(Fore.LIGHTWHITE_EX + "“Every choice leads to a new destiny...”".center(60))
+        print(Fore.MAGENTA + "═" * 50 + "\n")
 
-        print(Fore.CYAN + "\nChoose what happens next:" + Style.RESET_ALL)
+        # Display options
         for opt in result["options"]:
-            print(Fore.LIGHTYELLOW_EX + opt)
-        print(Fore.LIGHTRED_EX + "0. 🛑 Stop and save progress to contune later" + Style.RESET_ALL)
+            print(Fore.LIGHTYELLOW_EX + f"   {opt}")
+        print(Fore.LIGHTRED_EX + "   0️⃣ 🛑 Save progress & return later" + Style.RESET_ALL)
+        print(Fore.MAGENTA + "💫" + "═" * 46 + "💫" + "\n")
 
+        # Handle user input
         while True:
-            choice = input(Fore.CYAN + "\nEnter 1, 2, 3 to continue or 0 to stop: ").strip()
+            choice = input(Fore.CYAN + "🔹 Enter your choice (1-3) or 0 to stop: ").strip()
             if choice == "0":
-                print(Fore.GREEN + "\n✅ Progress saved. You can resume later.")
+                print(Fore.YELLOW + "\n⌛ Saving your progress...", end="", flush=True)
+                time.sleep(1)
                 self._save_stories(stories)
-                print(Fore.LIGHTBLUE_EX + "↩️ Returning to main menu...")
+                print(Fore.GREEN + "\r✅ Progress saved successfully!")
+                time.sleep(0.5)
+                print(Fore.LIGHTBLUE_EX + "↩️ Returning to main menu...\n")
                 return
             elif choice in ["1", "2", "3"]:
                 index = int(choice) - 1
                 if index < len(result["options"]):
                     story.last_choice = result["options"][index]
+                    print(Fore.LIGHTBLUE_EX + "\n✨ Generating what happens next... Please wait.\n")
                     self._story_loop(story, stories, auto_continue=True)
                     break
                 else:
@@ -120,8 +152,8 @@ class StoryManager:
             else:
                 print(Fore.RED + "❌ Invalid input. Please enter 1, 2, 3 or 0.")
 
-    # STORY LOOP 
 
+    # STORY LOOP 
     def _story_loop(self, selected, stories, auto_continue=False):
         """Generate and display the next part of the story, continuing based on user choices."""
 
@@ -129,15 +161,18 @@ class StoryManager:
 
         prompt = (
             f"Summary of previous parts:\n{self._summarize_story(selected.parts[:-1])}\n\n"
-            f"Here’s the last scene of the story:\n{selected.parts[-1][-500:]}"
-        )
+            f"Here's the last scene of the story:\n{selected.parts[-1][-500:]}" )
 
         if selected.last_choice:
             prompt += f"\n\nContinue the story focusing on the choice: {selected.last_choice}"
 
         prompt += "\n\nContinue naturally from where the story left off. Do NOT restart or repeat previous events."
 
+        # Get AI result (with true end flag)
         result = self.ai_helper.generate_part(prompt, selected.genre, selected.length)
+        if not result or not result.get("text"):
+            raise RuntimeError("AI failed to generate the next story part.")
+
         new_part = result["text"]
         selected.add_part(new_part)
 
@@ -150,30 +185,85 @@ class StoryManager:
 
         self._save_stories(stories)
 
+        # Intelligent ending detection (AI + fallback)
+        is_true_end = result.get("is_true_end", False)
         lines = [l.strip() for l in new_part.split("\n") if l.strip()]
         has_choices = any(line.startswith(("1.", "2.", "3.")) for line in lines)
-        is_true_end = "THE END" in new_part.upper() and not has_choices
 
+        if not has_choices and len(selected.parts) >= 8:
+            is_true_end = True
+
+        if any(phrase in new_part.lower() for phrase in [
+            "the journey was complete", "finally free", "at last, peace",
+            "their story had ended", "and that was the end"
+        ]):
+            is_true_end = True
+
+        # If story truly ended
         if is_true_end:
-            print(Fore.MAGENTA + "\n🏁 The story has reached its end. Well done!")
-            print(Fore.LIGHTBLUE_EX + "=" * 50)
-            print("Generated using AI Interactive Story Creator 🌙")
-            print("=" * 50 + "\n")
-            print(Fore.LIGHTBLUE_EX + "↩️ Returning to main menu...")
+            print(Fore.MAGENTA + "\n" + "═" * 60)
+            print(Fore.MAGENTA + "🌙  T H E   E N D  🌙".center(60))
+            print(Fore.MAGENTA + "═" * 60)
+            print(Fore.LIGHTWHITE_EX + "Your story has gracefully reached its conclusion.".center(60))
+            print(Fore.LIGHTWHITE_EX + "Thank you for journeying through this adventure.".center(60))
+            print(Fore.LIGHTWHITE_EX + "We hope to see you again for another tale! 🌠".center(60))
+            print(Fore.MAGENTA + "═" * 60 + "\n")
+
+            #  Simulate save and graceful exit
+            self._save_stories(stories)
+            print(Fore.YELLOW + "⌛ Saving your progress...", end="", flush=True)
+            time.sleep(1.5)
+            print(Fore.GREEN + "\r✅ Progress saved successfully!".ljust(60))
+            time.sleep(1)
+
+            # Ask if user wants to start a new chapter based on same story
+            print(Fore.CYAN + "\nWould you like to begin a *new chapter* inspired by this story?")
+            next_choice = input(Fore.LIGHTYELLOW_EX + "Enter (y)es to continue the legacy, or any other key to exit: ").strip().lower()
+
+            if next_choice == "y":
+                print(Fore.LIGHTBLUE_EX + "\n✨ Crafting a new chapter inspired by your previous journey...\n")
+                new_prompt = (
+                    f"This is a continuation inspired by the story titled '{selected.title}'. "
+                    f"Summarize the previous ending, then start a new chapter that continues naturally — "
+                    f"introducing a new conflict, mystery, or emotional thread. "
+                    f"Keep the tone and style consistent with the original story."
+                )
+                # Generate the new continuation
+                new_result = self.ai_helper.generate_part(new_prompt, selected.genre, selected.length)
+                new_text = new_result["text"]
+                selected.add_part(new_text)
+
+                print(Fore.MAGENTA + "\n💫  NEW CHAPTER BEGINS  💫\n")
+                self._print_story_text(new_text)
+                print(Fore.GREEN + "\n🕯️ New chapter added successfully!\n")
+
+                self._save_stories(stories)
+                self._ask_user_choice(new_result, selected, stories)
+            else:
+                print(Fore.CYAN + "\n↩️ Returning to main menu...\n")
+                time.sleep(1)
             return
 
+        # Otherwise, continue story normally
         self._ask_user_choice(result, selected, stories)
+
 
     # STORY MANAGEMENT 
 
     def load_old_stories(self):
         """Load and allow the user to continue one of their saved stories."""
         stories_data = self.file_handler.load_stories(self.username)
+        if stories_data is None:
+            raise FileNotFoundError("User story data could not be loaded or is corrupted.")
+
         if not stories_data:
             print(Fore.YELLOW + "\n📂 No saved stories found.")
             return
 
         stories = [Story.from_dict(s) for s in stories_data]
+        if not stories:
+            stories = []
+
         print(Fore.CYAN + "\n📜 Your saved stories:")
         for i, s in enumerate(stories, start=1):
             print(f"{i}. {s.title} ({s.genre}, {len(s.parts)} parts)")
@@ -200,12 +290,18 @@ class StoryManager:
     def delete_story(self):
         """Allow the user to delete one of their saved stories (with confirmation)."""
         stories_data = self.file_handler.load_stories(self.username)
+        if stories_data is None:
+            raise FileNotFoundError("User story data could not be loaded or is corrupted.")
+
 
         if not stories_data:
             print(Fore.YELLOW + "📭 No saved stories found.")
             return
 
         stories = [Story.from_dict(s) for s in stories_data]
+        if not stories:
+            stories = []
+
         print(Fore.CYAN + "\n🗑️ Your saved stories:")
         for i, s in enumerate(stories, start=1):
             print(f"{i}. {s.get_summary()}")
@@ -274,11 +370,17 @@ class StoryManager:
                     
             pdf_path = os.path.join(export_dir, f"{title}.pdf")
             self._export_as_novel_pdf(selected, pdf_path, creation_date)
+            if not os.path.exists(pdf_path):
+                raise FileNotFoundError(f"PDF export failed for '{title}'. File not found.")
+
 
         # 2. EMAIL EXPORT 
         elif export_choice == "2":
             email_helper = EmailHelper()
             receiver_email = input(Fore.CYAN + "Enter recipient email: ").strip()
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", receiver_email):
+                print(Fore.RED + "⚠️ Invalid email address format. Please try again.")
+                return
 
             print(Fore.CYAN + "\n📧 Sending story as PDF attachment...")
             attachments = []
@@ -296,7 +398,10 @@ class StoryManager:
                 "— The Story Creator Team 🌙"
             )
 
-            email_helper.send_email(receiver_email, subject, body, attachments=attachments)
+            try:
+                email_helper.send_email(receiver_email, subject, body, attachments=attachments)
+            except Exception as e:
+                raise RuntimeError(f"Failed to send email: {e}")
 
 
 
@@ -415,7 +520,8 @@ class StoryManager:
 
         # export final pdf
         doc.build(story_flow, onFirstPage=self._draw_cover_background)
-        print(Fore.GREEN + f"\n✅ Story exported successfully : '{output_path}'" + Fore.RESET)
+        print(Fore.GREEN + f"\n✅ Story exported successfully! 📂\nSaved at: {output_path}\n" + Fore.RESET)
+
 
 
     def _draw_cover_background(self,canvas_obj, doc):

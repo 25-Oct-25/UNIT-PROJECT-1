@@ -1,7 +1,9 @@
+#Built-in modules
 import json
 import os
 import hashlib
 import hmac
+#External libraries
 from dotenv import load_dotenv
 from colorama import Fore, Style, init
 

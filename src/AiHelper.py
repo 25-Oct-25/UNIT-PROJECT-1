@@ -1,4 +1,6 @@
+#External libraries
 from huggingface_hub import InferenceClient
+#Built-in module
 import os
 
 
@@ -13,18 +15,21 @@ class AIHelper:
     def generate_part(self, prompt, genre, length="short"):
         """
         Generate a story part with smooth continuation and concise storytelling.
-        Always ends with exactly three numbered choices.
+        Ends with three numbered choices unless the story is concluded.
         """
         system_message = (
-            f"You are a concise, talented {genre} story writer. "
-            f"Continue the story naturally and logically from the previous events. "
-            f"Write in a cinematic and emotional style but keep it concise — "
-            f"no more than 4 to 6 short paragraphs. "
-            f"Avoid repeating any previous information or summarizing earlier parts. "
-            f"Focus only on what happens next. "
-            f"After writing, provide exactly THREE numbered choices (1., 2., 3.) "
-            f"that are short (one line each), clear, and mutually distinct. "
-            f"Never include 'THE END' unless the story truly concludes."
+            f"You are a skilled {genre} story writer. "
+            f"Continue the story naturally and logically from where it left off. "
+            f"Write in a cinematic, emotional, and immersive style — around 4 to 6 short paragraphs per part. "
+            f"Focus only on what happens next, keeping consistency with tone and characters. "
+
+            f"If the main story arc feels resolved, or the hero completes their goal, "
+            f"then conclude gracefully with a satisfying final paragraph followed by 'THE END'. "
+
+            f"Only include numbered choices (1., 2., 3.) if the story naturally continues afterward. "
+            f"If the story is truly finished, DO NOT include any numbered choices — just end with 'THE END'. "
+
+            f"Never generate both 'THE END' and numbered options together."
         )
 
         try:
@@ -36,18 +41,18 @@ class AIHelper:
                     {"role": "user", "content": prompt},
                 ],
                 max_tokens=750 if length == "short" else 1100,
-                temperature=0.7,  
+                temperature=0.7,
                 top_p=0.9,
             )
 
-            #  Extract response text
+            # Extract response text
             story_text = response.choices[0].message["content"].strip()
 
-            #  Detect numbered options (1–3)
+            # Detect numbered options (1–3)
             lines = story_text.split("\n")
             options = [line.strip() for line in lines if line.strip().startswith(("1.", "2.", "3."))]
 
-            #  Add fallback if missing
+            # Add fallback if missing
             if not options:
                 options = [
                     "1. The hero takes a bold action to change the situation.",
@@ -56,15 +61,25 @@ class AIHelper:
                 ]
                 story_text += "\n\n" + "\n".join(options)
 
-            #  Clean up unwanted endings or empty lines
-            story_text = story_text.replace("THE END", "").strip()
+            # Clean up unwanted blank lines only — keep 'THE END' if it's actually there
             story_text = "\n".join([line for line in story_text.split("\n") if line.strip()])
 
-            
-            return {"text": story_text, "options": options}
+            # Detect if it's a true ending
+            is_true_end = "THE END" in story_text.upper()
+            if any(phrase in story_text.lower() for phrase in [
+                "the journey was complete",
+                "finally free",
+                "at last, peace",
+                "their story had ended",
+                "and that was the end" ]):
+                is_true_end = True
+
+
+            # ✅ Return final result (no dead code after)
+            return {"text": story_text, "options": options, "is_true_end": is_true_end}
 
         except Exception as e:
-            #  Safe fallback
+            # Safe fallback
             fallback_text = (
                 f"⚠️ HF API Error: {str(e)}\n"
                 "The connection to the AI service was interrupted.\n"
@@ -72,7 +87,7 @@ class AIHelper:
             )
             fallback_options = [
                 "1. Retry the last part.",
-                "2. Change the story’s direction.",
+                "2. Change the story's direction.",
                 "3. End the story for now."
             ]
             print("\n" + fallback_text)
