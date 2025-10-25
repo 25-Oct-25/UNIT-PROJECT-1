@@ -12,3 +12,4 @@ This project combines Digital Forensics and Cybersecurity, providing both deep f
 - Results stored: in structured JSON format
 - Optional encryption mode: --secure to protect results using AES encryption
 - Modular design: with decorators and exception handling
+# ForensicCLI Toolkit - Final Submission Update
