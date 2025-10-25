@@ -50,3 +50,12 @@ ENCRYPTION_KEY=your_secret_key
 4. Colorama — CLI color enhancement  
 5. smtplib — Email sending  
 6. dotenv — Secure credential management
+
+---
+
+Developed for educational and creative purposes.
+
+
+###  Developed by *[Lama Alharbi]*  
+**Interactive Story Project — 2025**
+
