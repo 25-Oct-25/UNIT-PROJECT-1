@@ -34,10 +34,12 @@ Before running the project, make sure you have the following:
 1. Create a `.env` file in the project root directory.  
 2. Add your credentials:
 
+```bash
 HUGGINGFACE_API_KEY=your_huggingface_api_key
 EMAIL_SENDER=your_email@gmail.com
 EMAIL_PASSWORD=your_email_password
 ENCRYPTION_KEY=your_secret_key
+```
 
 3. Run the program in your terminal.
 
