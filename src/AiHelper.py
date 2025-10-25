@@ -1,7 +1,7 @@
-#External libraries
+# External libraries
 from huggingface_hub import InferenceClient
 from colorama import Fore, Style
-#Built-in module
+# Built-in modules
 import os
 import time
 import re
@@ -9,53 +9,60 @@ from datetime import datetime
 
 
 class AIHelper:
-        
-    def __init__(self, model_name):
-        """Initialize connection to Hugging Face API with optional model selection."""
-        api_key = os.getenv("HUGGINGFACE_API_KEY")
-        if not api_key:
-            raise ValueError("API key not found. Please check your .env file.")
+    """
+    Handles communication with Hugging Face models and manages
+    story generation, error recovery, retries, and clean text handling.
+    """
+    def __init__(self):
+        """Initialize the AI helper and connect to Hugging Face safely."""
+        try:
+            api_key = os.getenv("HUGGINGFACE_API_KEY")
+            if not api_key:
+                raise ValueError("Hugging Face API key not found. Check your .env file.")
 
-        # Initialize the Hugging Face client
-        self.client = InferenceClient(api_key=api_key)
-        # Store selected model name
-        self.model_name = model_name
+            # ✅ fixed model name (stable and supported)
+            self.model_name = "mistralai/Mixtral-8x7B-Instruct-v0.1"
+            self.client = InferenceClient(api_key=api_key)
+
+        except Exception as e:
+            raise RuntimeError(f"❌ Failed to initialize AIHelper: {e}")
+    
 
 
-
-    def generate_part(self, prompt, genre, length="short"):
+    def generate_part(self, prompt: str, genre: str, length: str = "short"):
         """
-        Generate a story part with smooth continuation and concise storytelling.
-        Ends with three numbered choices unless the story is concluded.
+        Generate the next story part, automatically retrying on connection issues.
+        Returns a dictionary:
+        {
+            'text': generated story text,
+            'options': list of user choices,
+            'is_true_end': bool (True if story has logically ended)
+        }
         """
+        # System instructions for consistent storytelling
         system_message = (
             f"You are a skilled {genre} story writer. "
-            f"Continue the story naturally and logically from where it left off. "
-            f"Write in a cinematic, emotional, and immersive style — around 4 to 6 short paragraphs per part. "
-            f"Focus only on what happens next, keeping consistency with tone and characters. "
-
-            f"If the main story arc feels resolved, or the hero completes their goal, "
-            f"then conclude gracefully with a satisfying final paragraph followed by 'THE END'. "
-
-            f"Only include numbered choices (1., 2., 3.) if the story naturally continues afterward. "
-            f"If the story is truly finished, DO NOT include any numbered choices — just end with 'THE END'. "
-
-            f"Never generate both 'THE END' and numbered options together."
+            f"Continue the story naturally from where it left off. "
+            f"Write in a cinematic, immersive, emotional tone — around 4 to 6 short paragraphs. "
+            f"Focus on the next logical event and keep consistent with characters and tone. "
+            f"If the story arc is resolved, gracefully end with 'THE END'. "
+            f"If it continues, end with 3 numbered choices (1., 2., 3.) for what happens next. "
+            f"Never include both 'THE END' and choices together."
         )
 
         try:
-            if getattr(self, "creativity", "balanced") == "balanced":
-                temperature = 0.7
-            elif self.creativity == "imaginative":
-                temperature = 1.0
-            elif self.creativity == "serious":
-                temperature = 0.4
-            else:
-                temperature = 0.7
+            # CREATIVE BEHAVIOR CONTROL 
+            creativity = getattr(self, "creativity", "balanced").lower()
+            temperature_map = {"balanced": 0.7, "imaginative": 1.0, "serious": 0.4}
+            temperature = temperature_map.get(creativity, 0.7)
+
+            #  MODEL CALL WITH RETRIES 
+            response = None
             for attempt in range(3):
                 try:
+                    print(Fore.CYAN + f"🪄 Generating attempt {attempt + 1}..." + Style.RESET_ALL)
 
-                    # Generate story continuation
+                    # ✅ Always use chat_completion (Mixtral supports it)
                     response = self.client.chat_completion(
                         model=self.model_name,
                         messages=[
@@ -65,68 +72,89 @@ class AIHelper:
                         max_tokens=750 if length == "short" else 1100,
                         temperature=temperature,
                         top_p=0.9,
-                        timeout=30 )
-                    break
-                except Exception as e:
-                    if attempt == 2: 
-                        raise e
-                    print(Fore.YELLOW +f"⚠️ Attempt {attempt+1} failed, retrying..."+ Style.RESET_ALL)
+                    )
+
+                    if response and hasattr(response, "choices"):
+                        break
                     time.sleep(2)
 
-            # Extract response text
+                except Exception as inner_error:
+                    print(Fore.YELLOW + f"⚠️ Attempt {attempt+1} failed: {inner_error}" + Style.RESET_ALL)
+                    if attempt == 2:
+                        raise inner_error
+                    time.sleep(2)
+
+            if not response or not hasattr(response, "choices"):
+                raise RuntimeError("No valid AI response after 3 attempts.")
+
+            # TEXT CLEANING 
             story_text = response.choices[0].message["content"].strip()
-            
             story_text = re.sub(r'\n{3,}', '\n\n', story_text)
             story_text = re.sub(r'(\b\w+\b)( \1\b)+', r'\1', story_text)
-            story_text = story_text.strip()
+            story_text = "\n".join([line for line in story_text.split("\n") if line.strip()])
 
-            # Detect numbered options (1–3)
+            # OPTION DETECTION 
             lines = story_text.split("\n")
             options = [line.strip() for line in lines if line.strip().startswith(("1.", "2.", "3."))]
 
-            # Add fallback if missing
-            if not options:
+            # END DETECTION 
+            is_true_end = "THE END" in story_text.upper() or any(
+                phrase in story_text.lower()
+                for phrase in [
+                    "the journey was complete",
+                    "finally free",
+                    "at last, peace",
+                    "their story had ended",
+                    "and that was the end",
+                ]
+            )
+
+            # FALLBACK OPTIONS (for AI outputs missing choices) 
+            if not options and not is_true_end:
                 options = [
                     "1. The hero takes a bold action to change the situation.",
                     "2. A mysterious twist forces a new decision.",
-                    "3. The hero pauses to reflect before moving forward."
+                    "3. The hero pauses to reflect before moving forward.",
                 ]
                 story_text += "\n\n" + "\n".join(options)
 
-            # Clean up unwanted blank lines only — keep 'THE END' if it's actually there
-            story_text = "\n".join([line for line in story_text.split("\n") if line.strip()])
+            # LOGGING 
+            try:
+                os.makedirs("logs", exist_ok=True)
+                with open("logs/ai_history.txt", "a", encoding="utf-8") as f:
+                    f.write(f"\n[{datetime.now()}] Model: {self.model_name} | Creativity: {creativity}\n")
+                    f.write(f"Prompt: {prompt[:250]}...\nResponse: {story_text[:600]}...\n" + "-" * 60 + "\n")
+            except Exception as log_error:
+                print(Fore.YELLOW + f"⚠️ Failed to write log: {log_error}" + Fore.RESET)
 
-            # Detect if it's a true ending
-            is_true_end = "THE END" in story_text.upper()
-            if any(phrase in story_text.lower() for phrase in [
-                "the journey was complete",
-                "finally free",
-                "at last, peace",
-                "their story had ended",
-                "and that was the end" ]):
-                is_true_end = True
-            
-            os.makedirs("logs", exist_ok=True)
-            with open("logs/ai_history.txt", "a", encoding="utf-8") as f:
-                f.write(f"\n[{datetime.now()}] Model: {self.model_name} | Creativity: {getattr(self, 'creativity', 'balanced')}\n")
-                f.write(f"Prompt: {prompt[:200]}...\n")
-                f.write(f"Response: {story_text[:500]}...\n")
-                f.write("-" * 60 + "\n")
+            # FINAL VALIDATION 
+            if not story_text.strip():
+                raise RuntimeError("Generated story text was empty.")
 
-            # Return final result (no dead code after)
-            return {"text": story_text, "options": options, "is_true_end": is_true_end}
+            return {
+                "text": story_text,
+                "options": options,
+                "is_true_end": is_true_end,
+            }
 
         except Exception as e:
-            # Safe fallback
+            # GLOBAL SAFE FALLBACK 
+            print(Fore.RED + f"\n❌ AI Error: {e}" + Fore.RESET)
+            print(Fore.YELLOW + "⚠️ The AI connection failed. You can retry later safely.")
+            print(Fore.LIGHTCYAN_EX + "Your story progress has been saved.\n" + Fore.RESET)
+
             fallback_text = (
-                f"⚠️ HF API Error: {str(e)}\n"
-                "The connection to the AI service was interrupted.\n"
-                "Don't worry — your progress is saved and you can continue!"
+                "⚠️ AI service connection issue.\n"
+                "Please check your internet or API key.\n"
+                "Your progress is safe — you can continue later."
             )
             fallback_options = [
-                "1. Retry the last part.",
+                "1. Retry generating this part.",
                 "2. Change the story's direction.",
-                "3. End the story for now."
+                "3. End the story for now.",
             ]
-            print("\n" + fallback_text)
-            return {"text": fallback_text, "options": fallback_options}
+            return {
+                "text": fallback_text,
+                "options": fallback_options,
+                "is_true_end": False,
+            }

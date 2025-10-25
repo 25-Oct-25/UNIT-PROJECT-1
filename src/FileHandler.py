@@ -1,13 +1,14 @@
-#Built-in modules
+# Built-in modules
 import json
 import os
+import shutil
 
 
 class FileHandler:
     
     STORIES_FILE = "data/stories.json"
 
-    # Internal Helper Methods
+    # INTERNAL HELPER METHODS — Safely read and write data files
 
     @staticmethod
     def _read_data():
@@ -37,13 +38,16 @@ class FileHandler:
         try:
             with open(temp_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
-            os.replace(temp_file, FileHandler.STORIES_FILE)  # atomic replace
+                f.flush()
+                os.fsync(f.fileno())
+            
+            shutil.move(temp_file, FileHandler.STORIES_FILE)
         except Exception as e:
             if os.path.exists(temp_file):
                 os.remove(temp_file)
             raise RuntimeError(f"Failed to write stories file safely: {e}")
 
-    # Public Methods 
+    # STORY STORAGE METHODS — Core methods for saving, loading, and tracking story data
 
     @staticmethod
     def load_stories(username):
@@ -91,3 +95,56 @@ class FileHandler:
         """
         data = FileHandler._read_data()
         return data.get(username, {}).get("last_story")
+    
+    # USER PREFERENCES METHODS — Save and load preferences per user (e.g. creativity level)
+    
+    @staticmethod
+    def save_user_preference(username, key, value):
+        """
+        Save a user preference (e.g., creativity level, theme, or last used model)
+        to the main data file for persistence.
+        """
+        data = FileHandler._read_data()
+        if username not in data:
+            data[username] = {}
+        if "preferences" not in data[username]:
+            data[username]["preferences"] = {}
+
+        data[username]["preferences"][key] = value
+        FileHandler._write_data(data)
+
+    @staticmethod
+    def load_user_preference(username, key):
+        """
+        Load a specific user preference (e.g., creativity level).
+        Returns None if not found.
+        """
+        data = FileHandler._read_data()
+        return (
+            data.get(username, {})
+            .get("preferences", {})
+            .get(key)
+        )
+    
+    # SESSION TRACKING METHODS — Manage last login or activity timestamps for users
+
+    @staticmethod
+    def update_last_session(username):
+        """
+        Update the user's last active session time (last login or activity).
+        """
+        from datetime import datetime
+
+        data = FileHandler._read_data()
+        if username not in data:
+            data[username] = {}
+        data[username]["last_session"] = datetime.now().strftime("%d %b %Y, %I:%M %p")
+        FileHandler._write_data(data)
+
+    @staticmethod
+    def get_last_session(username):
+        """
+        Retrieve the user's last session time, if available.
+        """
+        data = FileHandler._read_data()
+        return data.get(username, {}).get("last_session", None)

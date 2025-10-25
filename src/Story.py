@@ -55,6 +55,8 @@ class Story:
             "length": self.length,
             "parts": self.parts,
             "last_choice": self.last_choice,
+            "created_at": getattr(self, "created_at", "Unknown"),
+
         }
 
 
