@@ -1,0 +1,62 @@
+[
+    {
+        "file": "/Users/hananaldayel/ForensicCLI/ForensicCLI/cases/CASE02/fig1.jpg",
+        "metadata": {
+            "file_name": "fig1.jpg",
+            "file_size_kb": 0.0,
+            "file_type": "image/jpeg",
+            "last_modified": "2025-10-22 09:50:25",
+            "exif_data": {}
+        },
+        "keyword_found": true,
+        "status": "MATCH"
+    },
+    {
+        "file": "/Users/hananaldayel/ForensicCLI/ForensicCLI/cases/CASE02/fig2.jpg",
+        "metadata": {
+            "file_name": "fig2.jpg",
+            "file_size_kb": 0.0,
+            "file_type": "image/jpeg",
+            "last_modified": "2025-10-22 09:50:33",
+            "exif_data": {}
+        },
+        "keyword_found": true,
+        "status": "MATCH"
+    },
+    {
+        "file": "/Users/hananaldayel/ForensicCLI/ForensicCLI/cases/CASE02/image11.jpg",
+        "metadata": {
+            "file_name": "image11.jpg",
+            "file_size_kb": 0.0,
+            "file_type": "image/jpeg",
+            "last_modified": "2025-10-22 09:49:53",
+            "exif_data": {}
+        },
+        "keyword_found": true,
+        "status": "MATCH"
+    },
+    {
+        "file": "/Users/hananaldayel/ForensicCLI/ForensicCLI/cases/CASE02/image22.jpg",
+        "metadata": {
+            "file_name": "image22.jpg",
+            "file_size_kb": 0.0,
+            "file_type": "image/jpeg",
+            "last_modified": "2025-10-22 09:50:03",
+            "exif_data": {}
+        },
+        "keyword_found": true,
+        "status": "MATCH"
+    },
+    {
+        "file": "/Users/hananaldayel/ForensicCLI/ForensicCLI/cases/CASE02/image33.jpg",
+        "metadata": {
+            "file_name": "image33.jpg",
+            "file_size_kb": 0.0,
+            "file_type": "image/jpeg",
+            "last_modified": "2025-10-22 09:50:16",
+            "exif_data": {}
+        },
+        "keyword_found": true,
+        "status": "MATCH"
+    }
+]

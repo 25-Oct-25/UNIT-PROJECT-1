@@ -1,0 +1,80 @@
+[
+    {
+        "file": "data/samples/collected/Internship Agreement_Female Summer Internship 2024 (RR7635) - Hanan Abdullah Mohammad Aldayel.pdf",
+        "metadata": {
+            "file_name": "Internship Agreement_Female Summer Internship 2024 (RR7635) - Hanan Abdullah Mohammad Aldayel.pdf",
+            "file_size_kb": 346.66,
+            "file_type": "application/pdf",
+            "last_modified": "2025-10-21 09:43:49",
+            "pdf_metadata": {
+                "/Producer": "macOS Version 14.4.1 (Build 23E224) Quartz PDFContext",
+                "/CreationDate": "D:20240604203803Z00'00'",
+                "/ModDate": "D:20240604203803Z00'00'"
+            },
+            "pages": 2
+        },
+        "keyword_found": false,
+        "status": "NO MATCH"
+    },
+    {
+        "file": "data/samples/collected/LEAP-2024-Saudi.jpg",
+        "metadata": {
+            "file_name": "LEAP-2024-Saudi.jpg",
+            "file_size_kb": 92.88,
+            "file_type": "image/jpeg",
+            "last_modified": "2024-05-02 22:33:58",
+            "exif_data": {
+                "Image Orientation": "Horizontal (normal)",
+                "Image XResolution": "96",
+                "Image YResolution": "96",
+                "Image ResolutionUnit": "Pixels/Inch",
+                "Image YCbCrPositioning": "Centered",
+                "Image ExifOffset": "86",
+                "EXIF ExifVersion": "0231",
+                "EXIF ComponentsConfiguration": "YCbCr",
+                "EXIF FlashPixVersion": "0100",
+                "EXIF ColorSpace": "Uncalibrated",
+                "EXIF ExifImageWidth": "1200",
+                "EXIF ExifImageLength": "765"
+            }
+        },
+        "keyword_found": false,
+        "status": "NO MATCH"
+    },
+    {
+        "file": "data/samples/collected/Screenshot_1446-06-02_at_20.59.16-removebg.png",
+        "metadata": {
+            "file_name": "Screenshot_1446-06-02_at_20.59.16-removebg.png",
+            "file_size_kb": 738.83,
+            "file_type": "image/png",
+            "last_modified": "2024-12-06 04:16:35",
+            "exif_data": {
+                "Image ExifOffset": "26",
+                "EXIF ColorSpace": "sRGB",
+                "EXIF ExifImageWidth": "589",
+                "EXIF ExifImageLength": "1168"
+            }
+        },
+        "keyword_found": false,
+        "status": "NO MATCH"
+    },
+    {
+        "file": "data/samples/collected/حنان عبدالله الدايل.pdf",
+        "metadata": {
+            "file_name": "حنان عبدالله الدايل.pdf",
+            "file_size_kb": 237.48,
+            "file_type": "application/pdf",
+            "last_modified": "2025-10-21 09:43:29",
+            "pdf_metadata": {
+                "/Author": "MAHMOUD",
+                "/Creator": "Microsoft® Word 2016",
+                "/CreationDate": "D:20240723150316+03'00'",
+                "/ModDate": "D:20240723150316+03'00'",
+                "/Producer": "Microsoft® Word 2016"
+            },
+            "pages": 1
+        },
+        "keyword_found": false,
+        "status": "NO MATCH"
+    }
+]

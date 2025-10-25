@@ -1,0 +1,10 @@
+{
+    "directory": "/Users/hananaldayel/ForensicCLI/ForensicCLI/cases/CASE02",
+    "files_scanned": 5,
+    "images_found": 5,
+    "csv_found": false,
+    "dataset_summary": {},
+    "suspicious_rule_hits": 0,
+    "rule_details": [],
+    "matches": []
+}
