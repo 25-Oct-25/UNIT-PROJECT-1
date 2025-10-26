@@ -3,14 +3,42 @@
     "id": 1,
     "name": "fahad",
     "department": "hr",
-    "position": "manegar",
+    "position": "manager",
     "salary": 8900.0
   },
   {
-    "id": 2,
-    "name": "adel",
-    "department": "hr",
-    "position": "mon",
-    "salary": 5000.0
+    "id": 3,
+    "name": "salem",
+    "department": "it",
+    "position": "network engineer",
+    "salary": 7500.0
+  },
+  {
+    "id": 4,
+    "name": "osama",
+    "department": "it",
+    "position": "software developer",
+    "salary": 15600.0
+  },
+  {
+    "id": 5,
+    "name": "mohammed",
+    "department": "finance",
+    "position": "accountant",
+    "salary": 6900.0
+  },
+  {
+    "id": 6,
+    "name": "faisal",
+    "department": "finance",
+    "position": "finance analyst",
+    "salary": 7600.0
+  },
+  {
+    "id": 7,
+    "name": "nasser",
+    "department": "marketing",
+    "position": "manager",
+    "salary": 8900.0
   }
 ]

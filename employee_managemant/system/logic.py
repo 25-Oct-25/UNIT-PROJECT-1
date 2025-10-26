@@ -101,11 +101,103 @@ def list_users():
     table = []
     for u in users:
         name = u.get("username", "Unknown")
-        pw = u.get("password", "")
-        table.append([name, pw])
+        pw = u.get("password", "*")
+        table.append([name, "******"])
     print(Fore.YELLOW + tabulate(table, headers=["Username", "Password"], tablefmt="grid") + Style.RESET_ALL)
     print()
     input(Fore.MAGENTA + "Press Enter to return..." + Style.RESET_ALL)
+
+def update_user():
+    users = storage.load_users()
+    if not users:
+        print(Fore.YELLOW + "No users to update.\n" + Style.RESET_ALL)
+        input("Press Enter to continue...")
+        return
+
+    print(Fore.CYAN + "\n📋 Current Users:\n" + Style.RESET_ALL)
+    for i, u in enumerate(users, 1):
+        print(f"{i}. {u['username']}")
+
+    try:
+        index = int(input("\nChoose user number to update: ")) - 1
+        if index < 0 or index >= len(users):
+            print(Fore.RED + "❌ Invalid choice.\n" + Style.RESET_ALL)
+            input("Press Enter to continue...")
+            return
+    except:
+        print(Fore.RED + "❌ Invalid number.\n" + Style.RESET_ALL)
+        input("Press Enter to continue...")
+        return
+
+    user = users[index]
+    print(Fore.CYAN + f"\nEditing user: {user['username']}\n" + Style.RESET_ALL)
+    print(Fore.YELLOW + tabulate([
+        ["1", "Username", user["username"]],
+        ["2", "Password", "******"]
+ ], headers=["No", "Field", "Current Value"], tablefmt="grid") + Style.RESET_ALL)
+
+    choice = input("Choose field number to update (1-2): ").strip()
+    if choice == "1":
+        new_username = input("New username: ").strip()
+        if not new_username:
+            print(Fore.RED + "❌ Value cannot be empty.\n" + Style.RESET_ALL)
+            input("Press Enter to continue...")
+            return
+        if any(u["username"] == new_username for u in users if u is not user):
+            print(Fore.RED + "❌ Username already exists.\n" + Style.RESET_ALL)
+            input("Press Enter to continue...")
+            return
+        user["username"] = new_username
+    elif choice == "2":
+        new_password = input("New password: ").strip()
+        if not new_password:
+            print(Fore.RED + "❌ Value cannot be empty.\n" + Style.RESET_ALL)
+            input("Press Enter to continue...")
+            return
+        user["password"] = new_password
+    else:
+        print(Fore.RED + "❌ Invalid choice.\n" + Style.RESET_ALL)
+        input("Press Enter to continue...")
+        return
+
+    with open(os.path.join(data_dir, "users.json"), "w", encoding="utf-8") as f:
+        json.dump(users, f, ensure_ascii=False, indent=2)
+
+    print(Fore.GREEN + "✅ User updated successfully.\n" + Style.RESET_ALL)
+    input("Press Enter to continue...")
+
+def delete_user():
+    users = storage.load_users()
+    if not users:
+        print(Fore.YELLOW + "No users to delete.\n" + Style.RESET_ALL)
+        input("Press Enter to continue...")
+        return
+
+    print(Fore.CYAN + "\n📋 Current Users:\n" + Style.RESET_ALL)
+    for i, u in enumerate(users, 1):
+        print(f"{i}. {u['username']}")
+
+    try:
+        index = int(input("\nChoose user number to delete: ")) - 1
+        if index < 0 or index >= len(users):
+            print(Fore.RED + "❌ Invalid choice.\n" + Style.RESET_ALL)
+            input("Press Enter to continue...")
+            return
+    except:
+        print(Fore.RED + "❌ Invalid number.\n" + Style.RESET_ALL)
+        input("Press Enter to continue...")
+        return
+
+    confirm = input(f"Are you sure you want to delete '{users[index]['username']}'? (y/n): ").lower()
+    if confirm == "y":
+        del users[index]
+        with open(os.path.join(data_dir, "users.json"), "w", encoding="utf-8") as f:
+            json.dump(users, f, ensure_ascii=False, indent=2)
+        print(Fore.GREEN + "✅ User deleted successfully.\n" + Style.RESET_ALL)
+    else:
+        print(Fore.CYAN + "❎ Deletion canceled.\n" + Style.RESET_ALL)
+
+    input("Press Enter to continue...")
 
 def add_employee(employees):
     while True:
@@ -138,6 +230,7 @@ def add_employee(employees):
         print(Fore.GREEN + f"✅ Employee '{name}' added successfully.\n" + Style.RESET_ALL)
         input(Fore.MAGENTA + "Press Enter to continue..." + Style.RESET_ALL)
         break
+
 def list_employees(employees):
     if not employees:
         print("No employees.\n")
@@ -177,35 +270,57 @@ def update_employee(employees):
         print(Fore.YELLOW + "No employees to update.\n" + Style.RESET_ALL)
         input("Press Enter to continue...")
         return
+
     while True:
         try:
             emp_id = int(input("Employee ID: "))
             break
         except:
             print(Fore.RED + "❌ Please enter a valid number.\n" + Style.RESET_ALL)
+
+    found = False
     for e in employees:
         if e.id == emp_id:
-            print(Fore.CYAN + f"Updating employee: {e.name}\n" + Style.RESET_ALL)
-            field = input("Field (name / department / position / salary): ").lower()
-            if field not in ["name", "department", "position", "salary"]:
-                print(Fore.RED + "❌ Invalid field.\n" + Style.RESET_ALL)
+            found = True
+            print(Fore.CYAN + f"\nEditing employee: {e.name}\n" + Style.RESET_ALL)
+            print(Fore.YELLOW + tabulate([
+                ["1", "Name", e.name],
+                ["2", "Department", e.department],
+                ["3", "Position", e.position],
+                ["4", "Salary", e.salary]
+            ], headers=["No", "Field", "Current Value"], tablefmt="grid") + Style.RESET_ALL)
+
+            choice = input("Choose field number to update (1-4): ").strip()
+            fields = {"1": "name", "2": "department", "3": "position", "4": "salary"}
+
+            if choice not in fields:
+                print(Fore.RED + "❌ Invalid choice.\n" + Style.RESET_ALL)
                 input("Press Enter to continue...")
                 return
-            value = input("New value: ")
-            if field == "salary":
+
+            new_value = input(f"Enter new {fields[choice].capitalize()}: ").strip()
+            if not new_value:
+                print(Fore.RED + "❌ Value cannot be empty.\n" + Style.RESET_ALL)
+                input("Press Enter to continue...")
+                return
+
+            if fields[choice] == "salary":
                 try:
-                    value = float(value)
+                    new_value = float(new_value)
                 except:
                     print(Fore.RED + "❌ Salary must be a number.\n" + Style.RESET_ALL)
                     input("Press Enter to continue...")
                     return
-            setattr(e, field, value)
+
+            setattr(e, fields[choice], new_value)
             storage.save_employees(employees)
             print(Fore.GREEN + f"✅ Employee '{e.name}' updated successfully.\n" + Style.RESET_ALL)
             input("Press Enter to continue...")
             return
-    print(Fore.RED + "❌ Employee not found.\n" + Style.RESET_ALL)
-    input("Press Enter to continue...")
+
+    if not found:
+        print(Fore.RED + "❌ Employee not found.\n" + Style.RESET_ALL)
+        input("Press Enter to continue...")
 
 def delete_employee(employees):
     if not employees:
@@ -259,8 +374,10 @@ def admin_menu():
     data = [
         ["1", "Create user"],
         ["2", "List users"],
-        ["3", "Manage employees"],
-        ["4", "Logout"]
+        ["3", "Update user"],
+        ["4", "Delete user"],
+        ["5", "Manage employees"],
+        ["6", "Logout"]
     ]
     print(Fore.CYAN + tabulate(data, headers=["Option", "Admin Tasks"], tablefmt="grid") + Style.RESET_ALL)
 
@@ -286,8 +403,12 @@ def admin_panel():
         elif choice == "2":
             list_users()
         elif choice == "3":
-            employee_panel("Admin")
+            update_user()
         elif choice == "4":
+            delete_user()
+        elif choice == "5":
+            employee_panel("Admin")
+        elif choice == "6":
             print(Fore.CYAN + "Logged out.\n" + Style.RESET_ALL)
             break
         else:
