@@ -1,39 +1,45 @@
-# 🎬 **YouTube Comment Analyzer & AI Report Generator**
+# 🎬 **YouTube Comment & Channel Analyzer — AI Report Generator**
 
 ## **Overview**
 
-An interactive **Python CLI project** that analyzes YouTube video comments using **Google Gemini AI** and the **YouTube Data API**.
-It detects viewer **sentiment**, identifies **common words**, and generates **AI-powered summaries with actionable advice** for improving future videos.
-You can also **export a professional PDF report** with charts and insights.
+An interactive **Python CLI project** that analyzes **YouTube video comments and channel data** using **Google Gemini AI** and the **YouTube Data API**.
+It detects viewer **sentiment**, identifies **common words**, generates **AI-powered summaries with actionable advice**, and can **analyze entire YouTube channels** fetching channel details, top videos, and generating professional PDF reports.
+
+You can easily **export visual reports** that include channel thumbnails, statistics, sentiment charts, and AI-generated recommendations to improve future content.
 
 ---
 
-## **Features**
+## ✨ **Features**
 
 * Interactive CLI with colorful text and ASCII art
 * English support *(Arabic support coming soon)*
 * Sentiment & keyword analysis
 * AI-powered summaries and recommendations using Gemini
 * Optional PDF report generation
+* PDF reports for both **videos** and **channels**
 * Secure API keys through environment variables
 
 ---
 
-## **Usage**
+## ⚙️ **Usage**
+
+Run the program:
 
 ```bash
 python main.py
 ```
 
-### **Menu Options**
+### **Main Menu Options**
+
 
 1️⃣ Enter the YouTube Video ID
 2️⃣ Show short summary of comments
 3️⃣ Check overall feeling (sentiment)
 4️⃣ See most repeated words or ideas
 5️⃣ Get tips to improve next video
-6️⃣ Generate PDF Report
-7️⃣ Exit
+6️⃣ Get information about a specific channel *(NEW)*
+7️⃣ Generate PDF Report
+8️⃣ Exit
  
 ---
 
