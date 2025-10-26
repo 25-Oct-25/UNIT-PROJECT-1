@@ -2,7 +2,7 @@ import os
 import json
 from datetime import datetime
 def save_analysis_json(video_title, data_cache:dict):
-    """Save analysis results as JSON file inside /data folder."""
+    """Save analysis results as JSON file inside data folder"""
     os.makedirs("data", exist_ok=True)
     safe_title = "".join(c for c in video_title if c.isalnum() or c in (" ", "_")).strip()
     json_path = os.path.join("data", f"analysis_{safe_title}.json")
@@ -11,5 +11,15 @@ def save_analysis_json(video_title, data_cache:dict):
 
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(data_cache, f, ensure_ascii=False, indent=2)
+
+    return json_path
+
+def save_channel_data(channel_info):
+    """Save data channel as JSON file inside data folder"""
+    os.makedirs("data", exist_ok=True)
+    filename = f"channel_info_{channel_info['title'].replace(' ', '_')}.json"
+    json_path = os.path.join("data",filename)   
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(channel_info, f, indent=4, ensure_ascii=False)
 
     return json_path

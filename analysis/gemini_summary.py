@@ -1,5 +1,5 @@
 """
-Handles AI-powered summarization using Google Gemini API.
+Handles AI summarization using Google Gemini API.
 """
 import google.generativeai as genai
 
@@ -17,6 +17,7 @@ def gemini_summary(comments, mode="terminal"):
         Comments:
         {text_data}
         """
+    #mode=="pdf"    
     else: 
         prompt = f"""
         Analyze these YouTube comments and provide (use a clear and simple word Without abbreviating):
@@ -29,6 +30,7 @@ def gemini_summary(comments, mode="terminal"):
         {text_data}
         """
     try:
+        #Generate gemini modal
         model = genai.GenerativeModel("models/gemini-2.5-flash")
         response = model.generate_content(prompt)
         return response.text.strip()
